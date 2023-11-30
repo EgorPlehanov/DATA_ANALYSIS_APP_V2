@@ -5,18 +5,18 @@ class FunctionCalculate:
     def __init__(self, function):
         self.function = function
 
-        self.calculate_function = FunctionLibrary.get_function_config_attribut_by_funcname_atribute(
-            function.function_name,
+        self.calculate_function = FunctionLibrary.get_function_config_attribute_by_key_attribute(
+            function.function_key,
             'function'
         )
-        self.parameters_default_values = FunctionLibrary.get_function_config_parameters_default_values_by_name(
-            function.function_name
+        self.parameters_default_values = FunctionLibrary.get_function_config_parameters_default_values_by_key(
+            function.function_key
         )
 
 
     def set_default_parameters(self):
-        for param_name, param_value in self.parameters_default_values.items():
-            self.set_parameter_value(param_name, param_value)
+        for name, value in self.parameters_default_values.items():
+            setattr(self, name, value)
 
     
         

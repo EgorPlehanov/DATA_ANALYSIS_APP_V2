@@ -1,35 +1,37 @@
-from .param_editor_interface import ParamEditorInterface
+from .parameter_editor_interface import ParamEditorInterface
 
 from typing import List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from flet import Container, Dropdown, dropdown
 
 
 @dataclass
 class DDOptionItem:
-    key: str    = None
-    text: str   = None
+    key: str    = ''
+    text: str   = 'Не задано'
+
+@dataclass
+class DDConfig:
+    name: str                   = ''
+    title: str                  = ''
+    options: List[DDOptionItem] = field(default_factory=list)
+    default_value: str          = ''
 
 
 class DropdownEditor(ParamEditorInterface, Container):
-    def __init__(self,
-        name: str                   = None,
-        title: str                  = None,
-        options: List[DDOptionItem] = None,
-        default_value: str          = None
-    ):
+    def __init__(self, config: DDConfig = DDConfig()):
         self._type = 'dropdown'
-        self._name = name
-        self.title = title
-        self.options = options
-        self.default_value = default_value
+        self._name = config.name
+        self.title = config.title
+        self.options = config.options
+        self.default_value = config.default_value
 
         super().__init__()
-        self.set_styles()
-        self.content = self.create_content()
+        self._set_styles()
+        self.content = self._create_content()
 
 
-    def create_content(self) -> Dropdown:
+    def _create_content(self) -> Dropdown:
         return Dropdown(
             dense=True,
             label=self.title,
@@ -38,11 +40,11 @@ class DropdownEditor(ParamEditorInterface, Container):
                 for option in self.options
             ],
             value=self.default_value,
-            on_change=self.on_change
+            on_change=self._on_change
         )
     
 
-    def on_change(self, e) -> None:
+    def _on_change(self, e) -> None:
         '''
         Обновляет значение параметра в экземпляре класса Function и карточке функции
         '''

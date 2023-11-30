@@ -16,17 +16,17 @@ class ParamEditorInterface(ABC):
         return self._name
     
     @abstractmethod
-    def create_content(self) -> Any:
+    def _create_content(self) -> Any:
         pass
     
     @abstractmethod
-    def on_change(self) -> None:
+    def _on_change(self) -> None:
         pass
 
     def update_content(self) -> None:
         pass
     
-    def set_styles(self) -> None:
+    def _set_styles(self) -> None:
         params = {
             'data': self._type,
             'padding': 10,

@@ -1,4 +1,5 @@
-from .param_editor_interface import ParamEditorInterface
+from .parameter_editor_interface import ParamEditorInterface
+from function_typing import ValueType
 
 from dataclasses import dataclass
 from typing import Dict, Any
@@ -11,34 +12,36 @@ from flet import (
 
 @dataclass
 class TFDTColumn:
-    name: str       = None
-    tooltip: str    = None
-
+    name: str             = ''
+    tooltip: str          = ''
+    value_type: ValueType = ValueType.FLOAT
 
 @dataclass
 class TFDTItem:
     values: Dict[str, str | int | float] = None
 
+@dataclass
+class TFDTConfig:
+    name: str           = ''
+    title: str          = ''
+    columns: Dict[str, TFDTColumn]      = {}
+    default_value: Dict[int, TFDTItem]  = {}
+
 
 class TextFealdsDataTableEditor(ParamEditorInterface, Container):
-    def __init__(self,
-        name: str                           = '',
-        title: str                          = None,
-        columns: Dict[str, TFDTColumn]      = {},
-        default_value: Dict[int, TFDTItem]  = {}
-    ):
+    def __init__(self, config: TFDTConfig = TFDTConfig()):
         self._type = 'textfields_datatable'
-        self._name = name
-        self.title = title
-        self.columns = columns
-        self.default_value = default_value
+        self._name = config.name
+        self.title = config.title
+        self.columns = config.columns
+        self.default_value = config.default_value
 
         super().__init__()
-        self.set_styles()
-        self.content = self.create_content()
+        self._set_styles()
+        self.content = self._create_content()
 
 
-    def create_content(self) -> Column:
+    def _create_content(self) -> Column:
         ref_data_table = Ref[DataTable]()
         ref_delete_button = Ref[IconButton]()
 

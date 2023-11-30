@@ -56,15 +56,15 @@ class GraphicArea(Column):
 
     def create_select_function_menu(self) -> Container:
         '''Создает меню выбора функции'''
-        print(self.functions)
         return Container(
             content = Row(
                 controls = [
                     PopupMenuButton(
                         content = Container(
                             content = Row(controls = [
-                                Text(type, size = 16), Icon(name = 'add')
+                                Text(type, size=16), Icon('add')
                             ]),
+                            tooltip = type,
                             bgcolor = colors.WHITE10,
                             padding = 5,
                             border_radius = 5,
@@ -132,11 +132,11 @@ class GraphicArea(Column):
 
     def add_function(self, e):
         '''Добавляет функцию в список'''
-        function_name = e.control.text
-        if not function_name:
+        key = e.control.data
+        if not key:
             return
         
-        function = Function(self, function_name)
+        function = Function(self, key)
         
         self.list_function_cards.append(function.view.card_view)
         self.list_function_parameters.append(function.view.parameters_view)

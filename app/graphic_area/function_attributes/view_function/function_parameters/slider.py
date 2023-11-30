@@ -1,34 +1,39 @@
-from .param_editor_interface import ParamEditorInterface
+from .parameter_editor_interface import ParamEditorInterface
+from function_typing import ValueType
 
-from typing import Literal
+from dataclasses import dataclass
 from flet import (
     Container, TextField, Slider, Ref, Column, Row, Text, InputBorder, TextThemeStyle
 )
 
 
+@dataclass
+class SLConfig:
+    name: str                   = ''
+    title: str                  = ''
+    value_type: ValueType       = ValueType.FLOAT
+    round_digits: int           = 2
+    min: int | float            = 0
+    max: int | float            = 0
+    step: int | float           = 1
+    default_value: int | float  = 0
+
+
+
 class SliderEditor(ParamEditorInterface, Container):
-    def __init__(self,
-        name: str                   = '',
-        title: str                  = '',
-        value_type: Literal['int_number', 'number'] = 'number',
-        round_digits: int           = 2,
-        min: int | float            = 0,
-        max: int | float            = 0,
-        step: int | float           = 1,
-        default_value: int | float  = 0
-    ):
+    def __init__(self, config: SLConfig = SLConfig()):
         self._type = 'slider'
-        self._name = name
-        self.title = title
-        self.value_type = value_type
-        self.round_digits = round_digits
-        self.min = min
-        self.max = max
-        self.step = step
-        self.default_value = default_value
+        self._name = config.name
+        self.title = config.title
+        self.value_type = config.value_type
+        self.round_digits = config.round_digits
+        self.min = config.min
+        self.max = config.max
+        self.step = config.step
+        self.default_value = config.default_value
 
         super().__init__()
-        self.set_styles()
+        self._set_styles()
         self.content = self.create_content()
     
     
@@ -58,8 +63,8 @@ class SliderEditor(ParamEditorInterface, Container):
                                 'max': self.max,
                             },
                             on_change = None, #self._is_text_field_value_valid,
-                            on_blur = self.on_change,
-                            on_submit = self.on_change,
+                            on_blur = self._on_change,
+                            on_submit = self._on_change,
                         )
                     ],
                 ),
@@ -76,7 +81,7 @@ class SliderEditor(ParamEditorInterface, Container):
                             label = '{value}',
                             data = {"ref_textfield": ref_textfield},
                             on_change = None, #self._update_slider_textfield,
-                            on_change_end = self.on_change,
+                            on_change_end = self._on_change,
                         ),
                         Text(self.max, style = TextThemeStyle.BODY_SMALL),
                     ],
@@ -88,7 +93,7 @@ class SliderEditor(ParamEditorInterface, Container):
         return editor_slider
     
     
-    def on_change(self, e) -> None:
+    def _on_change(self, e) -> None:
         '''
         Обнавляет значение параметра в экземпляре класса Function, заголовке слайдера и карточке функции
         '''

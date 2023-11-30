@@ -1,4 +1,4 @@
-from .param_editor_interface import ParamEditorInterface
+from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ResultData
 
 from typing import List
@@ -7,34 +7,36 @@ from flet import Container, Dropdown, dropdown, Ref
 
 
 @dataclass
-class DFDOptionItem:
+class DDFDOptionItem:
     function_name: str      = 'Не выбраны'
     value: List[ResultData] = field(default_factory=list)
 
     def __str__(self) -> str:
         return f"{self.function_name}: {self.value}"
 
+@dataclass
+class DDFDConfig:
+    name: str                     = ''
+    title: str                    = ''
+    options: DDFDOptionItem       = DDFDOptionItem()
+    default_value: DDFDOptionItem = DDFDOptionItem()
+
 
 class DropdownFunctionDataEditor(ParamEditorInterface, Container):
-    def __init__(self,
-        name: str                       = '',
-        title: str                      = 'Выбор набора данных',
-        options: DFDOptionItem          = DFDOptionItem(),
-        default_value: DFDOptionItem    = DFDOptionItem(),
-    ):
+    def __init__(self, config: DDFDConfig = DDFDConfig()):
         self._type = 'dropdown_function_data'
-        self._name = name
-        self.title = title
-        self.options = options
-        self.default_value = default_value
-        self.default_value_to_print = str(default_value)
+        self._name = config.name
+        self.title = config.title
+        self.options = config.options
+        self.default_value = config.default_value
+        self.default_value_to_print = str(config.default_value)
 
         super().__init__()
-        self.set_styles()
-        self.content = self.create_content()
+        self._set_styles()
+        self.content = self._create_content()
 
 
-    def create_content(self) -> Dropdown:
+    def _create_content(self) -> Dropdown:
         ref_dropdown_function_data = Ref[Dropdown]()
         return None
         # self.list_ref_params_to_update.append({
@@ -106,7 +108,7 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
         # return editor_dropdown_function_data
     
 
-    def on_change(self, e) -> None:
+    def _on_change(self, e) -> None:
         '''
         Обновляет значение параметра в экземпляре класса Function и карточке функции
         '''

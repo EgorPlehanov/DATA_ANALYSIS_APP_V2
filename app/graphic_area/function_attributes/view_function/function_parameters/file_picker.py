@@ -1,14 +1,15 @@
-from .param_editor_interface import ParamEditorInterface
+from .parameter_editor_interface import ParamEditorInterface
 
 from typing import List, Any
 from dataclasses import dataclass, field
 from flet import (
-    Container, FilePickerFileType, FilePicker, Ref, Text, Column, ElevatedButton, Row, icons
+    Container, FilePickerFileType, FilePicker, Ref,
+    Text, Column, ElevatedButton, Row, icons
 )
 
 
 @dataclass
-class FilePickerSettings:
+class FPSettings:
     dialog_title: str               = 'Выбор набора данных'
     initial_directory: str          = None
     file_type: FilePickerFileType   = FilePickerFileType.ANY
@@ -17,32 +18,35 @@ class FilePickerSettings:
     ])
     allow_multiple: bool            = True
 
+@dataclass
+class FPConfig:
+    name: str               = ''
+    title: str              = 'Набор данных'
+    button_text: str        = 'Выбрать файл данных'
+    settings: FPSettings    = FPSettings()
+    default_value: Any      = field(default_factory=list)
+
 
 class FilePickerEditor(ParamEditorInterface, Container):
-    def __init__(self,
-        name: str                                   = '',
-        title: str                                  = 'Набор данных',
-        button_text: str                            = 'Выбрать файл данных',
-        pick_files_parameters: FilePickerSettings   = FilePickerSettings(),
-        default_value: Any                          = []
-    ):
+    def __init__(self, config: FPConfig = FPConfig()):
         self._type = 'file_picker'
-        self._name = name
-        self.title = title
-        self.button_text = button_text
-        self.pick_files_parameters = pick_files_parameters
-        self.default_value = default_value
+        self._name = config.name
+        self.title = config.title
+        self.button_text = config.button_text
+        self.settings = config.settings
+        self.default_value = config.default_value
 
         super().__init__()
-        self.set_styles()
-        self.content = self.create_content()
+        self._set_styles()
+        self.content = self._create_content()
+
+        self.ref_files = Ref[Column]()
 
 
-    def create_content(self) -> Row:
-        ref_files = Ref[Column]()
+    def _create_content(self) -> Row:
         pick_files_dialog = FilePicker(
-            data={'ref_files': ref_files},
-            on_result=self.on_change,
+            data={'ref_files': self.ref_files},
+            on_result=self._on_change,
         )
         self.page.overlay.append(pick_files_dialog)
         self.page.update()
@@ -57,18 +61,18 @@ class FilePickerEditor(ParamEditorInterface, Container):
                             #     Text(f"{file['name']} ({self._convert_size(file['size'])})")
                             #     for file in (current_value if current_value is None else [])
                             # ],
-                            ref=ref_files,
+                            ref=self.ref_files,
                         ),
                         ElevatedButton(
                             text=self.button_text,
                             icon=icons.UPLOAD_FILE,
                             on_click=lambda _: pick_files_dialog.pick_files(
-                                dialog_title = self.pick_files_parameters.dialog_title,
-                                initial_directory = self.pick_files_parameters.initial_directory,
-                                file_type = self.pick_files_parameters.file_type
-                                    if self.pick_files_parameters.file_type is None else FilePickerFileType.CUSTOM,
-                                allowed_extensions = self.pick_files_parameters.allowed_extensions,
-                                allow_multiple = self.pick_files_parameters.allow_multiple,
+                                dialog_title = self.settings.dialog_title,
+                                initial_directory = self.settings.initial_directory,
+                                file_type = self.settings.file_type
+                                    if self.settings.file_type is None else FilePickerFileType.CUSTOM,
+                                allowed_extensions = self.settings.allowed_extensions,
+                                allow_multiple = self.settings.allow_multiple,
                             ),
                         ),
                     ]
@@ -79,7 +83,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
         return editor_file_picker
     
 
-    def on_change(self, e) -> None:
+    def _on_change(self, e) -> None:
         '''
         Обновляет список файлов в параметре экземпляра класса Function
         '''

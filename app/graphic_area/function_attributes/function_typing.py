@@ -5,6 +5,9 @@ from pandas import DataFrame
 from enum import Enum
 
 
+__all__ = ['ResultData', 'FunctionType', 'FunctionConfig', 'FunctionOption', 'ValueType']
+
+
 @dataclass
 class ResultData:
     main_data: Optional[DataFrame]              = None
@@ -47,3 +50,9 @@ class FunctionConfig:
 
 
 FunctionOption = namedtuple('FunctionOption', ['key', 'name'])
+
+
+class ValueType(Enum):
+    FUNCTION = 0
+    INT = 1
+    FLOAT = 2

@@ -1,7 +1,7 @@
-from .param_editor_interface import ParamEditorInterface
+from .parameter_editor_interface import ParamEditorInterface
 
 from typing import List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from flet import Container, Ref, Checkbox, Column
 
 
@@ -11,26 +11,28 @@ class CBItem:
     label: str          = None
     default_value: bool = False
 
+@dataclass
+class CBConfig:
+    name: str                = ''
+    title: str               = ''
+    checkboxes: List[CBItem] = field(default_factory=list)
+    default_value: List[str] = field(default_factory=list)
+
 
 class CheckboxesEditor(ParamEditorInterface, Container):
-    def __init__(self,
-        name: str                = '',
-        title: str               = '',
-        checkboxes: List[CBItem] = [],
-        default_value: bool      = False
-    ):
+    def __init__(self, config: CBConfig = CBConfig()):
         self._type = 'checkbox'
-        self._name = name
-        self.title = title
-        self.checkboxes = checkboxes
-        self.default_value = default_value
+        self._name = config.name
+        self.title = config.title
+        self.checkboxes = config.checkboxes
+        self.default_value = config.default_value
 
         super().__init__()
-        self.set_styles()
-        self.content = self.create_content()
+        self._set_styles()
+        self.content = self._create_content()
 
 
-    def create_content(self) -> Column:
+    def _create_content(self) -> Column:
         ref_checkboxes = [Ref[Checkbox]() for _ in range(len(self.checkboxes))]
         return Column(
             controls=[
@@ -43,14 +45,14 @@ class CheckboxesEditor(ParamEditorInterface, Container):
                         'ref_checkboxes': ref_checkboxes,
                         'param_name': self._param_name,
                     },
-                    on_change=self.on_change,
+                    on_change=self._on_change,
                 )
                 for idx, checkbox in enumerate(self.checkboxes)
             ]
         )
     
 
-    def on_change(self, e) -> None:
+    def _on_change(self, e) -> None:
         '''
         Обновляет значение параметр в экземпляре класса Function
         Изменяет список выбранных чекбоксов
