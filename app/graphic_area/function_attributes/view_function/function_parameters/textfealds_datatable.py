@@ -22,13 +22,13 @@ class TFDTItem:
 
 class TextFealdsDataTableEditor(ParamEditorInterface, Container):
     def __init__(self,
-        param_name: str                     = '',
+        name: str                           = '',
         title: str                          = None,
         columns: Dict[str, TFDTColumn]      = {},
         default_value: Dict[int, TFDTItem]  = {}
     ):
         self._type = 'textfields_datatable'
-        self._param_name = param_name
+        self._name = name
         self.title = title
         self.columns = columns
         self.default_value = default_value
@@ -38,7 +38,7 @@ class TextFealdsDataTableEditor(ParamEditorInterface, Container):
         self.content = self.create_content()
 
 
-    def create_control(self) -> Column:
+    def create_content(self) -> Column:
         ref_data_table = Ref[DataTable]()
         ref_delete_button = Ref[IconButton]()
 

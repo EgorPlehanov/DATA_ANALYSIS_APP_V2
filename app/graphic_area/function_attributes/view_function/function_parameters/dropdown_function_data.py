@@ -17,13 +17,13 @@ class DFDOptionItem:
 
 class DropdownFunctionDataEditor(ParamEditorInterface, Container):
     def __init__(self,
-        param_name: str                 = '',
+        name: str                       = '',
         title: str                      = 'Выбор набора данных',
         options: DFDOptionItem          = DFDOptionItem(),
         default_value: DFDOptionItem    = DFDOptionItem(),
     ):
         self._type = 'dropdown_function_data'
-        self._param_name = param_name
+        self._name = name
         self.title = title
         self.options = options
         self.default_value = default_value
@@ -34,7 +34,7 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
         self.content = self.create_content()
 
 
-    def create_control(self) -> Dropdown:
+    def create_content(self) -> Dropdown:
         ref_dropdown_function_data = Ref[Dropdown]()
         return None
         # self.list_ref_params_to_update.append({

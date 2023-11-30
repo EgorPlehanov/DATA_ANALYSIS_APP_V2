@@ -1,4 +1,4 @@
-from view_function import *
+from .view_function import *
 
 
 class FunctionView:

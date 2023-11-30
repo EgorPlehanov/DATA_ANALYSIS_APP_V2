@@ -5,12 +5,12 @@ from flet import Container, Row, Text, Switch, LabelPosition, MainAxisAlignment
 
 class SwitchEditor(ParamEditorInterface, Container):
     def __init__(self,
-        param_name: str             = '',
-        title: str                  = 'Показывать таблицу данных?',
-        default_value: bool         = False
+        name: str           = 'show_data_table',
+        title: str          = 'Показывать таблицу данных?',
+        default_value: bool = False
     ):
         self._type = 'switch'
-        self._param_name = param_name
+        self._name = name
         self.title = title
         self.default_value = default_value
 
@@ -19,7 +19,7 @@ class SwitchEditor(ParamEditorInterface, Container):
         self.content = self.create_content()
 
 
-    def create_control(self) -> Row:
+    def create_content(self) -> Row:
         return Row(
             controls = [
                 Text(self.title),

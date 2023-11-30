@@ -1,7 +1,7 @@
 from flet import *
 from itertools import count
 
-from function_attributes import *
+from .function_attributes import *
 
 
 class Function:

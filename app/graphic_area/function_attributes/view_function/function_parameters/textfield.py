@@ -6,17 +6,17 @@ from flet import Container, TextField, TextStyle
 
 class TextFieldEditor(ParamEditorInterface, Container):
     def __init__(self,
-        param_name: str             = '',
+        name: str           = '',
         value_type: Literal['function', 'int_number', 'number'] = 'number',
-        label: str                 = None,
-        prefix_text: str            = None,
-        hint_text: str              = None,
-        helper_text: str            = None,
-        default_value: str          = None,
-        autocorrect: bool           = False
+        label: str          = None,
+        prefix_text: str    = None,
+        hint_text: str      = None,
+        helper_text: str    = None,
+        default_value: str  = None,
+        autocorrect: bool   = False
     ):
         self._type = 'text_field'
-        self._param_name = param_name
+        self._name = name
         self.value_type = value_type
         self.label = label
         self.prefix_text = prefix_text
@@ -30,7 +30,7 @@ class TextFieldEditor(ParamEditorInterface, Container):
         self.content = self.create_content()
 
 
-    def create_control(self) -> TextField:
+    def create_content(self) -> TextField:
         return TextField(
             label = self.label,
             prefix_text = self.prefix_text,

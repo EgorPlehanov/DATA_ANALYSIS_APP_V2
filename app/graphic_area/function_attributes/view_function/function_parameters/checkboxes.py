@@ -14,13 +14,13 @@ class CBItem:
 
 class CheckboxesEditor(ParamEditorInterface, Container):
     def __init__(self,
-        param_name: str          = '',
+        name: str                = '',
         title: str               = '',
         checkboxes: List[CBItem] = [],
         default_value: bool      = False
     ):
         self._type = 'checkbox'
-        self._param_name = param_name
+        self._name = name
         self.title = title
         self.checkboxes = checkboxes
         self.default_value = default_value

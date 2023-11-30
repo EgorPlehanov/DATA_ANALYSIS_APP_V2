@@ -1,2 +1,2 @@
-from function_calculate import FunctionCalculate
-from function_view import FunctionView
+from .function_calculate import FunctionCalculate
+from .function_view import FunctionView

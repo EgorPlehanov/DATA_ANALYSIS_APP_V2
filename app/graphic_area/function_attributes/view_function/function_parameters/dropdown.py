@@ -13,13 +13,13 @@ class DDOptionItem:
 
 class DropdownEditor(ParamEditorInterface, Container):
     def __init__(self,
-        param_name: str             = None,
+        name: str                   = None,
         title: str                  = None,
         options: List[DDOptionItem] = None,
         default_value: str          = None
     ):
         self._type = 'dropdown'
-        self._param_name = param_name
+        self._name = name
         self.title = title
         self.options = options
         self.default_value = default_value
@@ -29,7 +29,7 @@ class DropdownEditor(ParamEditorInterface, Container):
         self.content = self.create_content()
 
 
-    def create_control(self) -> Dropdown:
+    def create_content(self) -> Dropdown:
         return Dropdown(
             dense=True,
             label=self.title,

@@ -1,25 +1,10 @@
-import flet as ft
 from flet import (
-    Row,
-    Page,
-    TextField,
-    Ref,
-    Container,
-    Column,
-    Dropdown,
-    dropdown,
-    PopupMenuButton,
-    PopupMenuItem,
-    Text,
-    Icon,
-    colors,
-    alignment,
-    ScrollMode,
-    border,
-    Tabs,
+    Row, Page, Ref, Container, Column, PopupMenuButton, PopupMenuItem,
+    Text, Icon, colors, alignment, ScrollMode, border, Tabs,
 )
-# from .function import Function
-from .function_attributes.view_function.function_parameters.checkboxes import *
+
+from .function import Function
+from .function_attributes.calculate_functions.function_library import FunctionLibrary
 
 
 class GraphicArea(Column):
@@ -40,7 +25,7 @@ class GraphicArea(Column):
         # Список представлений параметров функций
         self.list_function_parameters = []
         # Список представлений результатов
-        self.list_results = []
+        self.list_function_results = []
 
         # Ссылки на элементы управления графической области
         self.ref_parameters_menu = Ref[Container]()
@@ -51,29 +36,7 @@ class GraphicArea(Column):
 
     def get_functions(self) -> dict:
         '''Возвращает словарь с функциями'''
-        return {
-            'data': (
-                'Данные', [
-                    'Trend',
-                    'Mean',
-                    'Median',
-                ]
-            ),
-            'edit': (
-                'Обработка', [
-                    'Trend',
-                    'Mean',
-                    'Median',
-                ]
-            ),
-            'analysis': (
-                'Анализ', [
-                    'Correlation',
-                    'Regression',
-                    'Trend',
-                ]
-            )
-        }
+        return FunctionLibrary.get_function_dict()
     
     
     def create_graphic_area_controls(self) -> list:
@@ -93,27 +56,32 @@ class GraphicArea(Column):
 
     def create_select_function_menu(self) -> Container:
         '''Создает меню выбора функции'''
+        print(self.functions)
         return Container(
             content = Row(
                 controls = [
                     PopupMenuButton(
                         content = Container(
-                            content = Row(controls=[
-                                Text(func_type, size=16), Icon(name='add')
+                            content = Row(controls = [
+                                Text(type, size = 16), Icon(name = 'add')
                             ]),
-                            bgcolor = ft.colors.WHITE10,
+                            bgcolor = colors.WHITE10,
                             padding = 5,
                             border_radius = 5,
                         ),
                         items = [
-                            PopupMenuItem(text=func_name, on_click=self.add_function)
-                            for func_name in func_names
+                            PopupMenuItem(
+                                text = func.name,
+                                data = func.key,
+                                on_click = self.add_function
+                            )
+                            for func in functions
                         ]
                     )
-                    for func_type, func_names in self.functions.values()
+                    for type, functions in self.functions.items()
                 ]
             ),
-            bgcolor = ft.colors.BLACK26,
+            bgcolor = colors.BLACK26,
             padding = 5,
         )
     
@@ -157,7 +125,7 @@ class GraphicArea(Column):
                 scrollable = False,
                 ref = self.ref_result_view,
                 animation_duration = 200,
-                tabs=self.list_results
+                tabs=self.list_function_results
             ),
         )
     
@@ -168,9 +136,11 @@ class GraphicArea(Column):
         if not function_name:
             return
         
-        function = CheckboxesEditor('D', 'param', [CBItem(True, 'a'), CBItem(False, 'b')])
-        print(function.type)
-        self.list_function_cards.append(function)
+        function = Function(self, function_name)
+        
+        self.list_function_cards.append(function.view.card_view)
+        self.list_function_parameters.append(function.view.parameters_view)
+        self.list_function_results.append(function.view.results_view)
         self.update()
     
 

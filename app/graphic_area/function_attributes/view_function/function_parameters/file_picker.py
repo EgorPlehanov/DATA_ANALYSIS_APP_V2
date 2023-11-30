@@ -20,14 +20,14 @@ class FilePickerSettings:
 
 class FilePickerEditor(ParamEditorInterface, Container):
     def __init__(self,
-        param_name: str                             = '',
+        name: str                                   = '',
         title: str                                  = 'Набор данных',
         button_text: str                            = 'Выбрать файл данных',
         pick_files_parameters: FilePickerSettings   = FilePickerSettings(),
         default_value: Any                          = []
     ):
         self._type = 'file_picker'
-        self._param_name = param_name
+        self._name = name
         self.title = title
         self.button_text = button_text
         self.pick_files_parameters = pick_files_parameters
@@ -38,7 +38,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
         self.content = self.create_content()
 
 
-    def create_control(self) -> Row:
+    def create_content(self) -> Row:
         ref_files = Ref[Column]()
         pick_files_dialog = FilePicker(
             data={'ref_files': ref_files},

@@ -1,40 +1,52 @@
-from dataclasses import dataclass
-from typing import Callable, Dict, Literal, Any
+from collections import defaultdict
+from typing import Literal
 from functools import partial
 
-from ..function_typing import *
-from functions import *
 from ..view_function.function_parameters import *
-
-
-@dataclass
-class FunctionConfig:
-    name: str
-    type: Literal['data', 'edit', 'analytic']
-    function: Callable
-    parameters: Dict[str, Any]
-
-    def __post_init__(self):
-        if  isinstance(self.type, str) or self.type not in ['data', 'edit', 'analytic']:
-            raise ValueError("Invalid type")
-
+from ..function_typing import *
+from .functions import *
 
 
 class FunctionLibrary:
+    @staticmethod
+    def get_russian_type_name(type: FunctionType):
+        '''Возвращает русское название типа функции'''
+        russian_type_name = {
+            FunctionType.DATA: 'Данные',
+            FunctionType.EDIT: 'Обработка',
+            FunctionType.ANALYTIC: 'Аналитика',
+        }
+        if type in russian_type_name:
+            return russian_type_name[type]
+        return type
+
 
     @staticmethod
-    def get_function_config_by_name(name: str):
+    def get_function_dict():
+        '''Возвращает словарь функций в виде {'type': [namedtuple(key, name), ...], ...}'''
+        grouped_functions = defaultdict(list)
+        for function in FunctionLibrary.function_by_key.values():
+            function_data = FunctionOption(key=function.key, name=function.name)
+            type = FunctionLibrary.get_russian_type_name(function.type)
+            grouped_functions[type].append(function_data)
+        return grouped_functions
+
+
+    @staticmethod
+    def get_function_config_by_key(key: str):
         '''Возвращает конфигурацию функции по ее имени'''
-        return FunctionLibrary.function_by_code[name]
+        if key not in FunctionLibrary.function_by_key:
+            raise ValueError(f'Недопустимое key: {key}')
+        return FunctionLibrary.function_by_key[key]
 
 
     @staticmethod
-    def get_function_config_attribut_by_funcname_atribute(
-        name: str,
+    def get_function_config_attribute_by_key_attribute(
+        key: str,
         attribute: Literal['name', 'type', 'function', 'parameters']
     ):
         '''Возвращает аттрибут конфигурации функции по ее имени и названию атрибута'''
-        function_config = FunctionLibrary.function_by_code[name]
+        function_config = FunctionLibrary.get_function_config_by_key(key)
         return getattr(function_config, attribute)
     
 
@@ -43,59 +55,30 @@ class FunctionLibrary:
         '''Возвращает список функций определенного типа'''
         return [
             function_config
-            for function_config in FunctionLibrary.function_by_code.values()
+            for function_config in FunctionLibrary.function_by_key.values()
             if function_config.type == type
         ]
+    
+
+    @staticmethod
+    def get_function_config_parameters_default_values_by_key(key: str):
+        '''Возвращает параметры функции по ее имени'''
+        function_config = FunctionLibrary.get_function_config_by_key(key)
+        return {
+            parameter.name: parameter.default_value
+            for parameter in function_config.parameters
+        }
 
 
-    function_by_code = {
+    function_by_key = {
         "trend": FunctionConfig(
-            name="Тренд",
-            type="data",
-            function=trend,
-            params={
-                # "type": {
-                #     'type': Dropdown,
-                #     'title': "Тип тренда",
-                #     'options': [
-                #         DDOptionItem("linear_rising", "Линейный возрастающий"),
-                #         DDOptionItem("linear_falling", "Линейный убывающий"),
-                #         DDOptionItem("nonlinear_rising", "Нелинейный возрастающий"),
-                #         DDOptionItem("nonlinear_falling", "Нелинейный убывающий"),
-                #     ],
-                # },
-                # "a": Slider(
-                #     title="Коэффициент a",
-                #     min=0.01,
-                #     max=100,
-                #     step=0.01,
-                #     default_value=0.01,
-                # ),
-                # 'b': Slider(
-                #     title="Коэффициент b",
-                #     min=0.1,
-                #     max=10.0,
-                #     step=0.1,
-                #     default_value=0.1,
-                # ),
-                # 'step': Slider(
-                #     title="Шаг по оси X (step)",
-                #     min=0.0001,
-                #     max=10,
-                #     step=0.0001,
-                #     default_value=1,
-                # ),
-                # 'N': Slider(
-                #     title="Длина данных (N)",
-                #     value_type='int_number',
-                #     round_digits=0,
-                #     min=100,
-                #     max=5000,
-                #     step=100,
-                #     default_value=1000,
-                # ),
-                'show_table_data': SwitchEditor()
-            }
+            key = "trend",
+            name = "Тренд",
+            type = FunctionType.DATA,
+            function = trend,
+            parameters = [
+                SwitchEditor()
+            ]
         )
     }
 

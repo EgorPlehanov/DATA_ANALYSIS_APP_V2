@@ -8,7 +8,7 @@ from flet import (
 
 class SliderEditor(ParamEditorInterface, Container):
     def __init__(self,
-        param_name: str             = '',
+        name: str                   = '',
         title: str                  = '',
         value_type: Literal['int_number', 'number'] = 'number',
         round_digits: int           = 2,
@@ -18,7 +18,7 @@ class SliderEditor(ParamEditorInterface, Container):
         default_value: int | float  = 0
     ):
         self._type = 'slider'
-        self._param_name = param_name
+        self._name = name
         self.title = title
         self.value_type = value_type
         self.round_digits = round_digits
@@ -32,7 +32,7 @@ class SliderEditor(ParamEditorInterface, Container):
         self.content = self.create_content()
     
     
-    def create_control(self) -> Column:
+    def create_content(self) -> Column:
         ref_textfield = Ref[TextField]()
         ref_slider = Ref[Slider]()
 

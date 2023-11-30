@@ -5,15 +5,15 @@ from flet import border, colors, margin
 
 class ParamEditorInterface(ABC):
     _type: str = None
-    _param_name: str = None
+    _name: str = None
 
     @property
     def type(self) -> str:
         return self._type
     
     @property
-    def param_name(self) -> str:
-        return self._param_name
+    def name(self) -> str:
+        return self._name
     
     @abstractmethod
     def create_content(self) -> Any:
