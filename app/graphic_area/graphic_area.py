@@ -19,7 +19,7 @@ from flet import (
     Tabs,
 )
 # from .function import Function
-from .function_attributes.function_view.function_parameters.checkboxes import *
+from .function_attributes.view_function.function_parameters.checkboxes import *
 
 
 class GraphicArea(Column):
@@ -168,7 +168,7 @@ class GraphicArea(Column):
         if not function_name:
             return
         
-        function = Checkboxes('D', 'param', [CBItem('a', True), CBItem('b', False)])
+        function = CheckboxesEditor('D', 'param', [CBItem(True, 'a'), CBItem(False, 'b')])
         print(function.type)
         self.list_function_cards.append(function)
         self.update()

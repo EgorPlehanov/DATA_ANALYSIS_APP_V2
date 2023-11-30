@@ -23,6 +23,9 @@ class FunctionCardView(Container):
         super().__init__()
         self.function = function
 
+        self.ref_card_result = Ref[Column]()
+        self.ref_show_button = Ref[IconButton]()
+
         self.content = self._create_card_content()
         self.data = self
         self.on_click = self.on_change_selected
@@ -37,9 +40,6 @@ class FunctionCardView(Container):
         '''
         Coздает содержимое карточки функции
         '''
-        ref_card_result = Ref[Column]()
-        ref_card_result_show_button = Ref[IconButton]()
-        
         card_content = Column(
             expand=True,
             controls=[
@@ -82,7 +82,7 @@ class FunctionCardView(Container):
         '''Создает параметры карточки'''
         return Markdown(
             animate_size=200,
-            ref=self.ref_card_parameters_text,
+            ref=self.ref_card_parameters,
             extension_set=MarkdownExtensionSet.GITHUB_WEB,
             value=self._get_card_parameters_text()
         )
