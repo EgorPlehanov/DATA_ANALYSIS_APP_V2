@@ -6,11 +6,11 @@ class FunctionCalculate:
         self.function = function
 
         self.calculate_function = FunctionLibrary.get_function_config_attribute_by_key_attribute(
-            function.function_key,
+            function.key,
             'function'
         )
         self.parameters_default_values = FunctionLibrary.get_function_config_parameters_default_values_by_key(
-            function.function_key
+            function.key
         )
 
 

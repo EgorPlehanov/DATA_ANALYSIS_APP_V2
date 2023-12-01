@@ -1,5 +1,5 @@
 from .parameter_editor_interface import ParamEditorInterface
-from function_typing import ValueType
+from ...function_typing import ValueType
 
 from dataclasses import dataclass
 from flet import (

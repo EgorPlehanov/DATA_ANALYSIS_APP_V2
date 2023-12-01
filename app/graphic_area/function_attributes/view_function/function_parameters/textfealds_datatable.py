@@ -1,8 +1,8 @@
 from .parameter_editor_interface import ParamEditorInterface
-from function_typing import ValueType
+from ...function_typing import ValueType
 
-from dataclasses import dataclass
-from typing import Dict, Any
+from dataclasses import dataclass, field
+from typing import Dict
 from flet import (
     Container, Column, DataTable, DataColumn, DataCell, IconButton, Ref,
     TextField, Text, DataRow, TextAlign, colors, KeyboardType, Markdown,
@@ -24,8 +24,8 @@ class TFDTItem:
 class TFDTConfig:
     name: str           = ''
     title: str          = ''
-    columns: Dict[str, TFDTColumn]      = {}
-    default_value: Dict[int, TFDTItem]  = {}
+    columns: Dict[str, TFDTColumn]      = field(default_factory=dict)
+    default_value: Dict[int, TFDTItem]  = field(default_factory=dict)
 
 
 class TextFealdsDataTableEditor(ParamEditorInterface, Container):

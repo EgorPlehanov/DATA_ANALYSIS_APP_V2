@@ -1,6 +1,5 @@
 from collections import defaultdict
 from typing import Literal
-from functools import partial
 
 from ..view_function.function_parameters import *
 from ..function_typing import *
@@ -68,13 +67,6 @@ class FunctionLibrary:
             parameter.name: parameter.default_value
             for parameter in function_config.parameters
         }
-    
-
-    @staticmethod
-    def get_function_print_name_by_key(key: str):
-        '''Возвращает название функции по ее имени'''
-        function_config = FunctionLibrary.get_function_config_by_key(key)
-        return f""
 
 
     function_by_key = {

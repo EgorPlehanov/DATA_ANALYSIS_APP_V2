@@ -1,8 +1,7 @@
 from .parameter_editor_interface import ParamEditorInterface
-from function_typing import ValueType
+from ...function_typing import ValueType
 
 from dataclasses import dataclass
-from typing import Literal
 from flet import Container, TextField, TextStyle
 
 

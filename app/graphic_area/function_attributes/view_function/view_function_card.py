@@ -43,10 +43,11 @@ class FunctionCardView(Container):
         card_content = Column(
             expand=True,
             controls=[
-                self._create_card_title(),
-                self._create_card_parameters(),
-                self._create_card_result_title(),
-                self._create_card_result_data(),
+                Text(self.function.formatted_name),
+                # self._create_card_title(),
+                # self._create_card_parameters(),
+                # self._create_card_result_title(),
+                # self._create_card_result_data(),
             ]
         )
         return card_content
