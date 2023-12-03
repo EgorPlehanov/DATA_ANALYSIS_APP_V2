@@ -64,7 +64,16 @@ class FunctionCalculate:
         main_data = self.calculate_function(**valid_parameters)
 
         self.result = ResultData(
-            main_data = main_data
+            main_data = main_data,
+            type = self.function.calculate_function_name,
+            initial_data=None,
+            extra_data=None,
+            error_message=None,
+            view_chart=None,
+            view_histogram=None,
+            view_table_horizontal=None,
+            view_table_vertical=None,
+            main_view=None
         )
 
 

@@ -1,6 +1,6 @@
 from flet import (
     Row, Page, Ref, Container, Column, PopupMenuButton, PopupMenuItem,
-    Text, Icon, colors, alignment, ScrollMode, border, Tabs,
+    Text, Icon, colors, alignment, ScrollMode, border, Tabs, padding
 )
 
 from .function import Function
@@ -90,8 +90,9 @@ class GraphicArea(Column):
         '''Создает меню представления созданных функций'''
         return Container(
             width = 350,
-            bgcolor = colors.BLACK26,
+            bgcolor = colors.BLACK12,
             alignment = alignment.top_center,
+            padding = padding.only(left=5, right=5),
             content = Column(
                 tight = True,
                 scroll = ScrollMode.AUTO,

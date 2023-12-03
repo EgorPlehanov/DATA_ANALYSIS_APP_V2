@@ -1,6 +1,6 @@
 from typing import Optional, Callable, List
 from collections import namedtuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pandas import DataFrame
 from enum import Enum
 
@@ -62,11 +62,12 @@ class ResultData:
 @dataclass
 class FunctionConfig:
     '''Конфигурация функции'''
-    key: str
-    name: str
-    type: FunctionType
-    function: Callable
-    parameters: dict
+    key: str            = 'Unknown'
+    name: str           = 'Неизвестная'
+    type: FunctionType  = FunctionType.DATA
+    function: Callable  = lambda: None
+    parameters: dict    = field(default_factory=dict)
+    main_view: ViewType = ViewType.CHART
 
     def __post_init__(self):
         if not isinstance(self.key, str) or not self.key:
