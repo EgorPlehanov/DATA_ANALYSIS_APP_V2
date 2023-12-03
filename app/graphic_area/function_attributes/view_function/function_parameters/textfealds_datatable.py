@@ -1,5 +1,5 @@
 from .parameter_editor_interface import ParamEditorInterface
-from ...function_typing import ValueType
+from ...function_typing import ValueType, ParameterType
 
 from dataclasses import dataclass, field
 from typing import Dict
@@ -27,10 +27,14 @@ class TFDTConfig:
     columns: Dict[str, TFDTColumn]      = field(default_factory=dict)
     default_value: Dict[int, TFDTItem]  = field(default_factory=dict)
 
+    @property
+    def type(self) -> ParameterType:
+        return ParameterType.TEXTFIELDS_DATATABLE
+
 
 class TextFealdsDataTableEditor(ParamEditorInterface, Container):
     def __init__(self, config: TFDTConfig = TFDTConfig()):
-        self._type = 'textfields_datatable'
+        self._type = ParameterType.TEXTFIELDS_DATATABLE
         self._name = config.name
         self.title = config.title
         self.columns = config.columns

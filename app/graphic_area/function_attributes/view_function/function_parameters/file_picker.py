@@ -1,4 +1,5 @@
 from .parameter_editor_interface import ParamEditorInterface
+from ...function_typing import ParameterType
 
 from typing import List, Any
 from dataclasses import dataclass, field
@@ -26,10 +27,14 @@ class FPConfig:
     settings: FPSettings    = FPSettings()
     default_value: Any      = field(default_factory=list)
 
+    @property
+    def type(self) -> ParameterType:
+        return ParameterType.FILE_PICKER
+
 
 class FilePickerEditor(ParamEditorInterface, Container):
     def __init__(self, config: FPConfig = FPConfig()):
-        self._type = 'file_picker'
+        self._type = ParameterType.FILE_PICKER
         self._name = config.name
         self.title = config.title
         self.button_text = config.button_text

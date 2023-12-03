@@ -1,4 +1,5 @@
 from .parameter_editor_interface import ParamEditorInterface
+from ...function_typing import ParameterType
 
 from typing import List
 from dataclasses import dataclass, field
@@ -17,10 +18,14 @@ class DDConfig:
     options: List[DDOptionItem] = field(default_factory=list)
     default_value: str          = ''
 
+    @property
+    def type(self) -> ParameterType:
+        return ParameterType.DROPDOWN
+
 
 class DropdownEditor(ParamEditorInterface, Container):
     def __init__(self, config: DDConfig = DDConfig()):
-        self._type = 'dropdown'
+        self._type = ParameterType.DROPDOWN
         self._name = config.name
         self.title = config.title
         self.options = config.options

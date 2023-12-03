@@ -1,4 +1,5 @@
 from .parameter_editor_interface import ParamEditorInterface
+from ...function_typing import ParameterType
 
 from typing import List
 from dataclasses import dataclass, field
@@ -18,10 +19,14 @@ class CBConfig:
     checkboxes: List[CBItem] = field(default_factory=list)
     default_value: List[str] = field(default_factory=list)
 
+    @property
+    def type(self) -> ParameterType:
+        return ParameterType.CHECKBOXES
+    # TODO: добавить валидацию полей для всех классов конфигураций
 
 class CheckboxesEditor(ParamEditorInterface, Container):
     def __init__(self, config: CBConfig = CBConfig()):
-        self._type = 'checkbox'
+        self._type = ParameterType.CHECKBOXES
         self._name = config.name
         self.title = config.title
         self.checkboxes = config.checkboxes

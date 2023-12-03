@@ -1,5 +1,5 @@
 from .parameter_editor_interface import ParamEditorInterface
-from ...function_typing import ValueType
+from ...function_typing import ValueType, ParameterType
 
 from dataclasses import dataclass
 from flet import (
@@ -14,15 +14,18 @@ class SLConfig:
     value_type: ValueType       = ValueType.FLOAT
     round_digits: int           = 2
     min: int | float            = 0
-    max: int | float            = 0
+    max: int | float            = 1
     step: int | float           = 1
-    default_value: int | float  = 0
+    default_value: int | float  = 1
 
+    @property
+    def type(self) -> ParameterType:
+        return ParameterType.SLIDER
 
 
 class SliderEditor(ParamEditorInterface, Container):
     def __init__(self, config: SLConfig = SLConfig()):
-        self._type = 'slider'
+        self._type = ParameterType.SLIDER
         self._name = config.name
         self.title = config.title
         self.value_type = config.value_type

@@ -1,5 +1,5 @@
 from .parameter_editor_interface import ParamEditorInterface
-from ...function_typing import ValueType
+from ...function_typing import ValueType, ParameterType
 
 from dataclasses import dataclass
 from flet import Container, TextField, TextStyle
@@ -16,10 +16,14 @@ class TFConfig:
     default_value: str      = ''
     autocorrect: bool       = False
 
+    @property
+    def type(self) -> ParameterType:
+        return ParameterType.TEXTFIELD
+
 
 class TextFieldEditor(ParamEditorInterface, Container):
     def __init__(self, config: TFConfig = TFConfig()):
-        self._type = 'text_field'
+        self._type = ParameterType.TEXTFIELD
         self._name = config.name
         self.value_type = config.value_type
         self.label = config.label

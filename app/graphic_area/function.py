@@ -1,7 +1,7 @@
+from .function_attributes import *
+
 from flet import *
 from itertools import count
-
-from .function_attributes import *
 
 
 class Function:
@@ -16,7 +16,10 @@ class Function:
 
         self.type = self.config.type
         self.name = self.config.name
+
+        
         self.formatted_name = self._create_formatted_name()
+        self.calculate_function_name = self.config.function.__name__
 
         self.calculate = FunctionCalculate(self)
         self.view = FunctionView(self)
@@ -24,3 +27,4 @@ class Function:
 
     def _create_formatted_name(self):
         return f'{self.name} (id: {self.id}, type: {self.type})'
+    

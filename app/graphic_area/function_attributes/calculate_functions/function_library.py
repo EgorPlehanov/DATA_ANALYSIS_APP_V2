@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Literal
+from typing import Literal, Any
 
 from ..view_function.function_parameters import *
 from ..function_typing import *
@@ -8,7 +8,7 @@ from .functions import *
 
 class FunctionLibrary:
     @staticmethod
-    def get_russian_type_name(type: FunctionType):
+    def get_russian_type_name(type: FunctionType) -> str:
         '''Возвращает русское название типа функции'''
         russian_type_name = {
             FunctionType.DATA: 'Данные',
@@ -21,7 +21,7 @@ class FunctionLibrary:
 
 
     @staticmethod
-    def get_function_dict():
+    def get_function_dict() -> dict:
         '''Возвращает словарь функций в виде {'type': [namedtuple(key, name), ...], ...}'''
         grouped_functions = defaultdict(list)
         for function in FunctionLibrary.function_by_key.values():
@@ -32,7 +32,7 @@ class FunctionLibrary:
 
 
     @staticmethod
-    def get_function_config_by_key(key: str):
+    def get_function_config_by_key(key: str) -> FunctionConfig:
         '''Возвращает конфигурацию функции по ее имени'''
         if key not in FunctionLibrary.function_by_key:
             raise ValueError(f'Недопустимое key: {key}')
@@ -50,7 +50,7 @@ class FunctionLibrary:
     
 
     @staticmethod
-    def get_functions_by_type(type: Literal['data', 'edit', 'analytic']):
+    def get_functions_by_type(type: FunctionType):
         '''Возвращает список функций определенного типа'''
         return [
             function_config
@@ -60,7 +60,7 @@ class FunctionLibrary:
     
 
     @staticmethod
-    def get_function_config_parameters_default_values_by_key(key: str):
+    def get_function_config_parameters_default_values_by_key(key: str) -> dict[str, Any]:
         '''Возвращает параметры функции по ее имени'''
         function_config = FunctionLibrary.get_function_config_by_key(key)
         return {
@@ -75,9 +75,14 @@ class FunctionLibrary:
             name = "Тренд",
             type = FunctionType.DATA,
             function = trend,
-            parameters = [
-                SwitchEditor()
-            ]
+            parameters = {
+                'type': DDConfig(name='type', default_value='linear_rising'),
+                'a': SLConfig(name='a'),
+                'b': SLConfig(name='b'),
+                'step': SLConfig(name='step'),
+                'N': SLConfig(name='N'),
+                'show_data_table': SWConfig(),
+            }
         )
     }
 

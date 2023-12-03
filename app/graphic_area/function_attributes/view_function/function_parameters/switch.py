@@ -1,4 +1,5 @@
 from .parameter_editor_interface import ParamEditorInterface
+from ...function_typing import ParameterType
 
 from dataclasses import dataclass
 from flet import Container, Row, Text, Switch, LabelPosition, MainAxisAlignment
@@ -10,10 +11,14 @@ class SWConfig:
     title: str          = 'Показывать таблицу данных?'
     default_value: bool = False
 
+    @property
+    def type(self) -> ParameterType:
+        return ParameterType.SWITCH
+
 
 class SwitchEditor(ParamEditorInterface, Container):
     def __init__(self, config: SWConfig = SWConfig()):
-        self._type = 'switch'
+        self._type = ParameterType.SWITCH
         self._name = config.name
         self.title = config.title
         self.default_value = config.default_value
