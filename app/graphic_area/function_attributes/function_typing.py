@@ -33,6 +33,19 @@ class ViewType(Enum):
 
 
 @dataclass
+class FunctionResult:
+    '''Результат выполнения функции (значение которое должна возвращать каждая функция для calculate)
+    
+    main_data:  Основной набор данных
+    extra_data: Дополнительные данные
+    error_message: Сообщение об ошибке
+    '''
+    main_data: Optional[DataFrame]          = None
+    extra_data: Optional[List[DataFrame]]   = None
+    error_message: Optional[str]            = None
+
+
+@dataclass
 class ResultData:
     '''Результат выполнения функции
     
@@ -68,6 +81,7 @@ class FunctionConfig:
     function: Callable  = lambda: None
     parameters: dict    = field(default_factory=dict)
     main_view: ViewType = ViewType.CHART
+    view_list: List[ViewType] = field(default_factory=lambda: [ViewType.CHART])
 
     def __post_init__(self):
         if not isinstance(self.key, str) or not self.key:
@@ -80,10 +94,14 @@ class FunctionConfig:
             raise ValueError(f'Недопустимый тип function: {type(self.function)}')
         if not isinstance(self.parameters, dict):
             raise ValueError(f'Недопустимый тип parameters функции: {type(self.parameters)}')
+        if not isinstance(self.main_view, ViewType) or not self.main_view:
+            raise ValueError(f'Недопустимый тип main_view функции: {type(self.main_view)}, допустимые значения ViewType')
+        if not isinstance(self.view_list, list) or not all(isinstance(view, ViewType) for view in self.view_list):
+            raise ValueError(f'Недопустимый тип view_list функции: {type(self.view_list)}, допустимые значения ViewType')
 
 
 # Функция для меню выбора
-FunctionOption = namedtuple('FunctionOption', ['key', 'name'])
+FunctionMenuOption = namedtuple('FunctionOption', ['key', 'name'])
 
 
 class ValueType(Enum):

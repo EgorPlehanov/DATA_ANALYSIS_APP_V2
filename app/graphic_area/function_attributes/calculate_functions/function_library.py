@@ -25,7 +25,7 @@ class FunctionLibrary:
         '''Возвращает словарь функций в виде {'type': [namedtuple(key, name), ...], ...}'''
         grouped_functions = defaultdict(list)
         for function in FunctionLibrary.function_by_key.values():
-            function_data = FunctionOption(key=function.key, name=function.name)
+            function_data = FunctionMenuOption(key=function.key, name=function.name)
             type = FunctionLibrary.get_russian_type_name(function.type)
             grouped_functions[type].append(function_data)
         return grouped_functions

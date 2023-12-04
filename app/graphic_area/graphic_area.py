@@ -122,12 +122,18 @@ class GraphicArea(Column):
             ref=self.ref_result_view,
             expand = True,
             border = border.all(colors.BLACK),
-            content = Tabs(
-                scrollable = False,
-                ref = self.ref_result_view,
-                animation_duration = 200,
-                tabs=self.list_function_results
-            ),
+            content = Column(
+                tight = True,
+                expand = True,
+                scroll = ScrollMode.AUTO,
+                controls = self.list_function_results
+            ) 
+            # Tabs(
+            #     scrollable = False,
+            #     ref = self.ref_result_view,
+            #     animation_duration = 200,
+            #     tabs=
+            # ),
         )
     
 
@@ -137,7 +143,7 @@ class GraphicArea(Column):
         if not key:
             return
         
-        function = Function(self, key)
+        function = Function(self.page, self, key)
         
         self.list_function_cards.append(function.view.card_view)
         self.list_function_parameters.append(function.view.parameters_view)
@@ -145,8 +151,10 @@ class GraphicArea(Column):
         self.update()
     
 
-    def delite_function(self, function):
-        '''Удаляет функцию из списка'''
-        self.list_function_cards.remove(function)
+    def delete_function(self, function):
+        '''Удаляет функцию из графической области'''
+        self.list_function_cards.remove(function.view.card_view)
+        self.list_function_parameters.remove(function.view.parameters_view)
+        self.list_function_results.remove(function.view.results_view)
 
         self.update()

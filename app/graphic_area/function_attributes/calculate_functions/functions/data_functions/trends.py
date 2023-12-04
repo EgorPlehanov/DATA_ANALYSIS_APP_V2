@@ -1,3 +1,5 @@
+from ....function_typing import FunctionResult
+
 from typing import Literal
 import numpy as np
 import pandas as pd
@@ -23,5 +25,5 @@ def trend(
     data = None
     if type in trend_type_to_function:
         data = trend_type_to_function[type](t, a, b)
-
-    return pd.DataFrame({'x': t, 'y': data})
+        
+    return FunctionResult(main_data=pd.DataFrame({'x': t, 'y': data}))

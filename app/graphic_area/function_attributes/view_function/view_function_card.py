@@ -1,13 +1,14 @@
+import os
 from flet import (
-    Container, border, colors, Ref, Column, IconButton,
+    Page, Container, border, colors, Ref, Column, IconButton,
     Row, MainAxisAlignment, CrossAxisAlignment, Markdown,
     MarkdownExtensionSet, icons, animation, AnimationCurve,
-    Text, Icon,
+    Text, Icon, FilePicker, FilePickerResultEvent, FilePickerFileType
 )
 
 
 class FunctionCardView(Container):
-    def __init__(self, function):
+    def __init__(self, page: Page, function):
         super().__init__()
         self.function = function
         
@@ -22,6 +23,8 @@ class FunctionCardView(Container):
         self.bgcolor = colors.BLACK54
         self.border_radius = 10
         self.padding = 5
+
+        self.save_result_data_dialog = self._create_save_result_data_dialog()
 
 
     def _create_card_content(self):
@@ -39,7 +42,7 @@ class FunctionCardView(Container):
 
     def _create_card_title(self) -> Row:
         '''Создает заголовок карточки'''
-        return Row(
+        return Row( # TODO: переписать на Stack
             alignment = MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment = CrossAxisAlignment.START,
             controls = [
@@ -56,7 +59,7 @@ class FunctionCardView(Container):
                 IconButton(
                     icon=icons.DELETE,
                     data=self,
-                    # on_click=self.on_click_delete
+                    on_click=self.function.delete,
                 )
             ],
         )
@@ -89,16 +92,12 @@ class FunctionCardView(Container):
                     controls=[
                         IconButton(
                             icon=icons.SAVE,
-                            # on_click=self._open_dialog_save_file
+                            on_click=self._open_dialog_save_to_file
                         ),
                         IconButton(
                             icon=icons.KEYBOARD_ARROW_DOWN,
                             ref=self.ref_show_button,
-                            data={
-                                'control': self.ref_card_result,
-                                'button': self.ref_show_button,
-                            },
-                            # on_click=self._change_function_result_visible
+                            on_click=self._change_result_visible
                         ),
                     ]
                 )
@@ -128,14 +127,73 @@ class FunctionCardView(Container):
                                         Icon(name='KEYBOARD_ARROW_UP')
                                     ]
                                 ),
-                                data={
-                                    'control': self.ref_card_result,
-                                    'button': self.ref_show_button,
-                                },
-                                # on_click=self._change_function_result_visible
+                                on_click=self._change_result_visible
                             ),
                         ]
                     )
                 ]
             )
+        )
+    
+
+    def _change_result_visible(self, e):
+        '''Изменяет видимость результата'''
+        self.ref_card_result.current.visible = not self.ref_card_result.current.visible
+        if self.ref_card_result.current.visible:
+            self.ref_show_button.current.icon = icons.KEYBOARD_ARROW_UP
+        else:
+            self.ref_show_button.current.icon = icons.KEYBOARD_ARROW_DOWN
+        self.update()
+    
+
+    def _create_save_result_data_dialog(self) -> FilePicker:
+        '''Создает диалоговое окно для сохранения результата'''
+        return FilePicker(
+            on_result=self._save_result_data,
+        )
+    
+
+    def _save_result_data(self, e: FilePickerResultEvent) -> None:
+        '''Сохраняет результаты в файл'''
+        path = e.path
+        if not path:
+            return
+        file_format = os.path.splitext(path)[-1][1:].lower()
+
+        if file_format not in ['csv', 'json']:
+            path = f'{path}.csv'
+            file_format = 'csv'
+
+        try:
+            with open(path, 'w') as file:
+                data_to_save = self.function.get_result_data().main_data
+                match file_format:
+                    case 'csv':
+                        data_to_save.to_csv(file, index=False)
+                    case 'json':
+                        data_to_save.to_json(file, orient='records')
+                    case _:
+                        raise Exception(f'Неизвестный формат файла: {file_format}')
+                        
+        except Exception as ex:
+            print(f'Ошибка при сохранении: {ex}')
+    
+
+    def _open_dialog_save_to_file(self, e) -> None:
+        '''Открывает диалоговое окно cохранения результата'''
+        self.page.overlay.append(self.save_result_data_dialog)
+        self.page.update()
+
+        parameters_text = "; ".join([
+            f"{param}={value}".replace(': ', '-')
+            for param, value in self.function.calculate.get_current_parameters_formatted().items()
+            if 'show' not in param
+        ])
+        parameters_text = (parameters_text[:100] + '...') if len(parameters_text) > 100 else parameters_text
+
+        self.save_result_data_dialog.save_file(
+            dialog_title = f"Сохрание результата функции {self.function.formatted_name}",
+            file_name = f"{self.function.name}({parameters_text}).csv",
+            file_type = FilePickerFileType.CUSTOM,
+            allowed_extensions = ['csv', 'json'],
         )
