@@ -14,6 +14,13 @@ class FunctionView:
 
 
     def change_selection(self):
+        '''Изменяет выделение функции'''
         self.card_view.change_selection()
         self.parameters_view.change_selection()
         self.results_view.change_selection()
+
+    
+    def update_view(self):
+        '''Вызывает методы для обновления представлений'''
+        self.card_view.update_values()
+        

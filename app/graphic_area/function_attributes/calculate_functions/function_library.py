@@ -70,6 +70,91 @@ class FunctionLibrary:
 
 
     function_by_key = {
+        'test': FunctionConfig(
+            key = "test",
+            name = "Тест",
+            type = FunctionType.EDIT,
+            function = lambda cb, ddfd, dd, fp, sl, sw, tfdt, tf: print('test'),
+            parameters = [
+                CBConfig(
+                    name='cb',
+                    title='Кнопка',
+                    checkboxes=[
+                        CBItem(key='cb1', label='Кнопка 1'),
+                        CBItem('cb2', 'Кнопка 2'),
+                    ],
+                    default_value=['cb1']
+                ),
+                DDFDConfig(
+                    name='ddfd',
+                    title='Выпадающий список данных из другой функции',
+                    options=[
+                        DDFDOptionItem(function_name='Функция 1', value=None),
+                    ],
+                    default_value = None
+                ),
+                DDConfig(
+                    name='dd',
+                    title='Выпадающий список',
+                    options=[
+                        DDOptionItem(key='dd1', text='Заначение 1'),
+                        DDOptionItem(key='dd2', text='Заначение 2'),
+                    ],
+                    default_value='dd1'
+                ),
+                FPConfig(
+                    name='fp',
+                    title='Выбор файла',
+                    button_text='Выбрать файл',
+                    settings=FPSettings(),
+                    default_value=None
+                ),
+                SLConfig(
+                    name='sl',
+                    title='Слайдер',
+                    min=0,
+                    max=100,
+                    step=1,
+                    default_value=50
+                ),
+                SWConfig(
+                    name='sw',
+                    title='Свитч',
+                    default_value=False
+                ),
+                TFDTConfig(
+                    name='tfdt',
+                    title='Таблица данных',
+                    columns={
+                        'column1': TFDTColumn(
+                            name='column1',
+                            tooltip='Колонка 1',
+                            value_type=ValueType.FLOAT
+                        ),
+                        'column2': TFDTColumn(
+                            name='column2',
+                            tooltip='Колонка 2',
+                            value_type=ValueType.INT
+                        )
+                    },
+                    default_value = [
+                        TFDTItem(column_name='column1', row_index=0, value=1),
+                        TFDTItem('column2', 0, 2)
+                    ]
+                ),
+                TFConfig(
+                    name='tf',
+                    value_type = ValueType.FUNCTION,
+                    label = 'lable Функция',
+                    prefix_text = 'pref Функция: ',
+                    hint_text = 'hint Функция',
+                    helper_text = 'help Функция',
+                    autocorrect = False,
+                    default_value = 'x^2'
+                )
+            ],
+        ),
+
         "trend": FunctionConfig(
             key = "trend",
             name = "Тренд",

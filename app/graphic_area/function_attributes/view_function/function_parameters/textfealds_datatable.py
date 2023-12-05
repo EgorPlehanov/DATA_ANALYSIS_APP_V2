@@ -2,7 +2,7 @@ from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ValueType, ParameterType
 
 from dataclasses import dataclass, field
-from typing import Dict
+from typing import List
 from flet import (
     Container, Column, DataTable, DataColumn, DataCell, IconButton, Ref,
     TextField, Text, DataRow, TextAlign, colors, KeyboardType, Markdown,
@@ -18,14 +18,16 @@ class TFDTColumn:
 
 @dataclass
 class TFDTItem:
-    values: Dict[str, str | int | float] = None
+    column_name: str          = None
+    row_index: int            = None
+    value: str | int | float = None
 
 @dataclass
 class TFDTConfig:
-    name: str           = ''
-    title: str          = ''
-    columns: Dict[str, TFDTColumn]      = field(default_factory=dict)
-    default_value: Dict[int, TFDTItem]  = field(default_factory=dict)
+    name: str                     = ''
+    title: str                    = ''
+    columns: List[TFDTColumn]     = field(default_factory=list)
+    default_value: List[TFDTItem] = field(default_factory=list)
 
     @property
     def type(self) -> ParameterType:

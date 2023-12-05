@@ -28,6 +28,13 @@ class FunctionCalculate:
     def set_parameter_value(self, name: str, value: Any) -> None:
         '''Устанавливает значение параметра'''
         self.parameters_value[name] = value
+        self.calculate()
+        self.function.update_view()
+
+
+    def get_current_parameter_value(self, name: str) -> Any:
+        '''Возвращает значение параметра'''
+        return deepcopy(self.parameters_value[name])
 
 
     def get_current_parameters(self) -> dict:
@@ -37,12 +44,17 @@ class FunctionCalculate:
 
     def get_current_parameters_formatted(self) -> dict:
         '''Возвращает текущие значения параметров в виде строк'''
-        return {
-            name: str(value)
-                if self.parameters_config[name].type != ParameterType.DROPDOWN_FUNCTION_DATA
-                else value.formatted_name
-            for name, value in self.parameters_value.items()
-        }
+        formatted_parameters = {}
+        for name, value in self.parameters_value.items():
+            match self.parameters_config[name].type:
+                case ParameterType.DROPDOWN_FUNCTION_DATA:
+                    formatted_parameters[name] = value.formatted_name if value is not None else 'Не выбрано'
+                case ParameterType.FILE_PICKER:
+                    str_value = ', '.join([file.name for file in value]) if value is not None else 'Не выбрано'
+                    formatted_parameters[name] = str_value
+                case _:
+                    formatted_parameters[name] = str(value)
+        return formatted_parameters
     
     
     def calculate(self):
@@ -55,21 +67,20 @@ class FunctionCalculate:
             view_list = self.function.config.view_list
 
             self.result = ResultData(
-                main_data = function_result.main_data,
-                type = self._get_result_data_type(initial_data),
-                initial_data = initial_data,
-                extra_data = function_result.extra_data,
-                error_message = function_result.error_message,
-                view_chart = ViewType.CHART in view_list,
-                view_histogram = ViewType.HISTOGRAM in view_list,
-                view_table_horizontal = ViewType.TABLE_HORIZONTAL in view_list,
-                view_table_vertical = ViewType.TABLE_VERTICAL in view_list,
-                main_view = self.function.config.main_view
+                main_data               = function_result.main_data,
+                type                    = self._get_result_data_type(initial_data),
+                initial_data            = initial_data,
+                extra_data              = function_result.extra_data,
+                error_message           = function_result.error_message,
+                view_chart              = ViewType.CHART in view_list,
+                view_histogram          = ViewType.HISTOGRAM in view_list,
+                view_table_horizontal   = ViewType.TABLE_HORIZONTAL in view_list,
+                view_table_vertical     = ViewType.TABLE_VERTICAL in view_list,
+                main_view               = self.function.config.main_view
             )
         except Exception as e:
             self.result = ResultData(error_message = str(e))
-
-
+        
 
     def _get_valid_parameters(self) -> dict:
         '''Возвращает текущие значения параметров функции с учетом сигнатуры функции'''

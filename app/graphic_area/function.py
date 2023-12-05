@@ -56,3 +56,8 @@ class Function:
         '''Изменяет выделение функции'''
         self.selected = not self.selected
         self.view.change_selection()
+
+
+    def update_view(self):
+        '''Вызывает методы для обновления представлений'''
+        self.view.update_view()

@@ -1,9 +1,11 @@
+from ...function_typing import ValueType
+
 import re
 import ast
 import sympy as sp
 
 
-def validate_textfield_value(self, e) -> None:
+def validate_textfield_value(e) -> None:
         '''Проверка валидности значения текстового поля'''
         text_type = e.control.data.get('value_type')
         text_field_value = e.control.value
@@ -11,7 +13,7 @@ def validate_textfield_value(self, e) -> None:
         error_message = ''
         if text_field_value != '':
             match text_type:
-                case 'function':
+                case ValueType.FUNCTION:
                     if text_field_value:
                         if not re.match(f"^[a-z0-9+\-*/()., ]*$", text_field_value):
                             error_message = f"Ошибка: Недопустимые символы в функции"
@@ -22,10 +24,10 @@ def validate_textfield_value(self, e) -> None:
                                 sp.parse_expr(text_field_value)
                             except Exception as exeption:
                                 error_message = f"Ошибка: {exeption}"
-                case 'int_number':
+                case ValueType.INT:
                     if not text_field_value.isnumeric():
                         error_message = f"Не целое число"
-                case 'number':
+                case ValueType.FLOAT:
                     try:
                         float(text_field_value)
                     except ValueError:
@@ -36,7 +38,7 @@ def validate_textfield_value(self, e) -> None:
             if (
                 error_message == ''
                 and min_value and max_value 
-                and text_type in ('int_number', 'number')
+                and text_type in (ValueType.FLOAT, ValueType.INT)
                 and (float(text_field_value) < min_value or float(text_field_value) > max_value)
             ):
                 error_message = f"За границами [{min_value}, {max_value}]"

@@ -1,5 +1,6 @@
 from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ValueType, ParameterType
+from .parameters_utils import validate_textfield_value
 
 from dataclasses import dataclass
 from flet import (
@@ -77,7 +78,7 @@ class SliderEditor(ParamEditorInterface, Container):
                         'min': self.min,
                         'max': self.max,
                     },
-                    on_change = self._is_text_field_value_valid,
+                    on_change = validate_textfield_value,
                     on_blur = self._on_change,
                     on_submit = self._on_change,
                 )
@@ -99,7 +100,6 @@ class SliderEditor(ParamEditorInterface, Container):
                     value = self.default_value,
                     divisions = slider_divisions,
                     label = '{value}',
-                    on_change = None, #self._update_textfield,
                     on_change_end = self._on_change,
                 ),
                 Text(self.max, style = TextThemeStyle.BODY_SMALL),

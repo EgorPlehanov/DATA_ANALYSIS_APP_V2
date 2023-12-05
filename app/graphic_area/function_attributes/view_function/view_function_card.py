@@ -17,6 +17,7 @@ class FunctionCardView(Container):
         self.ref_card_result = Ref[Column]()
         self.ref_show_button = Ref[IconButton]()
         self.ref_result_data = Ref[Markdown]()
+        self.ref_card_signature = Ref[Markdown]()
 
         self.content = self._create_card_content()
         self.on_click = self.function._on_click
@@ -27,6 +28,7 @@ class FunctionCardView(Container):
         self.padding = 5
 
         self.save_result_data_dialog = self._create_save_result_data_dialog()
+        
 
     
     def change_selection(self):
@@ -61,12 +63,17 @@ class FunctionCardView(Container):
                 Row(
                     expand = True,
                     wrap = True,
-                    controls = [
-                        Markdown(
-                            extension_set = MarkdownExtensionSet.GITHUB_WEB,
-                            value = self._cerate_title_value()
-                        ),
-                    ],
+                    controls = [Column(controls=[
+                            Markdown(
+                                extension_set = MarkdownExtensionSet.GITHUB_WEB,
+                                value = self._cerate_title_value()
+                            ),
+                            Markdown(
+                                ref = self.ref_card_signature,
+                                extension_set = MarkdownExtensionSet.GITHUB_WEB,
+                                value = self._create_title_function_signature()
+                            ),
+                    ])]
                 ),
                 IconButton(
                     icon=icons.DELETE,
@@ -78,13 +85,11 @@ class FunctionCardView(Container):
     
 
     def _cerate_title_value(self):
-        '''Создает строку с названием функции на русском и ее пердставление в коде'''
-        func_name = f'#### **{self.function.name}** (*id:*\u00A0***{self.function.id}***)\n'
-        func_signature = self._get_title_function_signature()
-        return func_name + func_signature
+        '''Создает строку с форматированным названием функции'''
+        return f'#### **{self.function.name}** (*id:*\u00A0***{self.function.id}***)\n'
 
 
-    def _get_title_function_signature(self):
+    def _create_title_function_signature(self):
         '''Создает строку с представление сигнатуры функции со значениями параметров'''
         formated_parameters = self.function.calculate.get_current_parameters_formatted()
         parameters = '\n\n'.join(
@@ -119,27 +124,27 @@ class FunctionCardView(Container):
 
     def _create_card_result_data(self) -> Container:
         return Container(
-            animate_size=animation.Animation(200, AnimationCurve.FAST_OUT_SLOWIN),
-            content=Column(
-                ref=self.ref_card_result,
-                visible=False,
-                controls=[
+            animate_size = animation.Animation(200, AnimationCurve.FAST_OUT_SLOWIN),
+            content = Column(
+                ref = self.ref_card_result,
+                visible = False,
+                controls = [
                     Markdown(
-                        ref=self.ref_result_data,
-                        extension_set=MarkdownExtensionSet.GITHUB_WEB,
-                        value=self._get_result_table()
+                        ref = self.ref_result_data,
+                        extension_set = MarkdownExtensionSet.GITHUB_WEB,
+                        value = self._get_result_table()
                     ),
                     Row(
-                        alignment=MainAxisAlignment.END,
-                        controls=[
+                        alignment = MainAxisAlignment.END,
+                        controls = [
                             IconButton(
-                                content=Row(
-                                    controls=[
-                                        Text(value="Скрыть результат"),
-                                        Icon(name='KEYBOARD_ARROW_UP')
+                                content = Row(
+                                    controls = [
+                                        Text("Скрыть результат"),
+                                        Icon('KEYBOARD_ARROW_UP')
                                     ]
                                 ),
-                                on_click=self._change_result_visible
+                                on_click = self._change_result_visible
                             ),
                         ]
                     )
@@ -183,9 +188,12 @@ class FunctionCardView(Container):
 
     def _create_save_result_data_dialog(self) -> FilePicker:
         '''Создает диалоговое окно для сохранения результата'''
-        return FilePicker(
+        save_result_data_dialog = FilePicker(
             on_result=self._save_result_data,
         )
+        self.page.overlay.append(save_result_data_dialog)
+        self.page.update()
+        return save_result_data_dialog
     
 
     def _save_result_data(self, e: FilePickerResultEvent) -> None:
@@ -216,9 +224,6 @@ class FunctionCardView(Container):
 
     def _open_dialog_save_to_file(self, e) -> None:
         '''Открывает диалоговое окно cохранения результата'''
-        self.page.overlay.append(self.save_result_data_dialog)
-        self.page.update()
-
         parameters_text = "; ".join([
             f"{param}={value}".replace(': ', '-')
             for param, value in self.function.calculate.get_current_parameters_formatted().items()
@@ -232,3 +237,10 @@ class FunctionCardView(Container):
             file_type = FilePickerFileType.CUSTOM,
             allowed_extensions = ['csv', 'json'],
         )
+
+
+    def update_values(self) -> None:
+        '''Обновляет значения текстовых полей сигнатуры со значениями параметров и результатов'''
+        self.ref_card_signature.current.value = self._create_title_function_signature()
+        self.ref_result_data.current.value = self._get_result_table()
+        self.update()

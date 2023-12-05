@@ -40,21 +40,15 @@ class CheckboxesEditor(ParamEditorInterface, Container):
 
 
     def _create_content(self) -> Column:
-        ref_checkboxes = [Ref[Checkbox]() for _ in range(len(self.checkboxes))]
         return Column(
             controls=[
                 Checkbox(
-                    label=checkbox.label,
-                    value=checkbox.default_value,
-                    ref=ref_checkboxes[idx],
-                    data={
-                        'key': checkbox.key,
-                        'ref_checkboxes': ref_checkboxes,
-                        'param_name': self._param_name,
-                    },
-                    on_change=self._on_change,
+                    label = checkbox.label,
+                    value = checkbox.default_value,
+                    key = str(checkbox.key),
+                    on_change = self._on_change,
                 )
-                for idx, checkbox in enumerate(self.checkboxes)
+                for checkbox in self.checkboxes
             ]
         )
     
@@ -64,14 +58,15 @@ class CheckboxesEditor(ParamEditorInterface, Container):
         Обновляет значение параметр в экземпляре класса Function
         Изменяет список выбранных чекбоксов
         '''
-        checkbox_key = e.control.data.get('key')
-        checkbox_value = e.control.value
+        key = e.control.key
+        value = e.control.value
 
-        # param_current_value = self.function.get_parameter_value(param_name).get('value', [])
-        # if checkbox_value:
-        #     param_current_value.append(checkbox_key)
-        # else:
-        #     param_current_value.remove(checkbox_key)
-        # self.function.set_parameter_value(param_name, param_current_value)
-        # self.update_function_card()
+        current_value = self.function.calculate.get_current_parameter_value(self._name)
+        if value:
+            current_value.append(key)
+        else:
+            current_value.remove(key)
+        
+        self.function.calculate.set_parameter_value(self._name, current_value)
+        self.update()
          
