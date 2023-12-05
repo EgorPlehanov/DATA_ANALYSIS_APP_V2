@@ -33,7 +33,9 @@ class FPConfig:
 
 
 class FilePickerEditor(ParamEditorInterface, Container):
-    def __init__(self, config: FPConfig = FPConfig()):
+    def __init__(self, function, config: FPConfig = FPConfig()):
+        self.function = function
+
         self._type = ParameterType.FILE_PICKER
         self._name = config.name
         self.title = config.title

@@ -32,8 +32,10 @@ class TFDTConfig:
         return ParameterType.TEXTFIELDS_DATATABLE
 
 
-class TextFealdsDataTableEditor(ParamEditorInterface, Container):
-    def __init__(self, config: TFDTConfig = TFDTConfig()):
+class TextFieldsDataTableEditor(ParamEditorInterface, Container):
+    def __init__(self, function, config: TFDTConfig = TFDTConfig()):
+        self.function = function
+        
         self._type = ParameterType.TEXTFIELDS_DATATABLE
         self._name = config.name
         self.title = config.title

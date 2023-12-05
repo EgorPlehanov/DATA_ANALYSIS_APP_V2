@@ -24,7 +24,9 @@ class SLConfig:
 
 
 class SliderEditor(ParamEditorInterface, Container):
-    def __init__(self, config: SLConfig = SLConfig()):
+    def __init__(self, function, config: SLConfig = SLConfig()):
+        self.function = function
+
         self._type = ParameterType.SLIDER
         self._name = config.name
         self.title = config.title
@@ -37,86 +39,91 @@ class SliderEditor(ParamEditorInterface, Container):
 
         super().__init__()
         self._set_styles()
-        self.content = self.create_content()
-    
-    
-    def create_content(self) -> Column:
-        ref_textfield = Ref[TextField]()
-        ref_slider = Ref[Slider]()
 
-        slider_divisions = int((self.max - self.min) / self.step)
+        self.ref_textfield = Ref[TextField]()
+        self.ref_slider = Ref[Slider]()
+
+        self.content = self._create_content()
+    
+    
+    def _create_content(self) -> Column:
+        '''Создает модификатор параметра типа Slider'''
         editor_slider = Column(
             controls=[
-                Row(
-                    controls=[
-                        Text(f'{self.title}:'),
-                        TextField(
-                            ref = ref_textfield,
-                            value = self.default_value,
-                            tooltip = f"Задайте значение от {self.min} до {self.max} (шаг {self.step})",
-                            hint_text = f"Задайте {self._param_name}",
-                            expand = True,
-                            dense = True,
-                            border = InputBorder.UNDERLINE,
-                            data = {
-                                'ref_slider': ref_slider,
-                                'round_digits': self.round_digits,
-                                'text_type': self.value_type,
-                                'min': self.min,
-                                'max': self.max,
-                            },
-                            on_change = None, #self._is_text_field_value_valid,
-                            on_blur = self._on_change,
-                            on_submit = self._on_change,
-                        )
-                    ],
-                ),
-                Row(
-                    controls=[
-                        Text(self.min, style = TextThemeStyle.BODY_SMALL),
-                        Slider(
-                            ref = ref_slider,
-                            expand = True,
-                            min = self.min,
-                            max = self.max,
-                            value = self.default_value,
-                            divisions = slider_divisions,
-                            label = '{value}',
-                            data = {"ref_textfield": ref_textfield},
-                            on_change = None, #self._update_slider_textfield,
-                            on_change_end = self._on_change,
-                        ),
-                        Text(self.max, style = TextThemeStyle.BODY_SMALL),
-                    ],
-                    spacing = 0
-                )
+                self._create_editor_part_textfield(),
+                self._create_editor_part_slider()
             ],
             spacing = 0
         )
         return editor_slider
     
+
+    def _create_editor_part_textfield(self) -> Row:
+        '''Создает часть модификатора параметра с текстовым полем'''
+        return Row(
+            controls=[
+                Text(f'{self.title if self.title else self._name}:'),
+                TextField(
+                    ref = self.ref_textfield,
+                    value = self.default_value,
+                    tooltip = f"Задайте значение от {self.min} до {self.max} (шаг {self.step})",
+                    hint_text = f"Задайте {self._name}",
+                    expand = True,
+                    dense = True,
+                    border = InputBorder.UNDERLINE,
+                    data = {
+                        'round_digits': self.round_digits,
+                        'text_type': self.value_type,
+                        'min': self.min,
+                        'max': self.max,
+                    },
+                    on_change = self._is_text_field_value_valid,
+                    on_blur = self._on_change,
+                    on_submit = self._on_change,
+                )
+            ],
+        )
+    
+
+    def _create_editor_part_slider(self) -> Row:
+        '''Создает часть модификатора параметра со слайдером'''
+        slider_divisions = int((self.max - self.min) / self.step)
+        return Row(
+            controls=[
+                Text(self.min, style = TextThemeStyle.BODY_SMALL),
+                Slider(
+                    ref = self.ref_slider,
+                    expand = True,
+                    min = self.min,
+                    max = self.max,
+                    value = self.default_value,
+                    divisions = slider_divisions,
+                    label = '{value}',
+                    on_change = None, #self._update_textfield,
+                    on_change_end = self._on_change,
+                ),
+                Text(self.max, style = TextThemeStyle.BODY_SMALL),
+            ],
+            spacing = 0
+        )
+    
     
     def _on_change(self, e) -> None:
-        '''
-        Обнавляет значение параметра в экземпляре класса Function, заголовке слайдера и карточке функции
-        '''
-        if e.control.data.get('ref_slider'):
-            param_editor = e.control.data.get('ref_slider').current
+        '''Обнавляет значение параметра и значение текстового поля'''
+        if isinstance(e.control, TextField):
+            param_editor = self.ref_slider.current
             if e.control.error_text or not e.control.value:
                 return
         else:
-            param_editor = e.control.data.get('ref_textfield').current
+            param_editor = self.ref_textfield.current
             param_editor.error_text = None
 
-        # param_name = e.control.data.get('param_name')
-        # round_digits = e.control.data.get('round_digits', 3)
-        # param_value_type = e.control.data.get('text_type', 'number')
-        # param_value = int(float(e.control.value) * 10**round_digits) / 10**round_digits \
-        #     if round_digits > 0 and param_value_type != 'int_number' else int(float(e.control.value))
+        value = int(float(e.control.value) * 10**self.round_digits) / 10**self.round_digits \
+            if self.round_digits > 0 and self.value_type != 'int_number' else int(float(e.control.value))
 
-        # e.control.value = str(param_value)
-        # param_editor.value = str(param_value)
-        # self.function.set_parameter_value(param_name, param_value)
+        e.control.value = str(value)
+        param_editor.value = str(value)
+        self.function.calculate.set_parameter_value(self._name, value)
 
-        # self.update_function_card()
+        self.update()
     

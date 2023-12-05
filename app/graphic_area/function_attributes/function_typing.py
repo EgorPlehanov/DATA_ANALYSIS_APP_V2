@@ -93,7 +93,10 @@ class FunctionConfig:
         if not callable(self.function):
             raise ValueError(f'Недопустимый тип function: {type(self.function)}')
         if not isinstance(self.parameters, dict):
-            raise ValueError(f'Недопустимый тип parameters функции: {type(self.parameters)}')
+            if isinstance(self.parameters, list):
+                self.parameters = {param.name: param for param in self.parameters}
+            else:
+                raise ValueError(f'Недопустимый тип parameters функции: {type(self.parameters)}')
         if not isinstance(self.main_view, ViewType) or not self.main_view:
             raise ValueError(f'Недопустимый тип main_view функции: {type(self.main_view)}, допустимые значения ViewType')
         if not isinstance(self.view_list, list) or not all(isinstance(view, ViewType) for view in self.view_list):

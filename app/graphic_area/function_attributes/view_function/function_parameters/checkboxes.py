@@ -25,7 +25,9 @@ class CBConfig:
     # TODO: добавить валидацию полей для всех классов конфигураций
 
 class CheckboxesEditor(ParamEditorInterface, Container):
-    def __init__(self, config: CBConfig = CBConfig()):
+    def __init__(self, function, config: CBConfig = CBConfig()):
+        self.function = function
+
         self._type = ParameterType.CHECKBOXES
         self._name = config.name
         self.title = config.title

@@ -75,14 +75,24 @@ class FunctionLibrary:
             name = "Тренд",
             type = FunctionType.DATA,
             function = trend,
-            parameters = {
-                'type': DDConfig(name='type', default_value='linear_rising'),
-                'a': SLConfig(name='a'),
-                'b': SLConfig(name='b'),
-                'step': SLConfig(name='step'),
-                'N': SLConfig(name='N'),
-                'show_data_table': SWConfig(),
-            }
+            parameters = [
+                DDConfig(
+                    name='type',
+                    title='Тип тренда',
+                    options=[
+                        DDOptionItem(key='linear_rising', text='Линейный восходящий'),
+                        DDOptionItem(key='linear_falling', text='Линейный нисходящий'),
+                        DDOptionItem(key='nonlinear_rising', text='Нелинейный восходящий'),
+                        DDOptionItem(key='nonlinear_falling', text='Нелинейный нисходящий'),
+                    ],
+                    default_value='linear_rising'
+                ),
+                SLConfig(name='a'),
+                SLConfig(name='b'),
+                SLConfig(name='step'),
+                SLConfig(name='N'),
+                SWConfig(),
+            ]
         )
     }
 

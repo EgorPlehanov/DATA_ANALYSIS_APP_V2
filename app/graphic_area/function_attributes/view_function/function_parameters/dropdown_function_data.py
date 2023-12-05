@@ -27,7 +27,9 @@ class DDFDConfig:
 
 
 class DropdownFunctionDataEditor(ParamEditorInterface, Container):
-    def __init__(self, config: DDFDConfig = DDFDConfig()):
+    def __init__(self, function, config: DDFDConfig = DDFDConfig()):
+        self.function = function
+
         self._type = ParameterType.DROPDOWN_FUNCTION_DATA
         self._name = config.name
         self.title = config.title

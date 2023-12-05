@@ -17,7 +17,9 @@ class SWConfig:
 
 
 class SwitchEditor(ParamEditorInterface, Container):
-    def __init__(self, config: SWConfig = SWConfig()):
+    def __init__(self, function, config: SWConfig = SWConfig()):
+        self.function = function
+        
         self._type = ParameterType.SWITCH
         self._name = config.name
         self.title = config.title
@@ -47,8 +49,8 @@ class SwitchEditor(ParamEditorInterface, Container):
         '''
         Обновляет значение параметра переключателя в экземпляре класса Function
         '''
-        switch_value = e.control.value
-        # self.function.set_parameter_value(self._param_name, switch_value)
+        value = e.control.value
+        self.function.calculate.set_parameter_value(self.name, value)
 
-        # self.update_function_card()
+        self.update()
     

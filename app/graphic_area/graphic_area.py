@@ -167,7 +167,7 @@ class GraphicArea(Column):
             # Устанавливаем ссылку на новую выбранную функцию
             self.selected_function = clicked_function
             
-            self._scroll_view_to(self.ref_cards_view.current, clicked_function.id)
+            self._scroll_view_to(self.ref_cards_view.current, clicked_function.id)  # TODO: Разобраться почему не срабатывает
             self._scroll_view_to(self.ref_result_view.current, clicked_function.id)
         self.update()
 
