@@ -44,13 +44,18 @@ class FunctionCalculate:
 
     def get_current_parameters_formatted(self) -> dict:
         '''Возвращает текущие значения параметров в виде строк'''
+        empty_value = 'Не задано'
         formatted_parameters = {}
+
         for name, value in self.parameters_value.items():
             match self.parameters_config[name].type:
                 case ParameterType.DROPDOWN_FUNCTION_DATA:
-                    formatted_parameters[name] = value.formatted_name if value is not None else 'Не выбрано'
+                    formatted_parameters[name] = value.formatted_name if value is not None else empty_value
                 case ParameterType.FILE_PICKER:
-                    str_value = ', '.join([file.name for file in value]) if value is not None else 'Не выбрано'
+                    str_value = ', '.join([file.name for file in value]) if value is not None else empty_value
+                    formatted_parameters[name] = str_value
+                case ParameterType.TEXTFIELDS_DATATABLE:
+                    str_value = str(value).replace('**', '\*\*') if value else empty_value
                     formatted_parameters[name] = str_value
                 case _:
                     formatted_parameters[name] = str(value)

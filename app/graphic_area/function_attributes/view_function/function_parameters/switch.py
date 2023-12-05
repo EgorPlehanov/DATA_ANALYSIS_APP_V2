@@ -46,11 +46,8 @@ class SwitchEditor(ParamEditorInterface, Container):
     
     
     def _on_change(self, e) -> None:
-        '''
-        Обновляет значение параметра переключателя в экземпляре класса Function
-        '''
+        '''Обновляет значение параметра переключателя в экземпляре класса Function'''
         value = e.control.value
         self.function.calculate.set_parameter_value(self.name, value)
-
         self.update()
     

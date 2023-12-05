@@ -119,11 +119,11 @@ class SliderEditor(ParamEditorInterface, Container):
             param_editor.error_text = None
 
         value = int(float(e.control.value) * 10**self.round_digits) / 10**self.round_digits \
-            if self.round_digits > 0 and self.value_type != 'int_number' else int(float(e.control.value))
+            if self.round_digits > 0 and self.value_type != ValueType.INT else int(float(e.control.value))
 
         e.control.value = str(value)
         param_editor.value = str(value)
+        
         self.function.calculate.set_parameter_value(self._name, value)
-
         self.update()
     
