@@ -1,6 +1,7 @@
+from flet_core.scrollable_control import ScrollableControl
 from flet import (
     Row, Page, Ref, Container, Column, PopupMenuButton, PopupMenuItem,
-    Text, Icon, colors, alignment, ScrollMode, border, Tabs, padding
+    Text, Icon, colors, alignment, ScrollMode, border, padding, animation
 )
 
 from .function import Function
@@ -18,20 +19,19 @@ class GraphicArea(Column):
         self.functions = self.get_functions()
 
         # Текущая выбранная функция
-        self.ref_selected_function_card = Ref[Container]()
+        self.selected_function: Function = None
 
-        # Список представлений карточек функций
-        self.list_function_cards = []
-        # Список представлений параметров функций
-        self.list_function_parameters = []
-        # Список представлений результатов
-        self.list_function_results = []
+        # Список представлений карточек / параметров / результатов функций
+        self.list_cards = []
+        self.list_parameters = []
+        self.list_results = []
 
         # Ссылки на элементы управления графической области
-        self.ref_parameters_menu = Ref[Container]()
-        self.ref_result_view = Ref[Container]()
+        self.ref_result_view = Ref[Column]()
+        self.ref_cards_view = Ref[Column]()
 
         self.controls = self.create_graphic_area_controls()
+
 
 
     def get_functions(self) -> dict:
@@ -46,7 +46,7 @@ class GraphicArea(Column):
             Row(
                 expand=True,
                 controls=[
-                    self.create_function_card_menu(),
+                    self.create_cards_menu(),
                     self.create_parameters_menu(),
                     self.create_result_view()
                 ]
@@ -86,18 +86,19 @@ class GraphicArea(Column):
         )
     
 
-    def create_function_card_menu(self) -> Container:
+    def create_cards_menu(self) -> Container:
         '''Создает меню представления созданных функций'''
         return Container(
             width = 350,
             bgcolor = colors.BLACK12,
             alignment = alignment.top_center,
-            padding = padding.only(left=5, right=5),
+            padding = padding.only(left=10, right=10),
             content = Column(
                 tight = True,
+                spacing = 10,
                 scroll = ScrollMode.AUTO,
-                spacing = 5,
-                controls = self.list_function_cards
+                ref = self.ref_cards_view,
+                controls = self.list_cards
             )
         )
     
@@ -105,39 +106,32 @@ class GraphicArea(Column):
     def create_parameters_menu(self) -> Container:
         '''Создает меню параметров функции'''
         return Container(
-            ref=self.ref_parameters_menu,
             alignment = alignment.top_center,
             bgcolor = colors.BLACK12,
             animate_size = 100,
             content = Column(
                 tight = True,
                 scroll = ScrollMode.AUTO,
-                controls = self.list_function_parameters
+                controls = self.list_parameters
             )
         )
     
 
     def create_result_view(self) -> Container:
         return Container(
-            ref=self.ref_result_view,
             expand = True,
             border = border.all(colors.BLACK),
             content = Column(
                 tight = True,
                 expand = True,
                 scroll = ScrollMode.AUTO,
-                controls = self.list_function_results
+                ref = self.ref_result_view,
+                controls = self.list_results
             ) 
-            # Tabs(
-            #     scrollable = False,
-            #     ref = self.ref_result_view,
-            #     animation_duration = 200,
-            #     tabs=
-            # ),
         )
     
 
-    def add_function(self, e):
+    def add_function(self, e) -> None:
         '''Добавляет функцию в список'''
         key = e.control.data
         if not key:
@@ -145,16 +139,43 @@ class GraphicArea(Column):
         
         function = Function(self.page, self, key)
         
-        self.list_function_cards.append(function.view.card_view)
-        self.list_function_parameters.append(function.view.parameters_view)
-        self.list_function_results.append(function.view.results_view)
+        self.list_cards.append(function.view.card_view)
+        self.list_parameters.append(function.view.parameters_view)
+        self.list_results.append(function.view.results_view)
         self.update()
     
 
-    def delete_function(self, function):
+    def delete_function(self, function: Function) -> None:
         '''Удаляет функцию из графической области'''
-        self.list_function_cards.remove(function.view.card_view)
-        self.list_function_parameters.remove(function.view.parameters_view)
-        self.list_function_results.remove(function.view.results_view)
-
+        self.list_cards.remove(function.view.card_view)
+        self.list_parameters.remove(function.view.parameters_view)
+        self.list_results.remove(function.view.results_view)
         self.update()
+
+
+    def change_selected_function(self, clicked_function: Function) -> None:
+        '''Изменяет текущую выбранную функцию'''
+        clicked_function.change_selection()
+
+        if clicked_function == self.selected_function:
+            # Если нажата выбраная функция очищаем ссылку
+            self.selected_function = None
+        else:
+            # Снимаем выделение с предыдущей выбранной функции, если она есть
+            if self.selected_function is not None:
+                self.selected_function.change_selection()
+            # Устанавливаем ссылку на новую выбранную функцию
+            self.selected_function = clicked_function
+            
+            self._scroll_view_to(self.ref_cards_view.current, clicked_function.id)
+            self._scroll_view_to(self.ref_result_view.current, clicked_function.id)
+        self.update()
+
+
+    def _scroll_view_to(self, view: ScrollableControl, key: str | int) -> None:
+        '''Прокручивает вью до элемента с заданным ключом'''
+        view.scroll_to(
+            key = str(key),
+            duration = 500,
+            curve = animation.AnimationCurve.FAST_OUT_SLOWIN
+        )

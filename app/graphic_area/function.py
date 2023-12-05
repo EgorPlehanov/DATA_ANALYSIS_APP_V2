@@ -23,6 +23,8 @@ class Function:
 
         self.calculate = FunctionCalculate(self)
         self.view = FunctionView(page, self)
+
+        self.selected = False
     
 
     def _create_formatted_name(self):
@@ -43,3 +45,14 @@ class Function:
     def delete(self, e):
         '''Вызывает метод удаления функции'''
         self._graphic_area.delete_function(self)
+
+
+    def _on_click(self, e):
+        '''Вызывает метод изменения выделения функции'''
+        self._graphic_area.change_selected_function(self)
+
+
+    def change_selection(self):
+        '''Изменяет выделение функции'''
+        self.selected = not self.selected
+        self.view.change_selection()

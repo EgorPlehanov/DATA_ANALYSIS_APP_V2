@@ -10,14 +10,16 @@ from flet import (
 class FunctionCardView(Container):
     def __init__(self, page: Page, function):
         super().__init__()
+        self.page = page
         self.function = function
+        self.key = self.function.id
         
         self.ref_card_result = Ref[Column]()
         self.ref_show_button = Ref[IconButton]()
         self.ref_result_data = Ref[Markdown]()
 
         self.content = self._create_card_content()
-        # self.on_click = self._change_selected
+        self.on_click = self.function._on_click
         
         self.border = border.all(color=colors.BLACK)
         self.bgcolor = colors.BLACK54
@@ -25,6 +27,16 @@ class FunctionCardView(Container):
         self.padding = 5
 
         self.save_result_data_dialog = self._create_save_result_data_dialog()
+
+    
+    def change_selection(self):
+        '''Изменяет выделение карточки'''
+        if self.function.selected:
+            self.border = border.all(color=colors.BLUE)
+            self.bgcolor = colors.BLACK26
+        else:
+            self.border = border.all(color=colors.BLACK)
+            self.bgcolor = colors.BLACK54
 
 
     def _create_card_content(self):
@@ -115,7 +127,7 @@ class FunctionCardView(Container):
                     Markdown(
                         ref=self.ref_result_data,
                         extension_set=MarkdownExtensionSet.GITHUB_WEB,
-                        # value=self._get_card_parameters_result()
+                        value=self._get_result_table()
                     ),
                     Row(
                         alignment=MainAxisAlignment.END,
@@ -134,6 +146,29 @@ class FunctionCardView(Container):
                 ]
             )
         )
+
+
+    def _get_result_table(self, max_rows=10) -> str:
+        '''Создает таблицное представление результатов'''
+        data = self.function.get_result_main_data()
+        if data is None or data.empty:
+            return '***Нет данных***'
+        
+        if len(data) <= max_rows:
+            markdown_table = data.to_markdown()
+        else:
+            df_head = data.head(max_rows // 2)
+            df_tail = data.tail(max_rows // 2)
+
+            tail_rows = []
+            for idx, row in df_tail.iterrows():
+                row_text = f'| {idx} | ' + " | ".join(map(str, row)) + ' |'
+                tail_rows.append(row_text)
+
+            table_separator = '\n|' + '|'.join(['...'] * (data.shape[1] + 1)) + '|\n' if data.shape[0] > 10 else ""
+            markdown_table = df_head.to_markdown() + table_separator + '\n'.join(tail_rows)
+                
+        return markdown_table
     
 
     def _change_result_visible(self, e):
@@ -166,7 +201,7 @@ class FunctionCardView(Container):
 
         try:
             with open(path, 'w') as file:
-                data_to_save = self.function.get_result_data().main_data
+                data_to_save = self.function.get_result_main_data()
                 match file_format:
                     case 'csv':
                         data_to_save.to_csv(file, index=False)

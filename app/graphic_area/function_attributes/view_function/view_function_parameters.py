@@ -12,6 +12,11 @@ class FunctionParametersView(Container):
         self.width = 350
 
 
+    def change_selection(self):
+        '''Изменяет выделение (видимость) параметров'''
+        self.visible = self.function.selected
+
+
     def create_content(self) -> Column:
         return Column(
             controls = [], #self._get_parameters_view_list(),
