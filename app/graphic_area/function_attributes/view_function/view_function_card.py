@@ -244,3 +244,4 @@ class FunctionCardView(Container):
         self.ref_card_signature.current.value = self._create_title_function_signature()
         self.ref_result_data.current.value = self._get_result_table()
         self.update()
+    
