@@ -1,8 +1,9 @@
 from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ValueType, ParameterType
+from .parameters_utils import validate_textfield_value
 
 from dataclasses import dataclass
-from flet import Container, TextField, TextStyle
+from flet import Container, TextField, TextStyle, TapEvent
 
 
 @dataclass
@@ -50,22 +51,17 @@ class TextFieldEditor(ParamEditorInterface, Container):
             dense = True,
             autocorrect = self.autocorrect,
             value = self.default_value,
-            on_change = None, #self._is_text_field_value_valid,
+            data = {'value_type': self.value_type},
+            on_change = validate_textfield_value,
             on_blur = self._on_change,
             on_submit = self._on_change,
         )
     
 
     def _on_change(self, e) -> None:
-        '''
-        Обновляет значение параметра текстового поля в экземпляре класса Function
-        '''
+        '''Обновляет значение параметра текстового поля в экземпляре класса Function'''
         if e.control.error_text:
             return
-        text_field_value = e.control.value
-        # self.function.set_parameter_value(
-        #     self._param_name, text_field_value,
-        #     text_field_value.replace('**', '\*\*') if text_field_value else 'Нет значения'
-        # )
-        # self.update_function_card()
+        self.function.calculate.set_parameter_value(self._name, e.control.value)
+        self.update()
     
