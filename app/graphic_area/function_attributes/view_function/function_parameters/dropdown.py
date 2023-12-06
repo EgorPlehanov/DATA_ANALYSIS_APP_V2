@@ -52,10 +52,6 @@ class DropdownEditor(ParamEditorInterface, Container):
     
 
     def _on_change(self, e) -> None:
-        '''
-        Обновляет значение параметра в экземпляре класса Function и карточке функции
-        '''
-        param_value = e.control.value
-        # self.function.set_parameter_value(self._param_name, param_value)
-
-        # self.update_function_card()
+        '''Обновляет значение параметра в экземпляре класса Function и карточке функции'''
+        self.function.calculate.set_parameter_value(self._name, e.control.value)
+        self.update()

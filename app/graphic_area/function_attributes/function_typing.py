@@ -1,4 +1,4 @@
-from typing import Optional, Callable, List
+from typing import Optional, Callable, List, Dict
 from collections import namedtuple
 from dataclasses import dataclass, field
 from pandas import DataFrame
@@ -79,7 +79,7 @@ class FunctionConfig:
     name: str           = 'Неизвестная'
     type: FunctionType  = FunctionType.DATA
     function: Callable  = lambda: None
-    parameters: dict    = field(default_factory=dict)
+    parameters: Dict | List = field(default_factory=dict)
     main_view: ViewType = ViewType.CHART
     view_list: List[ViewType] = field(default_factory=lambda: [ViewType.CHART])
 

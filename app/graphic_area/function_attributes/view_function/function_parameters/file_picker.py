@@ -6,8 +6,8 @@ from dataclasses import dataclass, field
 from collections import namedtuple
 from flet import (
     Container, FilePickerFileType, FilePicker, Ref,
-    Text, Column, ElevatedButton, Row, icons,
-    FilePickerResultEvent
+    Text, Column, ElevatedButton, Row, icons, MainAxisAlignment,
+    FilePickerResultEvent, IconButton, colors, padding
 )
 
 
@@ -66,24 +66,22 @@ class FilePickerEditor(ParamEditorInterface, Container):
         return file_picker_dialog
     
 
-    def _create_content(self) -> Row:
+    def _create_content(self) -> Column:
         '''Создает содержимое редактора'''
-        return Row(
-            expand=True,
-            controls = [
-                Column(
-                    controls = [
-                        Text(self.title),
-                        Column(ref = self.ref_files),
-                        ElevatedButton(
-                            text = self.button_text,
-                            icon = icons.UPLOAD_FILE,
-                            on_click = self._open_file_picker
-                        ),
-                    ]
-                )
-            ],
-        )
+        return Column([
+            Row(
+                alignment = MainAxisAlignment.SPACE_BETWEEN,
+                controls = [
+                    Text(self.title),
+                    ElevatedButton(
+                        text = self.button_text,
+                        icon = icons.UPLOAD_FILE,
+                        on_click = self._open_file_picker
+                    )
+                ],
+            ),
+            Row([Column(ref = self.ref_files)])
+        ])
     
 
     def _open_file_picker(self, e):
@@ -110,15 +108,42 @@ class FilePickerEditor(ParamEditorInterface, Container):
                     )
                 )
             self.function.calculate.set_parameter_value(self._name, self.list_picked_files)
-            self.update()
+            self._update_picked_files()
     
 
     def _update_picked_files(self):
         '''Обновляет список файлов в редакторе'''
         self.ref_files.current.controls = [
-            Text(f"{file.name} ({self._convert_size(file.size)})")
-            for file in self.list_picked_files 
+            Container(
+                bgcolor = colors.WHITE10,
+                border_radius = 20,
+                padding = padding.only(right=15),
+                content = Row(
+                    spacing = 0,
+                    controls = [
+                        IconButton(
+                            icon = icons.CLOSE,
+                            icon_size = 14,
+                            tooltip = "Удалить",
+                            data = idx,
+                            on_click = self._delete_file,
+                        ),
+                        Text(f"{file.name} ({self._convert_size(file.size)})")
+                    ]
+                )
+            )
+            for idx, file in enumerate(self.list_picked_files) 
         ]
+        self.update()
+
+
+    
+    def _delete_file(self, e):
+        '''Удаляет выбранный файл'''
+        file_idx = e.control.data
+        self.list_picked_files.remove(self.list_picked_files[file_idx])
+        self.function.calculate.set_parameter_value(self._name, self.list_picked_files)
+        self._update_picked_files()
     
 
     def _convert_size(self, size):

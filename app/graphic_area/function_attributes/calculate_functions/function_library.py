@@ -125,21 +125,18 @@ class FunctionLibrary:
                 TFDTConfig(
                     name='tfdt',
                     title='Таблица данных',
-                    columns={
-                        'column1': TFDTColumn(
+                    columns=[
+                        TFDTColumn(
                             name='column1',
                             tooltip='Колонка 1',
                             value_type=ValueType.FLOAT
                         ),
-                        'column2': TFDTColumn(
-                            name='column2',
-                            tooltip='Колонка 2',
-                            value_type=ValueType.INT
-                        )
-                    },
+                        TFDTColumn('column2', 'Колонка 2', ValueType.INT)
+                    ],
                     default_value = [
                         TFDTItem(column_name='column1', row_index=0, value=1),
-                        TFDTItem('column2', 0, 2)
+                        TFDTItem('column2', 0, 2),
+                        TFDTItem('column2', 2, 2)
                     ]
                 ),
                 TFConfig(

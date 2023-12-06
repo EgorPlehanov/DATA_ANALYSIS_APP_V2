@@ -2,7 +2,7 @@ from ..function_typing import ParameterType
 from .function_parameters import *
 
 from flet import (
-    Container, Column, Row, Markdown, border, colors
+    Container, Column, Markdown
 )
 
 
@@ -53,17 +53,7 @@ class FunctionParametersView(Container):
         }
 
         for config in self.parameters_config.values():
-            param_type = config.type
-            param_editor = param_type_to_editor[param_type](self.function, config)
-                    
             parameters_list.append(
-                Container(
-                    content = param_editor,
-                    data = param_type,
-                    padding = 10,
-                    border_radius = 10,
-                    border = border.all(1, colors.with_opacity(0.05, colors.SECONDARY)),
-                    bgcolor = colors.BLACK12,
-                )
+                param_type_to_editor[config.type](self.function, config)
             )
         return parameters_list

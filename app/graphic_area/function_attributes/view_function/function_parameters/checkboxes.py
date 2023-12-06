@@ -22,7 +22,11 @@ class CBConfig:
     @property
     def type(self) -> ParameterType:
         return ParameterType.CHECKBOXES
-    # TODO: добавить валидацию полей для всех классов конфигураций
+
+    def __post_init__(self):
+        for chkbox in self.checkboxes:
+            chkbox.default_value = chkbox.key in self.default_value
+
 
 class CheckboxesEditor(ParamEditorInterface, Container):
     def __init__(self, function, config: CBConfig = CBConfig()):

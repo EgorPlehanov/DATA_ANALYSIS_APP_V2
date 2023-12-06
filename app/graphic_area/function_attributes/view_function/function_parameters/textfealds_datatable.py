@@ -3,7 +3,7 @@ from ...function_typing import ValueType, ParameterType
 from .parameters_utils import validate_textfield_value
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import Dict, List
 from flet import (
     Container, Column, DataTable, DataColumn, DataCell, IconButton, Ref,
     TextField, Text, DataRow, TextAlign, colors, KeyboardType, Markdown,
@@ -28,12 +28,19 @@ class TFDTColumn:
 class TFDTConfig:
     name: str                     = ''
     title: str                    = ''
-    columns: List[TFDTColumn]     = field(default_factory=list)
+    columns: Dict[str, TFDTColumn] | List[TFDTColumn] = field(default_factory=dict)
     default_value: List[TFDTItem] = field(default_factory=list)
 
     @property
     def type(self) -> ParameterType:
         return ParameterType.TEXTFIELDS_DATATABLE
+    
+    def __post_init__(self):
+        if isinstance(self.columns, list):
+            self.columns = {column.name: column for column in self.columns}
+        for item in self.default_value:
+            if item.column_name not in self.columns.keys():
+                raise ValueError(f"Неизвестный столбец: {item.column_name}, были заданы столбцы: {TFDTConfig.columns.keys()}")
 
 
 class TextFieldsDataTableEditor(ParamEditorInterface, Container):
@@ -55,13 +62,13 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
 
 
     def _create_content(self) -> Column:
-        editor_textfields_datatable = Column(
+        return Column(
             controls = [
                 Markdown(self.title),
                 self._create_datatable(),
+                self._create_datatable_edit_button()
             ],
         )
-        return editor_textfields_datatable
     
 
     def _create_datatable(self) -> DataTable:
@@ -80,7 +87,7 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
             animate_size               = animation.Animation(200, AnimationCurve.FAST_OUT_SLOWIN),
             show_checkbox_column       = True,
             checkbox_horizontal_margin = 0,
-        ),
+        )
     
 
     def _create_datatable_columns(self) -> List[DataColumn]:
@@ -90,17 +97,17 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
                 label = Text(column.name),
                 tooltip = column.tooltip,
             )
-            for column in self.columns
+            for column in self.columns.values()
         ]
     
 
-    def _create_datatable_rows(self, row_count: int, current_row_idx: int = 0) -> List[DataRow]:
+    def _create_datatable_rows(self, row_count: int, current_row_idx: int = 0, is_default: bool = True) -> List[DataRow]:
         '''Создает строки таблицы'''
         return [
             DataRow(
                 cells = [
-                    self._create_datatable_cell(column.name, row_idx)
-                    for column in self.columns
+                    self._create_datatable_cell(column_name, row_idx, is_default)
+                    for column_name in self.columns.keys()
                 ],
                 on_select_changed = self.on_datatable_select_changed
             )
@@ -108,9 +115,9 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
         ]
     
 
-    def _create_datatable_cell(self, column_name: str, row_idx) -> DataCell:
+    def _create_datatable_cell(self, column_name: str, row_idx, is_default: bool) -> DataCell:
         '''Создает ячейку таблицы'''
-        cell_config = self._get_config_by_column_name_row_index(column_name, row_idx)
+        cell_config = self._get_item_config_by_column_name_row_index(column_name, row_idx, is_default)
         return DataCell(TextField(
             value = str(cell_config.value),
             expand = True,
@@ -124,19 +131,21 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
                 'column_name': cell_config.column_name,
             },
             on_change = validate_textfield_value,
-            on_blur = self.on_change,
-            on_submit = self.on_change,
+            on_blur = self._on_change,
+            on_submit = self._on_change,
         ))
     
 
-    def _get_config_by_column_name_row_index(self, column_name: str, row_idx: int) -> TFDTItem:
+    def _get_item_config_by_column_name_row_index(self, column_name: str, row_idx: int, is_default: bool) -> TFDTItem:
         '''Возвращает конфигурацию ячейки по имени столбца и индексу строки, если такой нет возвращает дефолтную'''
-        return next((
-                item for item in self.default_value
-                if item.column_name == column_name and item.row_index == row_idx
-            ),
-            TFDTItem(column_name, row_idx)
-        )
+        if is_default:
+            return next((
+                    item for item in self.default_value
+                    if item.column_name == column_name and item.row_index == row_idx
+                ),
+                TFDTItem(column_name, row_idx)
+            )
+        return TFDTItem(column_name, row_idx)
     
 
     def _create_datatable_edit_button(self) -> Row:
@@ -176,9 +185,10 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
     def add_datatable_row(self, e) -> None:
         '''Добавляет строку в таблицу'''
         table = self.ref_data_table.current
-        table.rows.append(self._create_datatable_rows(
+        table.rows.extend(self._create_datatable_rows(
             row_count = 1,
-            current_row_idx = len(table.rows)
+            current_row_idx = len(table.rows),
+            is_default = False
         ))
         table.update()
 
@@ -198,7 +208,6 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
     def _on_change(self, e) -> None:
         '''Обновляет значение параметра при обновлении значения ячейки таблицы'''
         rows = self.ref_data_table.current.rows
-        
         values = {
             idx: {
                 cell.content.data.get('column_name'): float(cell.content.value)
@@ -210,7 +219,6 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
                 and not any(cell.content.error_text for cell in row.cells)  # Все ячейки строки заполнены без ошибок
             )
         }
-
         self.function.calculate.set_parameter_value(self._name, values)
         self.update()
     

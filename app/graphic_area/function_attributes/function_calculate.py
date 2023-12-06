@@ -3,6 +3,7 @@ from .function_typing import ParameterType, ResultData, ViewType
 from copy import deepcopy
 from typing import Any
 from inspect import signature
+from collections import defaultdict
 
 
 class FunctionCalculate:
@@ -22,7 +23,23 @@ class FunctionCalculate:
     def set_default_parameters_values(self) -> None:
         '''Устанавливает дефолтные значения параметров'''
         for param in self.parameters_config.values():
-            self.parameters_value[param.name] = param.default_value
+            match param.type:
+                case ParameterType.TEXTFIELDS_DATATABLE:
+                    rows = defaultdict(list)
+                    for cell in param.default_value:
+                        if cell.row_index not in rows:
+                            rows[cell.row_index].append(cell)
+
+                    self.parameters_value[param.name] = {
+                        row_idx: {
+                            cell.column_name: cell.value
+                            for cell in cells
+                        }
+                        for row_idx, cells in rows.items()
+                        if all(cell.value != '' for cell in cells)
+                    }
+                case _:
+                    self.parameters_value[param.name] = param.default_value
     
 
     def set_parameter_value(self, name: str, value: Any) -> None:
@@ -52,7 +69,7 @@ class FunctionCalculate:
                 case ParameterType.DROPDOWN_FUNCTION_DATA:
                     formatted_parameters[name] = value.formatted_name if value is not None else empty_value
                 case ParameterType.FILE_PICKER:
-                    str_value = ', '.join([file.name for file in value]) if value is not None else empty_value
+                    str_value = ', '.join([file.name for file in value]) if value is not None and len(value) else empty_value
                     formatted_parameters[name] = str_value
                 case ParameterType.TEXTFIELDS_DATATABLE:
                     str_value = str(value).replace('**', '\*\*') if value else empty_value
@@ -96,7 +113,8 @@ class FunctionCalculate:
                 self.parameters_value[name]
                 if self.parameters_config[name].type != ParameterType.DROPDOWN_FUNCTION_DATA
                 else self.parameters_value[name].get_result_main_data()
-            for name in function_parameters if name in self.parameters_value
+            for name in function_parameters
+            if name in self.parameters_value
         }
         # TODO: добавить проверку типов с выбрасыванием исключения
 
