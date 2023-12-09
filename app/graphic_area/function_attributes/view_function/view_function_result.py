@@ -21,7 +21,8 @@ class FunctionResultView(Container):
 
 
     def create_content(self) -> Column:
-        result_data = self.function.get_result_data()
+        return None
+        result_data = self.function.get_result()
         result_view = None
 
         if not result_data:

@@ -12,6 +12,7 @@ class FunctionParametersView(Container):
         self.function = function
 
         self.parameters_config = self.function.config.parameters
+        self.list_parameters = self._create_parameters_list()
         self.content = self.create_content()
         
         self.visible = False
@@ -29,7 +30,7 @@ class FunctionParametersView(Container):
             controls = [
                 Markdown("### Параметры"),
                 Column(
-                    controls = self._create_parameters_list(),
+                    controls = self.list_parameters,
                     tight = True
                 )
             ],
@@ -57,3 +58,11 @@ class FunctionParametersView(Container):
                 param_type_to_editor[config.type](self.function, config)
             )
         return parameters_list
+    
+
+    def update_dependencies_parameters(self):
+        '''Вызывает методы для обновления параметров зависимых функций'''
+        for param in self.list_parameters:
+            if param.type == ParameterType.DROPDOWN_FUNCTION_DATA:
+                param.update_values()
+        

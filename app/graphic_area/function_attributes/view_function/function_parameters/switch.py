@@ -18,9 +18,9 @@ class SWConfig:
 
 class SwitchEditor(ParamEditorInterface, Container):
     def __init__(self, function, config: SWConfig = SWConfig()):
+        self._type = ParameterType.SWITCH
         self.function = function
         
-        self._type = ParameterType.SWITCH
         self._name = config.name
         self.title = config.title
         self.default_value = config.default_value

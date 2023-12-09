@@ -24,9 +24,9 @@ class TFConfig:
 
 class TextFieldEditor(ParamEditorInterface, Container):
     def __init__(self, function, config: TFConfig = TFConfig()):
+        self._type = ParameterType.TEXTFIELD
         self.function = function
 
-        self._type = ParameterType.TEXTFIELD
         self._name = config.name
         self.value_type = config.value_type
         self.label = config.label

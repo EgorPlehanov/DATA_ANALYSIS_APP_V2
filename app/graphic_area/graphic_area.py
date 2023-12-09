@@ -1,11 +1,13 @@
+from .function import Function
+from .function_attributes.calculate_functions.function_library import FunctionLibrary
+from .function_attributes.function_typing import FunctionConfig
+
 from flet_core.scrollable_control import ScrollableControl
 from flet import (
     Row, Page, Ref, Container, Column, PopupMenuButton, PopupMenuItem,
     Text, Icon, colors, alignment, ScrollMode, border, padding, animation
 )
-
-from .function import Function
-from .function_attributes.calculate_functions.function_library import FunctionLibrary
+from typing import Dict, List
 
 
 class GraphicArea(Column):
@@ -16,11 +18,13 @@ class GraphicArea(Column):
         self.expand = True
         self.spacing = 0
 
-        self.functions = self.get_functions()
+        self.functions_configs: Dict[str, FunctionConfig] = self.get_functions_configs()
 
         # Текущая выбранная функция
         self.selected_function: Function = None
 
+        # Список ссылок на функции
+        self.list_functions: List[Function] = []
         # Список представлений карточек / параметров / результатов функций
         self.list_cards = []
         self.list_parameters = []
@@ -34,9 +38,9 @@ class GraphicArea(Column):
 
 
 
-    def get_functions(self) -> dict:
+    def get_functions_configs(self) -> Dict[str, FunctionConfig]:
         '''Возвращает словарь с функциями'''
-        return FunctionLibrary.get_function_dict()
+        return FunctionLibrary.get_dict_functions_configs()
     
     
     def create_graphic_area_controls(self) -> list:
@@ -78,7 +82,7 @@ class GraphicArea(Column):
                             for func in functions
                         ]
                     )
-                    for type, functions in self.functions.items()
+                    for type, functions in self.functions_configs.items()
                 ]
             ),
             bgcolor = colors.BLACK26,
@@ -142,6 +146,8 @@ class GraphicArea(Column):
         self.list_cards.append(function.view.card_view)
         self.list_parameters.append(function.view.parameters_view)
         self.list_results.append(function.view.results_view)
+        self.list_functions.append(function)
+        self.update_functions_dependencies_parameters(function)
         self.update()
     
 
@@ -150,6 +156,8 @@ class GraphicArea(Column):
         self.list_cards.remove(function.view.card_view)
         self.list_parameters.remove(function.view.parameters_view)
         self.list_results.remove(function.view.results_view)
+        self.list_functions.remove(function)
+        self.update_functions_dependencies_parameters(function)
         self.update()
 
 
@@ -179,3 +187,15 @@ class GraphicArea(Column):
             duration = 500,
             curve = animation.AnimationCurve.FAST_OUT_SLOWIN
         )
+
+    
+    def get_functions_list(self) -> list:
+        '''Возвращает список функций'''
+        return self.list_functions
+    
+
+    def update_functions_dependencies_parameters(self, new_function: Function) -> None:
+        '''Вызывает методы для обновления параметров функций с зависимыми параметрами'''
+        for function in self.list_functions:
+            if function != new_function and function.is_requires_dropdown_update:
+                function.update_dependencies_parameters()

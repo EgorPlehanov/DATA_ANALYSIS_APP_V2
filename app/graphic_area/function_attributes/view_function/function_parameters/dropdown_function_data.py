@@ -1,25 +1,20 @@
 from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ResultData, ParameterType
 
-from typing import List
+from typing import List, Any
 from dataclasses import dataclass, field
 from flet import Container, Dropdown, dropdown, Ref
 
 
 @dataclass
 class DDFDOptionItem:
-    function_name: str      = 'Не задана'
-    value: List[ResultData] = field(default_factory=list)
-
-    def __str__(self) -> str:
-        return f"{self.function_name}: {self.value}"
+    function_name: str = 'Не задана'
+    function: Any = None
 
 @dataclass
 class DDFDConfig:
     name: str                     = ''
     title: str                    = ''
-    options: DDFDOptionItem       = DDFDOptionItem()
-    default_value: DDFDOptionItem = DDFDOptionItem()
 
     @property
     def type(self) -> ParameterType:
@@ -28,14 +23,12 @@ class DDFDConfig:
 
 class DropdownFunctionDataEditor(ParamEditorInterface, Container):
     def __init__(self, function, config: DDFDConfig = DDFDConfig()):
-        self.function = function
-
         self._type = ParameterType.DROPDOWN_FUNCTION_DATA
+        self.function = function
+        
         self._name = config.name
         self.title = config.title
-        self.options = config.options
-        self.default_value = config.default_value
-        self.default_value_to_print = str(config.default_value)
+        self.options = self._get_current_options()
 
         self.ref_dropdown_function_data = Ref[Dropdown]()
 
@@ -50,85 +43,63 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
             ref = self.ref_dropdown_function_data,
             dense = True,
             label = self.title,
-            options = [
-                dropdown.Option(option.function_name, option.function_name)
-                for option in self.options
-            ],
-            value = self.default_value,
+            options = self._get_options_formatted(),
             on_change = self._on_change
         )
-
     
-    def test():
-        self.list_ref_params_to_update.append({
-            'ref': ref_dropdown_function_data,
-            'param_type': 'dropdown_function_data',
-            'param_name': param_name,
-            'param': param,
-        })
 
-        function_card_list = []
-        if self.function.type in ['edit', 'analytic']:
-            function_card_list.extend(self.graphic_area.list_functions_data)
-        if self.function.type == 'analytic':
-            function_card_list.extend(self.graphic_area.list_functions_edit)
-
-        options = param.get('options', {'Не выбраны': {'function_name': 'Не выбраны', 'value': []}}).copy()
-        options.update({
-            function_card.function_name_formatted: {
-                'function_name': function_card.function_name_formatted,
-                'value': function_card
-            }
-            for function_card in function_card_list
-        })
-        
-        dropdown_value = 'Не выбраны'
-        value_to_print = 'Не выбраны []'
-        # Проверка не удаленно ли текущее значение из списка
-        if current_value in options.values():
-            dropdown_value = current_value.get('function_name')
-            function_card = current_value.get('value')
-
-            if isinstance(function_card, FunctionCard):
-                function_card = function_card.function.result
-            value_to_print = f"{dropdown_value}: {[elem.get('type') for elem in function_card]}"
-        self.function.set_parameter_value(param_name, options[dropdown_value], value_to_print)
-        
-        # editor_dropdown_function_data = Dropdown(
-        #     ref=ref_dropdown_function_data,
-        #     dense=True,
-        #     label=param.get('title'),
-        #     on_change=self._on_change_dropdown_function_value,
-        # )
-        # if update_control is not None:
-        #     editor_dropdown_function_data = update_control
-
-        # editor_dropdown_function_data.options = [
-        #     dropdown.Option(key=key, text=key) for key in options.keys()
-        # ],
-        # editor_dropdown_function_data.value = dropdown_value
-        # editor_dropdown_function_data.data = {
-        #     'param_name': param_name, 'data': options
-        # }
-
-        
-        return editor_dropdown_function_data
+    def _get_current_options(self) -> List[dropdown.Option]:
+        '''Возвращает список конфигов функций для выпадающего списка'''
+        return [
+            DDFDOptionItem(function.formatted_name, function)
+            for function in self.function._graphic_area.get_functions_list()
+            if function != self.function
+        ]
     
+
+    def _get_options_formatted(self) -> List[dropdown.Option]:
+        '''Возвращает список функций для выпадающего списка'''
+        return [
+            dropdown.Option(key=option.function_name, text=option.function_name)
+            for option in self.options
+        ]
+
 
     def _on_change(self, e) -> None:
         '''Обновляет значение параметра в экземпляре класса Function и карточке функции'''
         key = e.control.value
-        value = e.control.data.get('data').get(dropdown_value)
+        new_function = next((option.function for option in self.options if option.function_name == key), None)
+        if not self._update_dependencies(new_function):
+            return
+        
+        self.function.calculate.set_parameter_value(self.name, new_function)
+        self.update()
 
-        # function_card = param_value.get('value')
-        # if isinstance(function_card, FunctionCard):
-        #     function_card.list_dependent_functions.append(self)
-        #     self.provider_function = function_card
 
-        #     function_card = function_card.function.result
+    def _update_dependencies(self, new_function) -> bool:
+        '''Устанавливает зависимость текущей функции и выбранной в выпадающем списке'''
+        last_function = self.function.calculate.get_current_parameter_value(self.name)
+        if new_function == last_function:
+            return False
+        if last_function is not None:
+            last_function.list_dependent_out.remove(self.function)
+            self.function.list_dependent_in.remove(last_function)
+        if new_function is not None:
+            new_function.list_dependent_out.append(self.function)
+            self.function.list_dependent_in.append(new_function)
+        return True
 
-        # self.function.set_parameter_value(
-        #     param_name, param_value, f"{param_value.get('function_name')}: {[elem.get('type') for elem in function_card]}"
-        # )
-        # self.update_function_card()
+    
+    def update_values(self) -> None:
+        '''Обновляет значения выпадающего списка'''
+        self.options = self._get_current_options()
+        self.ref_dropdown_function_data.current.options = self._get_options_formatted()
+
+        current_value = self.ref_dropdown_function_data.current.value
+        if (
+            current_value is not None
+            and not any(current_value == option.function_name for option in self.options)
+        ):
+            self.function.calculate.set_parameter_value(self._name, None)
+        self.update()
     

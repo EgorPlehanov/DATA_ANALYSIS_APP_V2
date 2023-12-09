@@ -38,9 +38,9 @@ class FilePickerEditor(ParamEditorInterface, Container):
     FileData = namedtuple('FileData', ['name', 'path', 'size'])
 
     def __init__(self, function, config: FPConfig = FPConfig()):
+        self._type = ParameterType.FILE_PICKER
         self.function = function
 
-        self._type = ParameterType.FILE_PICKER
         self._name = config.name
         self.title = config.title
         self.button_text = config.button_text

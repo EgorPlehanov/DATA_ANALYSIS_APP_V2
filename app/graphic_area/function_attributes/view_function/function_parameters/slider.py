@@ -26,9 +26,9 @@ class SLConfig:
 
 class SliderEditor(ParamEditorInterface, Container):
     def __init__(self, function, config: SLConfig = SLConfig()):
+        self._type = ParameterType.SLIDER
         self.function = function
 
-        self._type = ParameterType.SLIDER
         self._name = config.name
         self.title = config.title
         self.value_type = config.value_type

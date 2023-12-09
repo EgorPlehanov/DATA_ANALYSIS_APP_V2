@@ -12,7 +12,7 @@ class FunctionCalculate:
 
         self.calculate_function = self.function.config.function
 
-        self.parameters_config = self.function.config.parameters
+        self.parameters_configs = self.function.config.parameters
         self.parameters_value = {}
         self.set_default_parameters_values()
 
@@ -22,24 +22,30 @@ class FunctionCalculate:
 
     def set_default_parameters_values(self) -> None:
         '''Устанавливает дефолтные значения параметров'''
-        for param in self.parameters_config.values():
-            match param.type:
+        for config in self.parameters_configs.values():
+            match config.type:
                 case ParameterType.TEXTFIELDS_DATATABLE:
-                    rows = defaultdict(list)
-                    for cell in param.default_value:
-                        if cell.row_index not in rows:
-                            rows[cell.row_index].append(cell)
-
-                    self.parameters_value[param.name] = {
-                        row_idx: {
-                            cell.column_name: cell.value
-                            for cell in cells
-                        }
-                        for row_idx, cells in rows.items()
-                        if all(cell.value != '' for cell in cells)
-                    }
+                    self.parameters_value[config.name] = self._get_textfields_datatable_default_values(config)
+                case ParameterType.DROPDOWN_FUNCTION_DATA:
+                    self.parameters_value[config.name] = None
                 case _:
-                    self.parameters_value[param.name] = param.default_value
+                    self.parameters_value[config.name] = config.default_value
+
+
+    def _get_textfields_datatable_default_values(self, config) -> dict:
+        '''Возвращает значение по умолчанию для параметра с типом TEXTFIELDS_DATATABLE'''
+        rows = defaultdict(list)
+        for cell in config.default_value:
+            if cell.row_index not in rows:
+                rows[cell.row_index].append(cell)
+        return {
+            row_idx: {
+                cell.column_name: cell.value
+                for cell in cells
+            }
+            for row_idx, cells in rows.items()
+            if all(cell.value != '' for cell in cells)
+        }
     
 
     def set_parameter_value(self, name: str, value: Any) -> None:
@@ -51,12 +57,12 @@ class FunctionCalculate:
 
     def get_current_parameter_value(self, name: str) -> Any:
         '''Возвращает значение параметра'''
-        return deepcopy(self.parameters_value[name])
+        return self.parameters_value[name]
 
 
     def get_current_parameters(self) -> dict:
         '''Возвращает текущие значения параметров'''
-        return deepcopy(self.parameters_value)
+        return self.parameters_value
     
 
     def get_current_parameters_formatted(self) -> dict:
@@ -65,7 +71,7 @@ class FunctionCalculate:
         formatted_parameters = {}
 
         for name, value in self.parameters_value.items():
-            match self.parameters_config[name].type:
+            match self.parameters_configs[name].type:
                 case ParameterType.DROPDOWN_FUNCTION_DATA:
                     formatted_parameters[name] = value.formatted_name if value is not None else empty_value
                 case ParameterType.FILE_PICKER:
@@ -111,7 +117,7 @@ class FunctionCalculate:
         valid_parameters = {
             name:
                 self.parameters_value[name]
-                if self.parameters_config[name].type != ParameterType.DROPDOWN_FUNCTION_DATA
+                if self.parameters_configs[name].type != ParameterType.DROPDOWN_FUNCTION_DATA
                 else self.parameters_value[name].get_result_main_data()
             for name in function_parameters
             if name in self.parameters_value
@@ -124,11 +130,11 @@ class FunctionCalculate:
         return valid_parameters
 
 
-    def _get_parameters_initial_data(self) -> dict:
+    def _get_parameters_initial_data(self) -> list[ResultData]:
         '''Возвращает список результатов функций для параметров типа DROPDOWN_FUNCTION_DATA'''
         return [
             self.parameters_value[name].get_result()
-            for name, param in self.parameters_config.items()
+            for name, param in self.parameters_configs.items()
             if param.type == ParameterType.DROPDOWN_FUNCTION_DATA
         ]
 

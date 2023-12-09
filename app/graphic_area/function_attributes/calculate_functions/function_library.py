@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Literal, Any
+from typing import Literal, Any, Dict
 
 from ..view_function.function_parameters import *
 from ..function_typing import *
@@ -21,7 +21,7 @@ class FunctionLibrary:
 
 
     @staticmethod
-    def get_function_dict() -> dict:
+    def get_dict_functions_configs() -> Dict[str, FunctionConfig]:
         '''Возвращает словарь функций в виде {'type': [namedtuple(key, name), ...], ...}'''
         grouped_functions = defaultdict(list)
         for function in FunctionLibrary.function_by_key.values():
@@ -43,14 +43,14 @@ class FunctionLibrary:
     def get_function_config_attribute_by_key_attribute(
         key: str,
         attribute: Literal['name', 'type', 'function', 'parameters']
-    ):
+    ) -> Any:
         '''Возвращает аттрибут конфигурации функции по ее имени и названию атрибута'''
         function_config = FunctionLibrary.get_function_config_by_key(key)
         return getattr(function_config, attribute)
     
 
     @staticmethod
-    def get_functions_by_type(type: FunctionType):
+    def get_functions_by_type(type: FunctionType) -> list[FunctionConfig]:
         '''Возвращает список функций определенного типа'''
         return [
             function_config
@@ -60,7 +60,7 @@ class FunctionLibrary:
     
 
     @staticmethod
-    def get_function_config_parameters_default_values_by_key(key: str) -> dict[str, Any]:
+    def get_function_config_parameters_default_values_by_key(key: str) -> Dict[str, Any]:
         '''Возвращает параметры функции по ее имени'''
         function_config = FunctionLibrary.get_function_config_by_key(key)
         return {
@@ -74,7 +74,7 @@ class FunctionLibrary:
             key = "test",
             name = "Тест",
             type = FunctionType.EDIT,
-            function = lambda cb, ddfd, dd, fp, sl, sw, tfdt, tf: print('test'),
+            function = lambda cb, ddfd, dd, fp, sl, sw, tfdt, tf: print('Тестовая печать Тест test()'),
             parameters = [
                 CBConfig(
                     name='cb',
@@ -88,10 +88,6 @@ class FunctionLibrary:
                 DDFDConfig(
                     name='ddfd',
                     title='Выпадающий список данных из другой функции',
-                    options=[
-                        DDFDOptionItem(function_name='Функция 1', value=None),
-                    ],
-                    default_value = None
                 ),
                 DDConfig(
                     name='dd',
@@ -147,7 +143,7 @@ class FunctionLibrary:
                     hint_text = 'hint Функция',
                     helper_text = 'help Функция',
                     autocorrect = False,
-                    default_value = 'x^2'
+                    default_value = 'x**2'
                 )
             ],
         ),

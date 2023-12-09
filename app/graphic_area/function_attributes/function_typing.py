@@ -23,6 +23,9 @@ class FunctionType(Enum):
     EDIT = 'edit'
     ANALYTIC = 'analytic'
 
+    def __str__(self):
+        return self.value
+
 
 class ViewType(Enum):
     '''Тип представления результатов функции'''

@@ -30,9 +30,9 @@ class CBConfig:
 
 class CheckboxesEditor(ParamEditorInterface, Container):
     def __init__(self, function, config: CBConfig = CBConfig()):
-        self.function = function
-
         self._type = ParameterType.CHECKBOXES
+        self.function = function
+        
         self._name = config.name
         self.title = config.title
         self.checkboxes = config.checkboxes
