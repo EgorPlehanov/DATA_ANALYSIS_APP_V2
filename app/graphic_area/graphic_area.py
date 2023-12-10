@@ -48,6 +48,7 @@ class GraphicArea(Column):
         return [
             self.create_select_function_menu(),
             Row(
+                spacing=0,
                 expand=True,
                 controls=[
                     self.create_cards_menu(),
@@ -96,13 +97,17 @@ class GraphicArea(Column):
             width = 350,
             bgcolor = colors.BLACK12,
             alignment = alignment.top_center,
-            padding = padding.only(left=10, right=10),
             content = Column(
                 tight = True,
-                spacing = 10,
                 scroll = ScrollMode.AUTO,
-                ref = self.ref_cards_view,
-                controls = self.list_cards
+                controls = [Container(
+                    padding = 10,
+                    content = Column(
+                        spacing = 10,
+                        ref = self.ref_cards_view,
+                        controls = self.list_cards
+                    )
+                )]
             )
         )
     
@@ -175,7 +180,7 @@ class GraphicArea(Column):
             # Устанавливаем ссылку на новую выбранную функцию
             self.selected_function = clicked_function
             
-            self._scroll_view_to(self.ref_cards_view.current, clicked_function.id)  # TODO: Разобраться почему не срабатывает
+            self._scroll_view_to(self.ref_cards_view.current, clicked_function.id)
             self._scroll_view_to(self.ref_result_view.current, clicked_function.id)
         self.update()
 

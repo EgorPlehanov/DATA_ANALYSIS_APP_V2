@@ -74,7 +74,7 @@ class FunctionLibrary:
             key = "test",
             name = "Тест",
             type = FunctionType.EDIT,
-            function = lambda cb, ddfd, dd, fp, sl, sw, tfdt, tf: print('Тестовая печать Тест test()'),
+            function = lambda cb, ddfd, dd, fp, sl, sw, tfdt, tf: FunctionResult(None, None, None),
             parameters = [
                 CBConfig(
                     name='cb',

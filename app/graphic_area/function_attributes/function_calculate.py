@@ -92,7 +92,7 @@ class FunctionCalculate:
             function_result = self.calculate_function(**valid_parameters)
 
             initial_data = self._get_parameters_initial_data()
-            view_list = self.function.config.view_list
+            view_list = self._get_view_list()
 
             self.result = ResultData(
                 main_data               = function_result.main_data,
@@ -104,7 +104,8 @@ class FunctionCalculate:
                 view_histogram          = ViewType.HISTOGRAM in view_list,
                 view_table_horizontal   = ViewType.TABLE_HORIZONTAL in view_list,
                 view_table_vertical     = ViewType.TABLE_VERTICAL in view_list,
-                main_view               = self.function.config.main_view
+                main_view               = self.function.config.main_view,
+                color                   = self.function.color
             )
         except Exception as e:
             self.result = ResultData(error_message = str(e))
@@ -116,9 +117,12 @@ class FunctionCalculate:
 
         valid_parameters = {
             name:
-                self.parameters_value[name]
-                if self.parameters_configs[name].type != ParameterType.DROPDOWN_FUNCTION_DATA
-                else self.parameters_value[name].get_result_main_data()
+                self.parameters_value[name].get_result_main_data()
+                if (
+                    self.parameters_configs[name].type == ParameterType.DROPDOWN_FUNCTION_DATA
+                    and self.parameters_value[name] is not None
+                )
+                else self.parameters_value[name]
             for name in function_parameters
             if name in self.parameters_value
         }
@@ -135,8 +139,25 @@ class FunctionCalculate:
         return [
             self.parameters_value[name].get_result()
             for name, param in self.parameters_configs.items()
-            if param.type == ParameterType.DROPDOWN_FUNCTION_DATA
+            if (
+                param.type == ParameterType.DROPDOWN_FUNCTION_DATA
+                and self.parameters_value[name] is not None
+            )
         ]
+    
+
+    def _get_view_list(self) -> list[ViewType]:
+        '''Возвращает список типов отображения'''
+        view_list = []
+        view_list.extend(self.function.config.view_list)
+        if (
+            'show_data_table' in self.parameters_configs
+            and self.parameters_configs['show_data_table'].type == ParameterType.SWITCH
+            and self.parameters_value['show_data_table']
+        ):
+            view_list.append(ViewType.TABLE_HORIZONTAL)
+
+        return view_list
 
 
     def _get_result_data_type(self, initial_data: list[ResultData]):
@@ -146,5 +167,4 @@ class FunctionCalculate:
         if len(initial_data_types) == 0:
             return result_data_type
         return result_data_type  + '(' + ', '.join(initial_data_types) + ')'
-        
         

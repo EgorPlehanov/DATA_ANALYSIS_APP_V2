@@ -3,7 +3,7 @@ from collections import namedtuple
 from dataclasses import dataclass, field
 from pandas import DataFrame
 from enum import Enum
-
+from flet import colors
 
 class ParameterType(Enum):
     '''Тип параметра функции'''
@@ -36,19 +36,6 @@ class ViewType(Enum):
 
 
 @dataclass
-class FunctionResult:
-    '''Результат выполнения функции (значение которое должна возвращать каждая функция для calculate)
-    
-    main_data:  Основной набор данных
-    extra_data: Дополнительные данные
-    error_message: Сообщение об ошибке
-    '''
-    main_data: Optional[DataFrame]          = None
-    extra_data: Optional[List[DataFrame]]   = None
-    error_message: Optional[str]            = None
-
-
-@dataclass
 class ResultData:
     '''Результат выполнения функции
     
@@ -73,7 +60,42 @@ class ResultData:
     view_table_horizontal: Optional[bool]       = None
     view_table_vertical: Optional[bool]         = None
     main_view: Optional[ViewType]               = None
+    color: Optional[str]                        = colors.GREEN
 
+
+@dataclass
+class FunctionResult:
+    '''Результат выполнения функции (значение которое должна возвращать каждая функция для calculate)
+    
+    main_data:  Основной набор данных
+    extra_data: Дополнительные данные
+    error_message: Сообщение об ошибке
+    '''
+    main_data: Optional[DataFrame]          = None
+    extra_data: Optional[List[ResultData]]  = None
+    error_message: Optional[str]            = None
+
+    def __post_init__(self):
+        '''Округляет и удаляет значения больше заданного порога в датафрейме'''
+        max_value: int = 1000000000
+        decimal_places: int = 4
+        def round_and_clip(value):
+            try:
+                numeric_value = value
+                if isinstance(numeric_value, (str)):
+                    numeric_value = float(value.replace(',', '.'))
+                return round(numeric_value, decimal_places) if numeric_value <= max_value else max_value
+            except ValueError:
+                return value
+            
+        if self.main_data is not None and isinstance(self.main_data, DataFrame):
+            self.main_data = self.main_data.map(round_and_clip)
+
+        if self.extra_data is not None and len(self.extra_data) > 0:
+            for data in self.extra_data:
+                if data.main_data is not None and isinstance(data.main_data, DataFrame):
+                    data.main_data = data.main_data.map(round_and_clip)
+            
 
 @dataclass
 class FunctionConfig:

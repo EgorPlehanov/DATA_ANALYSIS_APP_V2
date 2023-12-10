@@ -1,10 +1,11 @@
 from .function_attributes import *
 
-from flet import Page
+from flet import Page, colors
 from itertools import count
 from copy import deepcopy
 from typing import List
 from pandas import DataFrame
+from random import choice
 
 
 class Function:
@@ -23,6 +24,8 @@ class Function:
         
         self.formatted_name: str = self._create_formatted_name()
         self.calculate_function_name = self.config.function.__name__
+
+        self.color = self._get_random_color()
 
         self.calculate = FunctionCalculate(self)
         self.view = FunctionView(page, self)
@@ -50,8 +53,10 @@ class Function:
 
     def get_result_main_data(self) -> DataFrame:
         '''Возвращает основные данные результата вычисления функции'''
-        return deepcopy(self.calculate.result.main_data)
-    
+        if self.calculate.result is not None:
+            return deepcopy(self.calculate.result.main_data)
+        return None
+
 
     def delete(self, e) -> None:
         '''Вызывает метод удаления функции'''
@@ -78,3 +83,22 @@ class Function:
         '''Вызывает методы для обновления параметров зависимых функций'''
         self.view.update_dependencies_parameters()
     
+
+    def _get_random_color(self):
+        '''Возвращает случайный цвет'''
+        colors_variable = set([
+            colors.RED,
+            colors.BLUE,
+            colors.GREEN,
+            colors.YELLOW,
+            colors.ORANGE,
+            colors.PURPLE,
+            colors.PINK,
+            colors.BROWN,
+            colors.LIGHT_BLUE,
+            colors.LIGHT_GREEN,
+            colors.WHITE,
+            colors.GREY,
+            colors.AMBER,
+        ])
+        return choice(list(colors_variable))

@@ -2,11 +2,10 @@ from ..function_typing import ResultData, ViewType
 from .result_attributes import *
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, List
 from flet import (
-    Container, colors, padding, border, Column, Ref, Text, Row,
-    MainAxisAlignment, FontWeight, IconButton, icons, Icon, Markdown,
-    CrossAxisAlignment, animation, BorderSide, AnimationCurve
+    Container, colors, padding, border, Column,
+    Ref, Text, Row, MainAxisAlignment, FontWeight
 )
 
 
@@ -48,15 +47,27 @@ class FunctionResultView(Container):
             and self.result_data.extra_data is None
             and self.result_data.error_message is None
         ):
-            self.ref_title.current.value = 'Нет данных для построения графиков функции ' + self.function.calculate_function_name
+            self.ref_title.current.value = "Нет данных для построения графиков функции " \
+                + self.function.calculate_function_name
             return self.view_title
 
-        is_many_graphs = True
-        self.ref_title.current.value = f"График{'и' if is_many_graphs else ''} функции {self.function.calculate_function_name}"
+        is_many_graphs = self._is_result_data_have_many_graphs()
+        self.ref_title.current.value = f"График{'и' if is_many_graphs else ''} " \
+            + f"функции {self.function.calculate_function_name}"
         return Column([
             self.view_title,
             self._create_view_result(self.result_data),
         ])
+
+
+    def _is_result_data_have_many_graphs(self) -> bool:
+        '''Проверяет есть ли в результатах больше одного графика'''
+        count = sum([
+            1 if self.result_data.main_data is not None else 0,
+            len(self.result_data.extra_data) if self.result_data.extra_data is not None else 0,
+        ])
+        print('count: ', count)
+        return count > 1
 
 
     def _create_view_title(self) -> Row:
@@ -73,69 +84,94 @@ class FunctionResultView(Container):
 
     def _create_view_result(self, result_data: ResultData) -> Column:
         '''Создает содержимое результата'''
-        element_controls = []
+        result_items = []
         
-        error_message = result_data.error_message
-        if error_message is not None:
-            element_controls.append(ResultItem(
-                control = ResultErrorMessage(error_message),
-                is_main = True
-            ))
+        if result_data.error_message is not None:
+            result_items.append(self._create_result_item('error_message', result_data))
         
-        main_data = result_data.main_data
-        if main_data is not None:
-            type = result_data.type.strip()
+        if result_data.main_data is not None:
             if result_data.view_chart:
-                element_controls.append(ResultItem(
-                    control = ResultChart(main_data, type),
-                    is_main = result_data.main_view == ViewType.CHART,
-                    button_name = f"Показать график: ***{type}***"
-                ))
+                result_items.append(self._create_result_item(ViewType.CHART, result_data))
 
             if result_data.view_histogram:
-                element_controls.append(ResultItem(
-                    control = ResultHistogram(main_data, type),
-                    is_main = result_data.main_view == ViewType.HISTOGRAM,
-                    button_name = f"Показать гистограмму: ***{type}***"
-                ))
+                result_items.append(self._create_result_item(ViewType.HISTOGRAM, result_data))
                     
-
             if result_data.view_table_horizontal:
-                element_controls.append(ResultItem(
-                    control = ResultTableHorizontal(main_data),
-                    is_main = result_data.main_view == ViewType.TABLE_HORIZONTAL,
-                    button_name = f"Показать таблицу данных: ***{type}***"
-                ))
+                result_items.append(self._create_result_item(ViewType.TABLE_HORIZONTAL, result_data))
                     
             if result_data.view_table_vertical:
-                element_controls.append(ResultItem(
+                result_items.append(self._create_result_item(ViewType.TABLE_VERTICAL, result_data))
+
+        if result_data.extra_data:
+            for data in result_data.extra_data:
+                result_items.append(self._create_result_item('extra_data', data))
+
+        if result_data.initial_data:
+            for data in result_data.initial_data:
+                result_items.append(self._create_result_item('initial_data', data))
+
+        return Column(self._create_view_list_result_item(result_items))
+    
+
+    def _create_result_item(self, type: str, result_data: ResultData) -> ResultItem:
+        '''Создает элемент результата по типу и данным'''
+        error_message = result_data.error_message
+        main_data = result_data.main_data
+        function_type = result_data.type.strip()
+        main_view = result_data.main_view
+        color = self.function.color
+
+        match type:
+            case 'error_message':
+                return ResultItem(
+                    control = ResultErrorMessage(error_message),
+                    is_main = True
+                )
+            case ViewType.CHART:
+                return ResultItem(
+                    control = ResultChart(main_data, function_type, color),
+                    is_main = main_view == ViewType.CHART,
+                    button_name = f"Показать график: ***{function_type}***"
+                )
+            case ViewType.HISTOGRAM:
+                return ResultItem(
+                    control = ResultHistogram(main_data, function_type, color),
+                    is_main = main_view == ViewType.HISTOGRAM,
+                    button_name = f"Показать гистограмму: ***{function_type}***"
+                )
+            case ViewType.TABLE_HORIZONTAL:
+                return ResultItem(
+                    control = ResultTableHorizontal(main_data),
+                    is_main = main_view == ViewType.TABLE_HORIZONTAL,
+                    button_name = f"Показать таблицу данных: ***{function_type}***"
+                )
+            case ViewType.TABLE_VERTICAL:
+                return ResultItem(
                     control = ResultTableVertical(main_data),
-                    is_main = result_data.main_view == ViewType.TABLE_VERTICAL,
-                    button_name = f"Показать таблицу статистических параметров: ***{type}***",
-                ))
+                    is_main = main_view == ViewType.TABLE_VERTICAL,
+                    button_name = f"Показать таблицу статистических параметров: ***{function_type}***",
+                )
+            case 'extra_data':
+                return ResultItem(
+                    control = self._create_view_result(result_data),
+                    button_name = f"Показать дополнительные данные:{(f' ***{function_type}***')}"
+                )
+            case 'initial_data':
+                return ResultItem(
+                    control = self._create_view_result(result_data),
+                    button_name = f"Показать исходные данные:{(f' ***{function_type}***')}"
+                )
+            case _:
+                raise ValueError(f'Недопустимый тип: {type}')
+            
 
-        extra_data = result_data.extra_data
-        if extra_data:
-            for data in extra_data:
-                element_controls.append(ResultItem(
-                    control = self._create_view_result(data),
-                    button_name = f"Показать дополнительные данные:{(f' ***{data.type.strip()}***')}"
-                ))
-
-        initial_data = result_data.initial_data
-        if initial_data:
-            for data in initial_data:
-                element_controls.append(ResultItem(
-                    control = self._create_view_result(data),
-                    button_name = f"Показать исходные данные:{(f' ***{data.type.strip()}***')}"
-                ))
-
-        return Column([
+    def _create_view_list_result_item(self, result_items: List[ResultItem]) -> List:
+        '''Создает список элементов результата, помещает неглавные представления в раскрывающийся контейнер'''
+        return [
             item.control if item.is_main
             else ResultToggleContainer(item.control, item.button_name, item.is_open)
-            for item in element_controls
-        ])
-
+            for item in result_items
+        ]
     
 
     def update_values(self) -> None:

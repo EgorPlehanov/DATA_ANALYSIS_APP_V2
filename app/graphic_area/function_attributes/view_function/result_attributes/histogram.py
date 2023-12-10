@@ -10,7 +10,7 @@ class ResultHistogram(Row):
     def __init__(self,
         data: DataFrame,
         title: str,
-        color: str = colors.LIGHT_GREEN,
+        color: str = colors.GREEN,
     ):
         super().__init__()
         self.data = data

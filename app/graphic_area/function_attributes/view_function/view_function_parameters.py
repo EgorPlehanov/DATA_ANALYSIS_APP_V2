@@ -2,7 +2,7 @@ from ..function_typing import ParameterType
 from .function_parameters import *
 
 from flet import (
-    Container, Column, Markdown
+    Container, Column, Markdown, padding
 )
 
 
@@ -16,7 +16,7 @@ class FunctionParametersView(Container):
         self.content = self.create_content()
         
         self.visible = False
-        self.padding = 10
+        self.padding = padding.only(right=10, top=10, bottom=10)
         self.width = 350
 
 
@@ -43,14 +43,14 @@ class FunctionParametersView(Container):
         parameters_list = []
 
         param_type_to_editor = {
-            ParameterType.CHECKBOXES:             lambda function, config: CheckboxesEditor(function, config),
-            ParameterType.DROPDOWN_FUNCTION_DATA: lambda function, config: DropdownFunctionDataEditor(function, config),
-            ParameterType.DROPDOWN:               lambda function, config: DropdownEditor(function, config),
-            ParameterType.FILE_PICKER:            lambda function, config: FilePickerEditor(function, config),
-            ParameterType.SLIDER:                 lambda function, config: SliderEditor(function, config),
-            ParameterType.SWITCH:                 lambda function, config: SwitchEditor(function, config),
-            ParameterType.TEXTFIELDS_DATATABLE:   lambda function, config: TextFieldsDataTableEditor(function, config),
-            ParameterType.TEXTFIELD:              lambda function, config: TextFieldEditor(function, config),
+            ParameterType.CHECKBOXES:             CheckboxesEditor,
+            ParameterType.DROPDOWN_FUNCTION_DATA: DropdownFunctionDataEditor,
+            ParameterType.DROPDOWN:               DropdownEditor,
+            ParameterType.FILE_PICKER:            FilePickerEditor,
+            ParameterType.SLIDER:                 SliderEditor,
+            ParameterType.SWITCH:                 SwitchEditor,
+            ParameterType.TEXTFIELDS_DATATABLE:   TextFieldsDataTableEditor,
+            ParameterType.TEXTFIELD:              TextFieldEditor,
         }
 
         for config in self.parameters_config.values():

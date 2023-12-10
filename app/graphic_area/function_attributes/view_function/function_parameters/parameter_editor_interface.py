@@ -33,7 +33,6 @@ class ParamEditorInterface(ABC):
             'border_radius': 10,
             'border': border.all(1, colors.with_opacity(0.05, colors.SECONDARY)),
             'bgcolor': colors.BLACK12,
-            'margin': margin.only(left=5, right=5, top=5),
         }
         for key, value in params.items():
             setattr(self, key, value)

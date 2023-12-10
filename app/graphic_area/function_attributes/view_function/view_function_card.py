@@ -3,7 +3,8 @@ from flet import (
     Page, Container, border, colors, Ref, Column, IconButton,
     Row, MainAxisAlignment, CrossAxisAlignment, Markdown,
     MarkdownExtensionSet, icons, animation, AnimationCurve,
-    Text, Icon, FilePicker, FilePickerResultEvent, FilePickerFileType
+    Text, Icon, FilePicker, FilePickerResultEvent, FilePickerFileType,
+    Stack
 )
 
 
@@ -25,7 +26,7 @@ class FunctionCardView(Container):
         self.border = border.all(color=colors.BLACK)
         self.bgcolor = colors.BLACK54
         self.border_radius = 10
-        self.padding = 5
+        self.padding = 10
 
         self.save_result_data_dialog = self._create_save_result_data_dialog()
         
@@ -56,6 +57,33 @@ class FunctionCardView(Container):
 
     def _create_card_title(self) -> Row:
         '''Создает заголовок карточки'''
+        return Row([Stack(
+            expand = True,
+            controls = [
+                Row(
+                    wrap = True,
+                    controls = [Column([
+                        Markdown(
+                            extension_set = MarkdownExtensionSet.GITHUB_WEB,
+                            value = self._cerate_title_value()
+                        ),
+                        Markdown(
+                            ref = self.ref_card_signature,
+                            extension_set = MarkdownExtensionSet.GITHUB_WEB,
+                            value = self._create_title_function_signature()
+                        ),
+                    ])],
+                ),
+                IconButton(
+                    icon = icons.DELETE,
+                    on_click = self.function.delete,
+                    right = 0
+                )
+            ]
+        )])
+    
+    
+    
         return Row( # TODO: переписать на Stack
             alignment = MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment = CrossAxisAlignment.START,
@@ -123,6 +151,7 @@ class FunctionCardView(Container):
     
 
     def _create_card_result_data(self) -> Container:
+        '''Создает содержимое результата карточки'''
         return Container(
             animate_size = animation.Animation(200, AnimationCurve.FAST_OUT_SLOWIN),
             content = Column(
