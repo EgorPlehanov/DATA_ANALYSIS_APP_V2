@@ -127,16 +127,23 @@ class GraphicArea(Column):
     
 
     def create_result_view(self) -> Container:
+        '''Создает меню представления результата'''
         return Container(
             expand = True,
-            border = border.all(colors.BLACK),
+            alignment = alignment.top_center,
             content = Column(
                 tight = True,
                 expand = True,
                 scroll = ScrollMode.AUTO,
-                ref = self.ref_result_view,
-                controls = self.list_results
-            ) 
+                controls = [Container(
+                    padding = 10,
+                    content = Column(
+                        spacing = 10,
+                        ref = self.ref_result_view,
+                        controls = self.list_results
+                    ) 
+                )]
+            )
         )
     
 

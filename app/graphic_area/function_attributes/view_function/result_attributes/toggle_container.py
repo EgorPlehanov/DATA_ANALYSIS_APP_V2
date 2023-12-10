@@ -19,14 +19,14 @@ class ResultToggleContainer(Container):
         self.ref_control = Ref[Container]()
         self.ref_button = Ref[IconButton]()
 
-        self.controls = self.create_controls()
+        self.content = self.create_content()
 
         self.animate_size = animation.Animation(200, AnimationCurve.FAST_OUT_SLOWIN)
         self.border_radius = 10
         self.border = border.only(left=BorderSide(1, colors.with_opacity(0.5, colors.ON_SURFACE)))
 
 
-    def create_controls(self) -> Row:
+    def create_content(self) -> Row:
         '''Создает блок с кнопкой для скрытия/открытия переданного виджета'''
         return Row(
         controls = [

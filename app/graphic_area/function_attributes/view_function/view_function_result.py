@@ -54,6 +54,7 @@ class FunctionResultView(Container):
         is_many_graphs = self._is_result_data_have_many_graphs()
         self.ref_title.current.value = f"График{'и' if is_many_graphs else ''} " \
             + f"функции {self.function.calculate_function_name}"
+        
         return Column([
             self.view_title,
             self._create_view_result(self.result_data),
@@ -117,7 +118,7 @@ class FunctionResultView(Container):
         '''Создает элемент результата по типу и данным'''
         error_message = result_data.error_message
         main_data = result_data.main_data
-        function_type = result_data.type.strip()
+        function_type = result_data.type.strip() if result_data.type is not None else ''
         main_view = result_data.main_view
         color = self.function.color
 
