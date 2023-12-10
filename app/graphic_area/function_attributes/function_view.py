@@ -23,6 +23,7 @@ class FunctionView:
     def update_view(self):
         '''Вызывает методы для обновления представлений'''
         self.card_view.update_values()
+        self.results_view.update_values()
 
 
     def update_dependencies_parameters(self):

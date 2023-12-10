@@ -165,10 +165,24 @@ class FunctionLibrary:
                     ],
                     default_value='linear_rising'
                 ),
-                SLConfig(name='a'),
-                SLConfig(name='b'),
-                SLConfig(name='step'),
-                SLConfig(name='N'),
+                SLConfig(
+                    name='a', title='Параметр a',
+                    min=0.01, max=100, step=0.01, default_value=0.01
+                ),
+                SLConfig(
+                    name='b', title='Параметр b',
+                    min=0.1, max=10, step=0.1, default_value=1
+                ),
+                SLConfig(
+                    name='step', title='Шаг по оси X (step)',
+                    min=0.0001, max=10, step=1, default_value=1,
+                    value_type=ValueType.FLOAT, round_digits=4
+                ),
+                SLConfig(
+                    name='N', title='Длина данных (N)',
+                    min=100, max=5000, step=100, default_value=1000,
+                    value_type=ValueType.INT, round_digits=0
+                ),
                 SWConfig(),
             ]
         )
