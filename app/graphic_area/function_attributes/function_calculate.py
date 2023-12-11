@@ -1,4 +1,4 @@
-from .function_typing import ParameterType, ResultData, ViewType
+from .function_typing import ParameterType, ResultData, ViewType, FunctionResult
 
 from copy import deepcopy
 from typing import Any
@@ -88,8 +88,11 @@ class FunctionCalculate:
         '''Вычисляет значение функции'''
         try:
             valid_parameters = self._get_valid_parameters()
-            function_result = self.calculate_function(**valid_parameters)
+            function_result: FunctionResult = self.calculate_function(**valid_parameters)
+            if not isinstance(function_result, FunctionResult):
+                raise Exception(f"Результат функции должен быть типа FunctionResult, а не {type(function_result)}")
 
+            self._set_function_color_to_extra_data(function_result)
             initial_data = self._get_parameters_initial_data()
             view_list = self._get_view_list()
 
@@ -128,7 +131,12 @@ class FunctionCalculate:
         # TODO: добавить проверку типов с выбрасыванием исключения
 
         if len(valid_parameters) != len(function_parameters):
-            raise ValueError("Количество параметров не совпадает")
+            raise ValueError(
+                "Количество параметров не совпадает, "
+                + f"ожидалось {len(function_parameters)} и получено {len(valid_parameters)}\n"
+                + f"Параметры: {function_parameters}"
+                + f"Вальные: {valid_parameters}"
+            )
 
         return valid_parameters
 
@@ -157,6 +165,13 @@ class FunctionCalculate:
             view_list.append(ViewType.TABLE_HORIZONTAL)
 
         return view_list
+    
+
+    def _set_function_color_to_extra_data(self, function_result: FunctionResult) -> None:
+        '''Устанавливает цвет функции в дополнительных данных'''
+        if function_result.extra_data is not None:
+            for data in function_result.extra_data:
+                data.color = self.function.color
 
 
     def _get_result_data_type(self, initial_data: list[ResultData]):

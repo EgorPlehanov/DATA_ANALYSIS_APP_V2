@@ -44,7 +44,8 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
             dense = True,
             label = self.title,
             options = self._get_options_formatted(),
-            on_change = self._on_change
+            on_change = self._on_change,
+            value = 'default',
         )
     
 
@@ -52,16 +53,36 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
         '''Возвращает список конфигов функций для выпадающего списка'''
         return [
             DDFDOptionItem(function.formatted_name, function)
-            for function in self.function._graphic_area.get_functions_list()
-            if function != self.function
+            for function in self._get_functions_without_circular_dependencies_on_current()
+        ]
+
+
+    def _get_functions_without_circular_dependencies_on_current(self) -> List:
+        '''Возвращает список функций без циклических зависимостей на текущую функцию'''
+        def is_circus(current):
+            '''Определяет, является ли функция циклическим зависимым от текущей функции'''
+            if current == self.function:
+                return True
+            for func in current.list_dependent_from:
+                if is_circus(func):
+                    return True
+            return False
+
+        return [
+            func
+            for func in self.function._graphic_area.get_functions_list()
+            if not is_circus(func)
         ]
     
 
     def _get_options_formatted(self) -> List[dropdown.Option]:
         '''Возвращает список функций для выпадающего списка'''
         return [
-            dropdown.Option(key=option.function_name, text=option.function_name)
-            for option in self.options
+            dropdown.Option(key='default', text='Не задано'),
+            *(
+                dropdown.Option(key=option.function_name, text=option.function_name)
+                for option in self.options
+            )
         ]
 
 
@@ -81,12 +102,19 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
         last_function = self.function.calculate.get_current_parameter_value(self.name)
         if new_function == last_function:
             return False
+        
         if last_function is not None:
-            last_function.list_dependent_out.remove(self.function)
-            self.function.list_dependent_in.remove(last_function)
+            last_function.list_dependent_to.remove(self.function)
+            self.function.list_dependent_from.remove(last_function)
         if new_function is not None:
-            new_function.list_dependent_out.append(self.function)
-            self.function.list_dependent_in.append(new_function)
+            new_function.list_dependent_to.append(self.function)
+            self.function.list_dependent_from.append(new_function)
+            
+        if last_function is not None:
+            last_function.update_dependencies_parameters()
+        if new_function is not None:
+            new_function.update_dependencies_parameters()
+
         return True
 
     
@@ -97,9 +125,13 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
 
         current_value = self.ref_dropdown_function_data.current.value
         if (
-            current_value is not None
-            and not any(current_value == option.function_name for option in self.options)
+            current_value != 'default'
+            and all(current_value != option.function_name for option in self.options)
         ):
+            print('UPDATE')
+            print('current_value', current_value)
+            print('options', [current_value == option.function for option in self.options])
             self.function.calculate.set_parameter_value(self._name, None)
+            self.ref_dropdown_function_data.current.value = 'default'
         self.update()
     

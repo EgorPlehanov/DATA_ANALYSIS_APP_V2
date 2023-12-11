@@ -15,9 +15,9 @@ def acf(
     Автокорреляция/Ковариация
     '''
     if data is None:
-        return []
+        return FunctionResult()
     
-    y = data.get('y').copy()
+    y = data.iloc[:, 1].copy()
     N = len(y)
 
     y_mean = np.mean(y)
@@ -46,10 +46,10 @@ def ccf(
     if first_data is None or second_data is None:
         return FunctionResult()
     
-    first_values = first_data.get('y').copy()
+    first_values = first_data.iloc[:, 1].copy()
     first_N = len(first_values)
 
-    second_values = second_data.get('y').copy()
+    second_values = second_data.iloc[:, 1].copy()
     second_N = len(second_values)
 
     N = first_N if first_N < second_N else second_N

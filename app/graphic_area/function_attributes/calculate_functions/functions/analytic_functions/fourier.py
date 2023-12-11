@@ -37,7 +37,7 @@ def fourier(
     if data is None:
         return FunctionResult()
     
-    y_values = data.get('y').copy()
+    y_values = data.iloc[:, 1].copy()
     fourier_data = get_fourier(y_values)
 
     extra_data = None

@@ -32,8 +32,8 @@ class Function:
 
         self.selected: bool = False                     # выбрана ли функция
         self.is_requires_dropdown_update: bool = self._is_update_required()   # требует ли обновление выпадающего списка функций
-        self.list_dependent_in: List[Function] = []     # функции от которых зависит данная функция
-        self.list_dependent_out: List[Function] = []    # функции которые зависят от данной
+        self.list_dependent_from: List[Function] = []     # функции от которых зависит данная функция
+        self.list_dependent_to: List[Function] = []    # функции которые зависят от данной
     
 
     def _create_formatted_name(self) -> str:
@@ -60,6 +60,7 @@ class Function:
 
     def delete(self, e) -> None:
         '''Вызывает метод удаления функции'''
+        self.clear_dependencies()
         self._graphic_area.delete_function(self)
 
 
@@ -77,14 +78,38 @@ class Function:
     def update_view(self) -> None:
         '''Вызывает методы для обновления представлений'''
         self.view.update_view()
+        self.recalculate_dependent_out_functions()
+
+
+    def recalculate_dependent_out_functions(self) -> None:
+        '''Вызывает методы для обновления функций, которые зависят от данной'''
+        for function in self.list_dependent_to:
+            function.recalculate_result()
+
+
+    def recalculate_result(self) -> None:
+        '''Вызывает метод для пересчета результата вычисления функции'''
+        self.calculate.calculate()
+        self.update_view()
 
     
-    def update_dependencies_parameters(self):
+    def update_dependencies_parameters(self) -> None:
         '''Вызывает методы для обновления параметров зависимых функций'''
         self.view.update_dependencies_parameters()
+        for function in self.list_dependent_from:
+            function.update_dependencies_parameters()
+
+
+    def clear_dependencies(self):
+        '''Очищает список зависимых функций'''
+        for function in self.list_dependent_from:
+            function.list_dependent_to.remove(self)
+        for function in self.list_dependent_to:
+            function.list_dependent_from.remove(self)
+
     
 
-    def _get_random_color(self):
+    def _get_random_color(self) -> str:
         '''Возвращает случайный цвет'''
         colors_variable = set([
             colors.RED,
@@ -102,3 +127,4 @@ class Function:
             colors.AMBER,
         ])
         return choice(list(colors_variable))
+    

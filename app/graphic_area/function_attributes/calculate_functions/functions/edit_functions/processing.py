@@ -16,14 +16,14 @@ def scale_values(
     if data is None:
         return FunctionResult()
     
-    y_values = data.get('y').copy()
+    y_values = data.iloc[:, 1].copy()
 
     min_val = np.min(y_values)
     max_val = np.max(y_values)
     
     normalized = new_min + ((y_values - min_val) * (new_max - new_min)) / (max_val - min_val)
 
-    scale_df = DataFrame({'x': data.get('x').copy(), 'y': normalized})
+    scale_df = DataFrame({'x': data.iloc[:, 0].copy(), 'y': normalized})
     return FunctionResult(main_data=scale_df)
     
 
@@ -37,13 +37,13 @@ def normalize_values(
     if data is None:
         return FunctionResult()
     
-    y_values = data.get('y').copy()
+    y_values = data.iloc[:, 1].copy()
 
     max_val = np.max(y_values)
     
     normalized = y_values / max_val * new_max
 
-    normalize_df = pd.DataFrame({'x': data.get('x').copy(), 'y': normalized})
+    normalize_df = pd.DataFrame({'x': data.iloc[:, 0].copy(), 'y': normalized})
     return FunctionResult(main_data=normalize_df)
 
 

@@ -107,8 +107,8 @@ def anti_noise(
         return FunctionResult()
     
     # ВАРИАНТ 1
-    x_values = data.get('x').copy()
-    y_values = data.get('y').copy()
+    x_values = data.iloc[:, 0].copy()
+    y_values = data.iloc[:, 1].copy()
     N = len(y_values)
 
     # extra_data = []
@@ -144,7 +144,7 @@ def anti_noise(
     # ВАРИАНТ 2
     noised_df = generate_noise(N, R, x_values=data['x'].values)
     data_noised_df = pd.concat([data, noised_df]).groupby('x', as_index=False).sum()
-    data_noised_y = data_noised_df.get('y').copy()
+    data_noised_y = data_noised_df.iloc[:, 1].copy()
 
     std_deviation = []
     extra_data = []

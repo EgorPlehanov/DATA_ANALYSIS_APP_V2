@@ -66,7 +66,7 @@ def spikes(
     spikes_df = generate_spikes(N, M, R, Rs)
     extra_data = [ResultData(type='spikes', main_data=spikes_df)]
 
-    data_spikes_df = pd.DataFrame({'x': data.get('x').copy(), 'y': data['y'] + spikes_df['y']})
+    data_spikes_df = pd.DataFrame({'x': data.iloc[:, 0].copy(), 'y': data['y'] + spikes_df['y']})
     return FunctionResult(main_data=data_spikes_df, extra_data=extra_data, error_message=error_message)
 
 
@@ -81,7 +81,7 @@ def anti_spikes(
     if data is None:
         return FunctionResult()
     
-    y_values = data.get('y').copy()
+    y_values = data.iloc[:, 1].copy()
     N = len(y_values)
 
     proc_data = np.copy(y_values)
@@ -89,5 +89,5 @@ def anti_spikes(
         if abs(y_values[i] - y_values[i-1]) > R and abs(y_values[i] - y_values[i+1]) > R:
             proc_data[i] = (y_values[i-1] + y_values[i+1]) / 2
 
-    no_spikes_df = pd.DataFrame({'x': data.get('x').copy(), 'y': proc_data})
+    no_spikes_df = pd.DataFrame({'x': data.iloc[:, 0].copy(), 'y': proc_data})
     return FunctionResult(main_data=no_spikes_df)

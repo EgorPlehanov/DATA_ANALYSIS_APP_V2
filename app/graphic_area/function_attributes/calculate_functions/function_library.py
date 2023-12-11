@@ -392,7 +392,7 @@ class FunctionLibrary:
                     min=0.1, max=1000, step=0.1, default_value=1,
                 ),
                 SLConfig(
-                    name='delta_t', title='Шаг по оси X (delta_t)',
+                    name='delta', title='Шаг по оси X (delta)',
                     min=1, max=15, step=1, default_value=1,
                     value_type=ValueType.INT, round_digits=0
                 ),
@@ -417,7 +417,7 @@ class FunctionLibrary:
                     min=0.1, max=1000, step=0.1, default_value=1,
                 ),
                 SLConfig(
-                    name='delta_t', title='Шаг по оси X (delta_t)',
+                    name='delta', title='Шаг по оси X (delta)',
                     min=1, max=15, step=1, default_value=1,
                     value_type=ValueType.INT, round_digits=0
                 ),
@@ -438,12 +438,12 @@ class FunctionLibrary:
                 ),
                 SLConfig(
                     name='N1', title='Cмещение от (N1)',
-                    min=0, max=1000, step=1, default_value=0,
+                    min=0, max=1000, step=1, default_value=100,
                     value_type=ValueType.INT, round_digits=0
                 ),
                 SLConfig(
                     name='N2', title='Cмещение до (N2)',
-                    min=0, max=1000, step=1, default_value=0,
+                    min=0, max=1000, step=1, default_value=500,
                     value_type=ValueType.INT, round_digits=0
                 ),
                 SWConfig(),
@@ -568,7 +568,7 @@ class FunctionLibrary:
                 ),
                 TFDTConfig(
                     name='M', title='Кол-во осреднений (M)',
-                    columns=[TFDTColumn(name='M', title='Кол-во осреднений', type=ValueType.INT)],
+                    columns=[TFDTColumn(name='M', tooltip='Кол-во осреднений шума', unit='шт', value_type=ValueType.INT)],
                     default_value=[
                         TFDTItem(column_name='M', row_index=0, value=1),
                         TFDTItem(column_name='M', row_index=1, value=10),
@@ -625,7 +625,7 @@ class FunctionLibrary:
             parameters = [
                 DDFDConfig(),
                 SLConfig(
-                    name='new_max', title='Новое максимальное значение (по модулю)',
+                    name='new_max', title='Новое макс. значение (по модулю)',
                     min=0.0001, max=1000, step=0.001, default_value=1,
                 ),
                 SWConfig(),
@@ -717,7 +717,7 @@ class FunctionLibrary:
             parameters = [
                 DDFDConfig(),
                 DDConfig(
-                    name='M', title='Тип коэффициента',
+                    name='function_type', title='Тип коэффициента',
                     options=[
                         DDOptionItem(key='autocorrelation', text='Автокорреляция'),
                         DDOptionItem(key='covariance', text='Ковариация'),

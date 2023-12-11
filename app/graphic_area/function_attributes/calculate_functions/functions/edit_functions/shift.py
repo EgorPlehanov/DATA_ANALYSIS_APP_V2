@@ -33,10 +33,10 @@ def shift(
             "N1 и N2 должны быть <= {N}, значения N1 = {N1}, N2 = {N2}'
         raise ValueError(error_message)
 
-    shifted_values = data.get('y').copy()
+    shifted_values = data.iloc[:, 1].copy()
     shifted_values[N1:N2+1] += C
 
-    shifted_df = pd.DataFrame({'x': data.get('x').copy(), 'y': shifted_df})
+    shifted_df = pd.DataFrame({'x': data.iloc[:, 0].copy(), 'y': shifted_values})
     return FunctionResult(main_data=shifted_df, error_message=error_message)
 
 
@@ -49,9 +49,9 @@ def anti_shift(
     if data is None:
         return FunctionResult()
         
-    y_values = data.get('y').copy()
+    y_values = data.iloc[:, 1].copy()
     mean_value = np.mean(y_values)
     y_values -= mean_value
 
-    no_shift_df = pd.DataFrame({'x': data.get('x').copy(), 'y': y_values})
+    no_shift_df = pd.DataFrame({'x': data.iloc[:, 0].copy(), 'y': y_values})
     return FunctionResult(main_data=no_shift_df)

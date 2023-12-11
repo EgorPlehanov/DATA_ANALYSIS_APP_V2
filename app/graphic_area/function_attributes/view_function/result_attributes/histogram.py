@@ -10,12 +10,14 @@ class ResultHistogram(Row):
     def __init__(self,
         data: DataFrame,
         title: str,
-        color: str = colors.GREEN,
+        color: str = colors.BLACK,
+        column_names: List[str] = None
     ):
         super().__init__()
         self.data = data
         self.title = title
         self.color = color
+        self.column_names = column_names
 
         self.controls = self.create_controls()
 

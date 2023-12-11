@@ -63,11 +63,16 @@ class FunctionResultView(Container):
 
     def _is_result_data_have_many_graphs(self) -> bool:
         '''Проверяет есть ли в результатах больше одного графика'''
-        count = sum([
-            1 if self.result_data.main_data is not None else 0,
-            len(self.result_data.extra_data) if self.result_data.extra_data is not None else 0,
-        ])
-        print('count: ', count)
+        result = self.result_data
+
+        view_cnt = sum(filter(None, [
+            result.view_chart, result.view_histogram,
+            result.view_table_horizontal, result.view_table_vertical
+        ])) if self.result_data.main_data is not None else 0
+        extra_cnt = len(self.result_data.extra_data) \
+            if self.result_data.extra_data is not None else 0
+
+        count = view_cnt + extra_cnt
         return count > 1
 
 
@@ -120,7 +125,7 @@ class FunctionResultView(Container):
         main_data = result_data.main_data
         function_type = result_data.type.strip() if result_data.type is not None else ''
         main_view = result_data.main_view
-        color = self.function.color
+        color = result_data.color
 
         match type:
             case 'error_message':

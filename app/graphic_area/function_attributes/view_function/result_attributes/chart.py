@@ -10,7 +10,7 @@ class ResultChart(Row):
     def __init__(self,
         data: DataFrame,
         title: str,
-        color: str = colors.GREEN,
+        color: str = colors.BLACK,
         column_names: List[str] = None,
         graphic_curved: bool = False,
         max_points_count: int = 1500

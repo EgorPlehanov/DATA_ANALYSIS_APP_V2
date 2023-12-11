@@ -13,7 +13,7 @@ def statistics(
     if data is None:
         return FunctionResult()
 
-    y = data.get('y').copy()
+    y = data.iloc[:, 1].copy()
 
     min_value = np.min(y)
     max_value = np.max(y)
@@ -56,15 +56,14 @@ def stationarity(
     """
     Оценивает стационарность данных.
     """
-    if data:
+    if data is None:
         return FunctionResult()
     
     M = int(M)
 
-    y = data.get('y').copy()
+    y = data.iloc[:, 1].copy()
     N = len(y)
 
-    error_message = ''
     if M > N:
         raise ValueError(
             f'Некорректное кол-во интервалов: M должен быть <= N. M = {M}, N = {N}'

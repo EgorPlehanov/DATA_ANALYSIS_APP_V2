@@ -71,7 +71,7 @@ class ResultData:
     view_table_horizontal: Optional[bool]       = None
     view_table_vertical: Optional[bool]         = None
     main_view: Optional[ViewType]               = ViewType.CHART
-    color: Optional[str]                        = colors.GREEN
+    color: Optional[str]                        = colors.BLACK
 
 
 

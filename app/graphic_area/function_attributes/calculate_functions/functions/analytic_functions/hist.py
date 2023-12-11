@@ -6,7 +6,7 @@ from pandas import DataFrame
 
 
 def hist(
-    data: DataFrame,                 # Набор данных (из другой функции)
+    data: DataFrame,            # Набор данных (из другой функции)
     M: int,                     # Количество интервалов
     is_density: bool = True,    # True - строить график плотности, False - гистограмму количества
 ) -> FunctionResult:
@@ -14,11 +14,11 @@ def hist(
     Строит графики функции плотности распределения вероятностей
     '''
     if data is None:
-        return []
+        return FunctionResult()
     
     M = int(M)
     
-    counts, bin_edges = np.histogram(data.get('y').copy(), bins=M, density=is_density)
+    counts, bin_edges = np.histogram(data.iloc[:, 1].copy(), bins=M, density=is_density)
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
 
     axi_name = 'density' if is_density else 'count'

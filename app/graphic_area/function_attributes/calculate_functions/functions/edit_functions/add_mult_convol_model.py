@@ -14,10 +14,10 @@ def add_model(
     if first_data is None or second_data is None:
         return FunctionResult()
     
-    first_values = first_data.get('y').copy()
+    first_values = first_data.iloc[:, 1].copy()
     first_N = len(first_values)
 
-    second_values = second_data.get('y').copy()
+    second_values = second_data.iloc[:, 1].copy()
     second_N = len(second_values)
 
     N = first_N if first_N < second_N else second_N
@@ -39,10 +39,10 @@ def mult_model(
     if first_data is None or second_data is None:
         return FunctionResult()
     
-    first_values = first_data.get('y').copy()
+    first_values = first_data.iloc[:, 1].copy()
     first_N = len(first_values)
 
-    second_values = second_data.get('y').copy()
+    second_values = second_data.iloc[:, 1].copy()
     second_N = len(second_values)
 
     N = first_N if first_N < second_N else second_N
@@ -65,10 +65,10 @@ def convol_model(
     if first_data is None or second_data is None:
         return FunctionResult()
     
-    first_values = first_data.get('y').copy()
+    first_values = first_data.iloc[:, 1].copy()
     first_N = len(first_values)
 
-    second_values = second_data.get('y').copy()
+    second_values = second_data.iloc[:, 1].copy()
     second_N = len(second_values)
 
     N = first_N if first_N < second_N else second_N
@@ -100,11 +100,11 @@ def extend_model(
     if first_data is None or second_data is None:
         return FunctionResult()
     
-    first_x = first_data.get('x').copy()
-    first_y = first_data.get('y').copy()
+    first_x = first_data.iloc[:, 0].copy()
+    first_y = first_data.iloc[:, 1].copy()
 
-    second_x = second_data.get('x').copy()
-    second_y = second_data.get('y').copy()
+    second_x = second_data.iloc[:, 0].copy()
+    second_y = second_data.iloc[:, 1].copy()
 
     second_x = second_x + np.max(first_x)
 
