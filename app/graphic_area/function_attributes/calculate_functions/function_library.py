@@ -305,6 +305,7 @@ class FunctionLibrary:
                 SLConfig(
                     name='N', title='Длина данных (N)',
                     min=100, max=5000, step=10, default_value=1000,
+                    value_type=ValueType.INT, round_digits=0
                 ),
                 TFDTConfig(
                     name='A_f_data', title='Амплитуда (A) и частота (f)',

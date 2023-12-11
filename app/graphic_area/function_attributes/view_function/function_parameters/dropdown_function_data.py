@@ -128,9 +128,6 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
             current_value != 'default'
             and all(current_value != option.function_name for option in self.options)
         ):
-            print('UPDATE')
-            print('current_value', current_value)
-            print('options', [current_value == option.function for option in self.options])
             self.function.calculate.set_parameter_value(self._name, None)
             self.ref_dropdown_function_data.current.value = 'default'
         self.update()
