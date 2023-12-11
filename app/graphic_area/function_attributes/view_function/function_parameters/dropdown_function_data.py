@@ -8,13 +8,13 @@ from flet import Container, Dropdown, dropdown, Ref
 
 @dataclass
 class DDFDOptionItem:
-    function_name: str = 'Не задана'
-    function: Any = None
+    function_name: str  = 'Не задана'
+    function: Any       = None
 
 @dataclass
 class DDFDConfig:
-    name: str                     = ''
-    title: str                    = ''
+    name: str   = None
+    title: str  = 'Выбор набора данных'
 
     @property
     def type(self) -> ParameterType:

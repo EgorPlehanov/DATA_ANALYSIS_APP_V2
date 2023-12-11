@@ -66,11 +66,11 @@ class ResultData:
     initial_data: Optional[List['ResultData']]  = None
     extra_data: Optional[List['ResultData']]    = None
     error_message: Optional[str]                = None
-    view_chart: Optional[bool]                  = None
+    view_chart: Optional[bool]                  = True
     view_histogram: Optional[bool]              = None
     view_table_horizontal: Optional[bool]       = None
     view_table_vertical: Optional[bool]         = None
-    main_view: Optional[ViewType]               = None
+    main_view: Optional[ViewType]               = ViewType.CHART
     color: Optional[str]                        = colors.GREEN
 
 

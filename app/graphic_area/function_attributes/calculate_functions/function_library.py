@@ -70,9 +70,11 @@ class FunctionLibrary:
 
 
     function_by_key = {
+
         # ================================================
         # FunctionType.DATA
         # ================================================
+
         'test': FunctionConfig(
             key = "test",
             name = "Тест",
@@ -370,39 +372,294 @@ class FunctionLibrary:
         # ================================================
         # FunctionType.EDIT
         # ================================================
+
+        'noise': FunctionConfig(
+            key = 'noise',
+            name = 'Случайный шум',
+            type = FunctionType.EDIT,
+            function = noise,
+            parameters = [
+                DDFDConfig(name='data'),
+                SLConfig(
+                    name='N', title='Длина данных (N)',
+                    min=10, max=5000, step=10, default_value=600,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SLConfig(
+                    name='R', title='Пороговое значение (R)',
+                    min=0.1, max=1000, step=0.1, default_value=1,
+                ),
+                SLConfig(
+                    name='delta_t', title='Шаг по оси X (delta_t)',
+                    min=1, max=15, step=1, default_value=1,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'my_noise': FunctionConfig(
+            key = 'my_noise',
+            name = 'Мой случайный шум',
+            type = FunctionType.EDIT,
+            function = my_noise,
+            parameters = [
+                DDFDConfig(name='data'),
+                SLConfig(
+                    name='N', title='Длина данных (N)',
+                    min=10, max=5000, step=10, default_value=600,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SLConfig(
+                    name='R', title='Пороговое значение (R)',
+                    min=0.1, max=1000, step=0.1, default_value=1,
+                ),
+                SLConfig(
+                    name='delta_t', title='Шаг по оси X (delta_t)',
+                    min=1, max=15, step=1, default_value=1,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'shift': FunctionConfig(
+            key = 'shift',
+            name = 'Сдвиг',
+            type = FunctionType.EDIT,
+            function = shift,
+            parameters = [
+                DDFDConfig(name='data'),
+                SLConfig(
+                    name='C', title='Значение смещения (C)',
+                    min=-1000, max=1000, step=0.1, default_value=200,
+                ),
+                SLConfig(
+                    name='N1', title='Cмещение от (N1)',
+                    min=0, max=1000, step=1, default_value=0,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SLConfig(
+                    name='N2', title='Cмещение до (N2)',
+                    min=0, max=1000, step=1, default_value=0,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'spikes': FunctionConfig(
+            key = 'spikes',
+            name = 'Одиночные выбросы',
+            type = FunctionType.EDIT,
+            function = spikes,
+            parameters = [
+                DDFDConfig(name='data'),
+                SLConfig(
+                    name='N', title='Длина данных (N)',
+                    min=10, max=10000, step=10, default_value=1000,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SLConfig(
+                    name='M', title='Количество выбросов (M)',
+                    min=1, max=100, step=1, default_value=10,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SLConfig(
+                    name='R', title='Опорное значение (R)',
+                    min=0.1, max=10000, step=0.1, default_value=10
+                ),
+                SLConfig(
+                    name='Rs', title='Разброс (Rs)',
+                    min=0.1, max=1000, step=0.1, default_value=5
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'add_model': FunctionConfig(
+            key = 'add_model',
+            name = 'Поэлементное сложение',
+            type = FunctionType.EDIT,
+            function = add_model,
+            parameters = [
+                DDFDConfig(name='first_data', title='Выбор первого набора данных'),
+                DDFDConfig(name='second_data', title='Выбор второго набора данных'),
+                SWConfig(),
+            ]
+        ),
+
+        'mult_model': FunctionConfig(
+            key = 'mult_model',
+            name = 'Поэлементное умножение',
+            type = FunctionType.EDIT,
+            function = mult_model,
+            parameters = [
+                DDFDConfig(name='first_data', title='Выбор первого набора данных'),
+                DDFDConfig(name='second_data', title='Выбор второго набора данных'),
+                SWConfig(),
+            ]
+        ),
+
+        'anti_shift': FunctionConfig(
+            key = 'anti_shift',
+            name = 'Удаление смещения',
+            type = FunctionType.EDIT,
+            function = anti_shift,
+            parameters = [
+                DDFDConfig(name='data'),
+                SWConfig(),
+            ]
+        ),
+
+        'anti_spikes': FunctionConfig(
+            key = 'anti_spikes',
+            name = 'Удаление выбросов',
+            type = FunctionType.EDIT,
+            function = anti_spikes,
+            parameters = [
+                DDFDConfig(name='data'),
+                SLConfig(
+                    name='R', title='Пороговое значение диапозона (R)',
+                    min=0.1, max=1000, step=0.1, default_value=10,
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'anti_trend_linear': FunctionConfig(
+            key = 'anti_trend_linear',
+            name = 'Удаление линейного тренда',
+            type = FunctionType.EDIT,
+            function = anti_trend_linear,
+            parameters = [
+                DDFDConfig(name='data'),
+                SWConfig(),
+            ]
+        ),
+
+        'anti_trend_non_linear': FunctionConfig(
+            key = 'anti_trend_non_linear',
+            name = 'Удаление НЕ линейного тренда',
+            type = FunctionType.EDIT,
+            function = anti_trend_non_linear,
+            parameters = [
+                DDFDConfig(name='data'),
+                SLConfig(
+                    name='W', title='Длина скользящего окна (W)',
+                    min=1, max=5000, step=1, default_value=10,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'anti_noise': FunctionConfig(
+            key = 'anti_noise',
+            name = 'Удаление шума',
+            type = FunctionType.EDIT,
+            function = anti_noise,
+            parameters = [
+                DDFDConfig(name='data'),
+                SLConfig(
+                    name='R', title='Пороговое значение шума (R)',
+                ),
+                TFDTConfig(
+                    name='M', title='Кол-во осреднений (M)',
+                    columns=[TFDTColumn(name='M', title='Кол-во осреднений', type=ValueType.INT)],
+                    default_value=[
+                        TFDTItem(column_name='M', row_index=0, value=1),
+                        TFDTItem(column_name='M', row_index=1, value=10),
+                        TFDTItem(column_name='M', row_index=2, value=100),
+                        TFDTItem(column_name='M', row_index=3, value=1000),
+                        TFDTItem(column_name='M', row_index=4, value=10000),
+                    ],
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'convol_model': FunctionConfig(
+            key = 'convol_model',
+            name = 'Свёртка',
+            type = FunctionType.EDIT,
+            function = convol_model,
+            parameters = [
+                DDFDConfig(name='first_data', title='Выбор первого набора данных'),
+                DDFDConfig(name='second_data', title='Выбор второго набора данных'),
+                SLConfig(
+                    name='M', title='Длина скользящего окна (M)',
+                    min=1, max=1000, step=1, default_value=10,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'scale_values': FunctionConfig(
+            key = 'scale_values',
+            name = 'Нормирование',
+            type = FunctionType.EDIT,
+            function = scale_values,
+            parameters = [
+                DDFDConfig(name='data'),
+                SLConfig(
+                    name='new_min', title='Новое минимальное значение',
+                    min=-1000, max=1000, step=0.001, default_value=-1,    
+                ),
+                SLConfig(
+                    name='new_max', title='Новое максимальное значение',
+                    min=-1000, max=1000, step=0.001, default_value=1,
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'normalize_values': FunctionConfig(
+            key = 'normalize_values',
+            name = 'Нормализация',
+            type = FunctionType.EDIT,
+            function = normalize_values,
+            parameters = [
+                DDFDConfig(name='data'),
+                SLConfig(
+                    name='new_max', title='Новое максимальное значение (по модулю)',
+                    min=0.0001, max=1000, step=0.001, default_value=1,
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'absolute_value': FunctionConfig(
+            key = 'absolute_value',
+            name = 'Модуль',
+            type = FunctionType.EDIT,
+            function = absolute_value,
+            parameters = [
+                DDFDConfig(name='data'),
+                SWConfig(),
+            ]
+        ),
+
+        'extend_model': FunctionConfig(
+            key = 'extend_model',
+            name = 'Объединение данных',
+            type = FunctionType.EDIT,
+            function = extend_model,
+            parameters = [
+                DDFDConfig(name='first_data', title='Выбор первого набора данных'),
+                DDFDConfig(name='second_data', title='Выбор второго набора данных'),
+                SWConfig(),
+            ]
+        ),
+
+        # ================================================
+        # FunctionType.ANALYTIC
+        # ================================================
+
+        
     }
 
-   
-
 # ======================================================================================
 # ======================================================================================
 
-
-functions_info = {
-
-    'data_download': {
-        # 'function': DataFunctions.data_download,
-        'type': 'data',
-        'name': 'Загрузить свой набор данных',
-        'parameters': {
-            'input_data': {
-                "type": "file_picker",
-                "title": "Набор данных",
-                'button_text': 'Выбрать набор данных',
-                'pick_files_parameters': {
-                    'dialog_title': 'Выбор набора данных',
-                    'initial_directory': None,
-                    'file_type': None,
-                    'allowed_extensions': ['csv', 'xls', 'xlsx', 'xlsm', 'xlsb', 'odf', 'ods', 'odt', 'json', 'txt', 'dat'],
-                    'allow_multiple': True,
-                },
-                "default_value": [],
-            },
-            'show_table_data': {
-                "type": "switch",
-                "title": "Показывать таблицу данных?",
-                'default_value': False
-            },
-        }
-    },
-}
