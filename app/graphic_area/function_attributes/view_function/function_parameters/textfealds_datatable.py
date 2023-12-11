@@ -21,7 +21,8 @@ class TFDTItem:
 @dataclass
 class TFDTColumn:
     name: str             = ''
-    tooltip: str          = None
+    tooltip: str          = ''
+    unit: str             = None
     value_type: ValueType = ValueType.FLOAT
 
 @dataclass
@@ -94,7 +95,7 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
         '''Создает колонки таблицы'''
         return [
             DataColumn(
-                label = Text(column.name),
+                label = Text(column.name + (f', {column.unit}' if column.unit else '')),
                 tooltip = column.tooltip,
             )
             for column in self.columns.values()

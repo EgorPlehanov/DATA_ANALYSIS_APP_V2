@@ -160,6 +160,7 @@ class GraphicArea(Column):
         self.list_results.append(function.view.results_view)
         self.list_functions.append(function)
         self.update_functions_dependencies_parameters(function)
+        self.change_selected_function(function)
         self.update()
     
 

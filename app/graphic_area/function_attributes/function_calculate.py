@@ -36,8 +36,7 @@ class FunctionCalculate:
         '''Возвращает значение по умолчанию для параметра с типом TEXTFIELDS_DATATABLE'''
         rows = defaultdict(list)
         for cell in config.default_value:
-            if cell.row_index not in rows:
-                rows[cell.row_index].append(cell)
+            rows[cell.row_index].append(cell)
         return {
             row_idx: {
                 cell.column_name: cell.value

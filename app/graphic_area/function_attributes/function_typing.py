@@ -5,6 +5,8 @@ from pandas import DataFrame
 from enum import Enum
 from flet import colors
 
+
+
 class ParameterType(Enum):
     '''Тип параметра функции'''
     CHECKBOXES = 'checkboxes'
@@ -15,6 +17,10 @@ class ParameterType(Enum):
     SWITCH = 'switch'
     TEXTFIELDS_DATATABLE = 'textfields_datatable'
     TEXTFIELD = 'textfield'
+
+    def __str__(self):
+        return self.value
+
 
 
 class FunctionType(Enum):
@@ -27,12 +33,17 @@ class FunctionType(Enum):
         return self.value
 
 
+
 class ViewType(Enum):
     '''Тип представления результатов функции'''
     CHART = 'chart'
     HISTOGRAM = 'histogram'
     TABLE_HORIZONTAL = 'table_horizontal'
     TABLE_VERTICAL = 'table_vertical'
+
+    def __str__(self):
+        return self.value
+
 
 
 @dataclass
@@ -61,6 +72,7 @@ class ResultData:
     view_table_vertical: Optional[bool]         = None
     main_view: Optional[ViewType]               = None
     color: Optional[str]                        = colors.GREEN
+
 
 
 @dataclass
@@ -95,7 +107,8 @@ class FunctionResult:
             for data in self.extra_data:
                 if data.main_data is not None and isinstance(data.main_data, DataFrame):
                     data.main_data = data.main_data.map(round_and_clip)
-            
+
+
 
 @dataclass
 class FunctionConfig:
@@ -128,8 +141,10 @@ class FunctionConfig:
             raise ValueError(f'Недопустимый тип view_list функции: {type(self.view_list)}, допустимые значения ViewType')
 
 
+
 # Функция для меню выбора
 FunctionMenuOption = namedtuple('FunctionOption', ['key', 'name'])
+
 
 
 class ValueType(Enum):
@@ -137,3 +152,6 @@ class ValueType(Enum):
     FUNCTION = 'function'
     INT = 'int'
     FLOAT = 'float'
+
+    def __str__(self):
+        return self.value

@@ -45,9 +45,9 @@ class FunctionCardView(Container):
     def _create_card_content(self):
         '''Coздает содержимое карточки функции'''
         card_content = Column(
-            expand=True,
             controls=[
                 self._create_card_title(),
+                self._create_card_signature(),
                 self._create_card_result_title(),
                 self._create_card_result_data(),
             ]
@@ -57,67 +57,55 @@ class FunctionCardView(Container):
 
     def _create_card_title(self) -> Row:
         '''Создает заголовок карточки'''
-        return Row([Stack(
+        return Row([Row(
+            alignment = MainAxisAlignment.SPACE_BETWEEN,
+            vertical_alignment = CrossAxisAlignment.START,
             expand = True,
-            controls = [
+            controls=[
                 Row(
-                    wrap = True,
-                    controls = [Column([
-                        Markdown(
-                            extension_set = MarkdownExtensionSet.GITHUB_WEB,
-                            value = self._cerate_title_value()
+                    vertical_alignment = CrossAxisAlignment.CENTER,
+                    controls=[
+                        Column(
+                            spacing = 0,
+                            horizontal_alignment = CrossAxisAlignment.CENTER,
+                            controls=[
+                                Icon(icons.CIRCLE, color=self.function.color, size=16),
+                                Markdown(
+                                    extension_set = MarkdownExtensionSet.GITHUB_WEB,
+                                    value = f"*id:*\u00A0***{self.function.id}***"
+                                ),
+                            ]
                         ),
-                        Markdown(
-                            ref = self.ref_card_signature,
-                            extension_set = MarkdownExtensionSet.GITHUB_WEB,
-                            value = self._create_title_function_signature()
-                        ),
-                    ])],
+                        Row(
+                            width = 230,
+                            wrap = True,
+                            controls=[Markdown(
+                                extension_set = MarkdownExtensionSet.GITHUB_WEB,
+                                value = f"#### **{self.function.name}**"
+                            )]
+                        )
+                    ]
                 ),
-                IconButton(
-                    icon = icons.DELETE,
-                    on_click = self.function.delete,
-                    right = 0
-                )
+                IconButton(icons.DELETE, on_click=self.function.delete)
             ]
         )])
     
-    
-    
-        return Row( # TODO: переписать на Stack
-            alignment = MainAxisAlignment.SPACE_BETWEEN,
-            vertical_alignment = CrossAxisAlignment.START,
-            controls = [
-                Row(
-                    expand = True,
-                    wrap = True,
-                    controls = [Column(controls=[
-                            Markdown(
-                                extension_set = MarkdownExtensionSet.GITHUB_WEB,
-                                value = self._cerate_title_value()
-                            ),
-                            Markdown(
-                                ref = self.ref_card_signature,
-                                extension_set = MarkdownExtensionSet.GITHUB_WEB,
-                                value = self._create_title_function_signature()
-                            ),
-                    ])]
-                ),
-                IconButton(
-                    icon=icons.DELETE,
-                    data=self,
-                    on_click=self.function.delete,
-                )
-            ],
-        )
-    
-
-    def _cerate_title_value(self):
-        '''Создает строку с форматированным названием функции'''
-        return f'#### **{self.function.name}** (*id:*\u00A0***{self.function.id}***)\n'
 
 
-    def _create_title_function_signature(self):
+    def _create_card_signature(self) -> Row:
+        '''Создает строку с представление сигнатуры функции'''
+        return Row([Row(
+            expand=True,
+            wrap=True,
+            controls=[Markdown(
+                    ref = self.ref_card_signature,
+                    extension_set = MarkdownExtensionSet.GITHUB_WEB,
+                    value = self._create_function_signature()
+            )]
+        )])
+
+
+    def _create_function_signature(self):
         '''Создает строку с представление сигнатуры функции со значениями параметров'''
         formated_parameters = self.function.calculate.get_current_parameters_formatted()
         parameters = '\n\n'.join(
@@ -270,7 +258,7 @@ class FunctionCardView(Container):
 
     def update_values(self) -> None:
         '''Обновляет значения текстовых полей сигнатуры со значениями параметров и результатов'''
-        self.ref_card_signature.current.value = self._create_title_function_signature()
+        self.ref_card_signature.current.value = self._create_function_signature()
         self.ref_result_data.current.value = self._get_result_table()
         self.update()
     

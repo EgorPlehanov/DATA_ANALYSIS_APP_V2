@@ -70,6 +70,9 @@ class FunctionLibrary:
 
 
     function_by_key = {
+        # ================================================
+        # FunctionType.DATA
+        # ================================================
         'test': FunctionConfig(
             key = "test",
             name = "Тест",
@@ -127,7 +130,7 @@ class FunctionLibrary:
                             tooltip='Колонка 1',
                             value_type=ValueType.FLOAT
                         ),
-                        TFDTColumn('column2', 'Колонка 2', ValueType.INT)
+                        TFDTColumn('column2', 'Колонка 2', value_type=ValueType.INT)
                     ],
                     default_value = [
                         TFDTItem(column_name='column1', row_index=0, value=1),
@@ -263,7 +266,110 @@ class FunctionLibrary:
             ]
         ),
 
+        'harm': FunctionConfig(
+            key = 'harm',
+            name = 'Гармонический процесс',
+            type = FunctionType.DATA,
+            function = harm,
+            parameters = [
+                SLConfig(
+                    name='N', title='Длина данных (N)',
+                    min=100, max=5000, step=100, default_value=1000,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SLConfig(
+                    name='A0', title='Амплитуда (A0)',
+                    min=1, max=1000, step=1, default_value=100
+                ),
+                SLConfig(
+                    name='f0', title='Частота (f0), Гц',
+                    min=1, max=1000, step=1, default_value=15
+                ),
+                SLConfig(
+                    name='delta_t', title='Шаг по оси X (delta_t)',
+                    min=0.0001, max=0.01, step=0.0001, default_value=0.0001,
+                    round_digits=5
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'poly_harm': FunctionConfig(
+            key = 'poly_harm',
+            name = 'Полигармонический процесс',
+            type = FunctionType.DATA,
+            function = poly_harm,
+            parameters = [
+                SLConfig(
+                    name='N', title='Длина данных (N)',
+                    min=100, max=5000, step=10, default_value=1000,
+                ),
+                TFDTConfig(
+                    name='A_f_data', title='Амплитуда (A) и частота (f)',
+                    columns=[
+                        TFDTColumn(name='A', tooltip='Амплитуда гармонического процесса'),
+                        TFDTColumn(name='f', tooltip='Частота гармонического процесса', unit='Гц'),
+                    ],
+                    default_value=[
+                        TFDTItem(column_name='A', row_index=0, value=100),
+                        TFDTItem(column_name='f', row_index=0, value=33),
+                        TFDTItem(column_name='A', row_index=1, value=15),
+                        TFDTItem(column_name='f', row_index=1, value=5),
+                        TFDTItem(column_name='A', row_index=2, value=20),
+                        TFDTItem(column_name='f', row_index=2, value=170),
+                    ]
+                ),
+                SLConfig(
+                    name='delta_t', title='Шаг по оси X (delta_t)',
+                    min=0.0001, max=0.01, step=0.0001, default_value=0.0001
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'custom_function': FunctionConfig(
+            key = 'custom_function',
+            name = 'Задать свою функцию',
+            type = FunctionType.DATA,
+            function = custom_function,
+            parameters = [
+                TFConfig(
+                    name='expression',
+                    value_type=ValueType.FUNCTION,
+                    label='Функция',
+                    prefix_text='y = ',
+                    hint_text='например: 1 + sin(x**2)',
+                    helper_text='Функция должна содержать только аргумент x',
+                    default_value='x'
+                ),
+                SLConfig(
+                    name='N', title='Длина данных (N)',
+                    min=100, max=5000, step=100, default_value=1000,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SLConfig(
+                    name='step', title='Шаг по оси X (step)',
+                    min=0.01, max=10, step=0.1, default_value=1
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'data_download': FunctionConfig(
+            key = 'data_download',
+            name = 'Загрузить свой набор данных',
+            type = FunctionType.DATA,
+            function = data_download,
+            parameters = [
+                FPConfig(name='input_data'),
+                SWConfig(),
+            ]
+        ),
+
         
+        # ================================================
+        # FunctionType.EDIT
+        # ================================================
     }
 
    
@@ -273,219 +379,6 @@ class FunctionLibrary:
 
 
 functions_info = {
-
-    'combinate_trend': {
-        # 'function': DataFunctions.combinate_trend,
-        'type': 'data',
-        'name': 'Кусочная функция',
-        'parameters': {
-            "type_list": {
-                "type": "checkbox",
-                "title": "Тип тренда",
-                "checkboxes": [
-                    {
-                        "key": "linear_rising",
-                        "label": "Линейно восходящий",
-                        'default_value': True,
-                    },
-                    {
-                        "key": "linear_falling",
-                        "label": "Линейно нисходящий",
-                        'default_value': True,
-                    },
-                    {
-                        "key": "nonlinear_rising",
-                        "label": "Нелинейно восходящий",
-                        'default_value': True,
-                    },
-                    {
-                        "key": "nonlinear_falling",
-                        "label": "Нелинейно нисходящий",
-                        'default_value': True,
-                    }
-                ],
-                "default_value": ["nonlinear_rising", "nonlinear_falling", "linear_rising", "linear_falling"],
-            },
-            "a": {
-                "type": "slider",
-                "title": "Параметр (a)",
-                "min": 0.01,
-                "max": 10.0,
-                "step": 0.01,
-                "default_value": 0.01,
-            },
-            "b": {
-                "type": "slider",
-                "title": "Параметр (b)",
-                "min": 0.1,
-                "max": 10.0,
-                "step": 0.1,
-                "default_value": 1.0,
-            },
-            "step": {
-                "type": "slider",
-                "title": "Шаг по оси x (step)",
-                "min": 1,
-                "max": 15,
-                "step": 1,
-                "default_value": 1,
-            },
-            "N": {
-                "type": "slider",
-                "title": "Длина данных (N)",
-                'text_type': 'int_number',
-                "min": 100,
-                "max": 5000,
-                "step": 100,
-                'round_digits': 0,
-                "default_value": 600,
-            },
-            'show_table_data': {
-                "type": "switch",
-                "title": "Показывать таблицу данных?",
-                'default_value': False
-            },
-        }
-    },
-
-    'harm': {
-        # 'function': DataFunctions.harm,
-        'type': 'data',
-        'name': 'Гармонический процесс',
-        'parameters': {
-            "N": {
-                "type": "slider",
-                "title": "Длина данных (N)",
-                'text_type': 'int_number',
-                "min": 100,
-                "max": 5000,
-                "step": 10,
-                'round_digits': 0,
-                "default_value": 1024,
-            },
-            "A0": {
-                "type": "slider",
-                "title": "Амплитуда (A0)",
-                "min": 1,
-                "max": 1000,
-                "step": 1,
-                "default_value": 100,
-            },
-            "f0": {
-                "type": "slider",
-                "title": "Частота (f0), Гц",
-                "min": 1,
-                "max": 1000,
-                "step": 1,
-                "default_value": 15,
-            },
-            "delta_t": {
-                "type": "slider",
-                "title": "Временной интервал (delta_t)",
-                "min": 0.0001,
-                "max": 0.01,
-                "step": 0.0001,
-                "round_digits": 5,
-                "default_value": 0.0001,
-            },
-            'show_table_data': {
-                "type": "switch",
-                "title": "Показывать таблицу данных?",
-                'default_value': False
-            },
-        }
-    },
-
-    'poly_harm': {
-        # 'function': DataFunctions.poly_harm,
-        'type': 'data',
-        'name': 'Полигармонический процесс',
-        'parameters': {
-            "N": {
-                "type": "slider",
-                "title": "Длина данных (N)",
-                'text_type': 'int_number',
-                "min": 100,
-                "max": 5000,
-                "step": 10,
-                'round_digits': 0,
-                "default_value": 1000,
-            },
-            "A_f_data": {
-                "type": "textfields_datatable",
-                "title": "Амплитуда (A) и частота (f)",
-                "columns": {
-                    "A": {
-                        'name': 'A',
-                        'tooltip': 'Амплитуда гармонического процесса',
-                    },
-                    "f": {
-                        'name': 'f, Гц',
-                        'tooltip': 'Частота гармонического процесса в герцах (Гц)'
-                    },
-                },
-                "default_value": {
-                    0: {"A": 100, "f": 33},
-                    1: {"A": 15, "f": 5},
-                    2: {"A": 20, "f": 170},
-                },
-            },
-            "delta_t": {
-                "type": "slider",
-                "title": "Временной интервал (delta_t)",
-                "min": 0.0001,
-                "max": 0.01,
-                "step": 0.0001,
-                "round_digits": 5,
-                "default_value": 0.0001,
-            },
-            'show_table_data': {
-                "type": "switch",
-                "title": "Показывать таблицу данных?",
-                'default_value': False
-            },
-        }
-    },
-
-    'custom_function': {
-        # 'function': DataFunctions.custom_function,
-        'type': 'data',
-        'name': 'Задать свою функцию',
-        'parameters': {
-            'expression': {
-                'type': 'text_field',
-                'text_type': 'function',
-                'label': 'Функция',
-                'prefix_text': 'y = ',
-                'hint_text': 'например: 1 + sin(x**2)',
-                'helper_text': 'Функция должна содержать только аргумент x',
-                'default_value': 'x',
-            },
-            "N": {
-                "type": "slider",
-                "title": "Длина данных (N)",
-                'text_type': 'int_number',
-                "min": 100,
-                "max": 5000,
-                "step": 100,
-                'round_digits': 0,
-                "default_value": 600,
-            },
-            "step": {
-                "type": "slider",
-                "title": "Шаг по оси x (step)",
-                "min": 0.1,
-                "max": 10,
-                "step": 0.1,
-                "default_value": 1,
-            },
-            'show_table_data': {
-                "type": "switch",
-                "title": "Показывать таблицу данных?",
-                'default_value': False
-            },
-        }
-    },
 
     'data_download': {
         # 'function': DataFunctions.data_download,

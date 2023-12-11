@@ -7,7 +7,7 @@ from collections import namedtuple
 from flet import (
     Container, FilePickerFileType, FilePicker, Ref,
     Text, Column, ElevatedButton, Row, icons, MainAxisAlignment,
-    FilePickerResultEvent, IconButton, colors, padding
+    FilePickerResultEvent, IconButton, colors, padding, TextButton
 )
 
 
@@ -19,13 +19,13 @@ class FPSettings:
     allowed_extensions: List[str]   = field(default_factory=lambda: [
         'csv', 'xls', 'xlsx', 'xlsm', 'xlsb', 'odf', 'ods', 'odt', 'json', 'txt', 'dat'
     ])
-    allow_multiple: bool            = True
+    allow_multiple: bool            = False
 
 @dataclass
 class FPConfig:
     name: str               = ''
-    title: str              = 'Набор данных'
-    button_text: str        = 'Выбрать файл данных'
+    title: str              = 'Набор данных:'
+    button_text: str        = 'Выбрать файл'
     settings: FPSettings    = FPSettings()
     default_value: Any      = field(default_factory=list)
 
@@ -73,7 +73,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
                 alignment = MainAxisAlignment.SPACE_BETWEEN,
                 controls = [
                     Text(self.title),
-                    ElevatedButton(
+                    TextButton(
                         text = self.button_text,
                         icon = icons.UPLOAD_FILE,
                         on_click = self._open_file_picker

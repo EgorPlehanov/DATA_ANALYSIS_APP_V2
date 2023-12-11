@@ -15,21 +15,25 @@ trend_type_to_function = {
 
 def trend(
     type: Literal[      # Тип тренда
-        'linear_rising', 'linear_falling', 'nonlinear_rising', 'nonlinear_falling'
+        'linear_rising', 'linear_falling',
+        'nonlinear_rising', 'nonlinear_falling'
     ],
     a: float,            # Коэффициент a
     b: float,            # Коэффициент b
     step: float,         # Шаг генерации данных
     N: int              # Длина данных
 ) -> FunctionResult:
-    ''' Создает графики тренда'''
+    '''
+    Создает графики тренда
+    '''
     t = np.arange(0, N * step, step)
 
     data = None
     if type in trend_type_to_function:
         data = trend_type_to_function[type](t, a, b)
-        
-    return FunctionResult(main_data=pd.DataFrame({'x': t, 'y': data}))
+    
+    trend_data = pd.DataFrame({'x': t, 'y': data})
+    return FunctionResult(main_data=trend_data)
 
 
 # def multi_trend(
@@ -56,7 +60,9 @@ def combinate_trend(
     step: float,        # Шаг генерации данных
     N: int              # Длина данных
 ) -> FunctionResult:
-    ''' Создает график комбинированной функции тренда'''
+    '''
+    Создает график комбинированной функции тренда
+    '''
     num_parts = len(type_list)
     if num_parts == 0:
         raise ValueError("Нет данных для построения графика")
@@ -83,4 +89,4 @@ def combinate_trend(
         previous_end_value = data[-1]
         
     combined_df = pd.concat(df_list, ignore_index=True)
-    return FunctionResult(combined_df)
+    return FunctionResult(main_data=combined_df)
