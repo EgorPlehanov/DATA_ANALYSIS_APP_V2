@@ -290,7 +290,7 @@ class FunctionLibrary:
                 SLConfig(
                     name='delta_t', title='Шаг по оси X (delta_t)',
                     min=0.0001, max=0.01, step=0.0001, default_value=0.0001,
-                    round_digits=5
+                    round_digits=4
                 ),
                 SWConfig(),
             ]
@@ -323,7 +323,8 @@ class FunctionLibrary:
                 ),
                 SLConfig(
                     name='delta_t', title='Шаг по оси X (delta_t)',
-                    min=0.0001, max=0.01, step=0.0001, default_value=0.0001
+                    min=0.0001, max=0.01, step=0.0001, default_value=0.0001,
+                    round_digits=4
                 ),
                 SWConfig(),
             ]
@@ -369,6 +370,7 @@ class FunctionLibrary:
         ),
 
         
+        
         # ================================================
         # FunctionType.EDIT
         # ================================================
@@ -379,7 +381,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = noise,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SLConfig(
                     name='N', title='Длина данных (N)',
                     min=10, max=5000, step=10, default_value=600,
@@ -404,7 +406,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = my_noise,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SLConfig(
                     name='N', title='Длина данных (N)',
                     min=10, max=5000, step=10, default_value=600,
@@ -429,7 +431,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = shift,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SLConfig(
                     name='C', title='Значение смещения (C)',
                     min=-1000, max=1000, step=0.1, default_value=200,
@@ -454,7 +456,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = spikes,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SLConfig(
                     name='N', title='Длина данных (N)',
                     min=10, max=10000, step=10, default_value=1000,
@@ -507,7 +509,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = anti_shift,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SWConfig(),
             ]
         ),
@@ -518,7 +520,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = anti_spikes,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SLConfig(
                     name='R', title='Пороговое значение диапозона (R)',
                     min=0.1, max=1000, step=0.1, default_value=10,
@@ -533,7 +535,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = anti_trend_linear,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SWConfig(),
             ]
         ),
@@ -544,7 +546,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = anti_trend_non_linear,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SLConfig(
                     name='W', title='Длина скользящего окна (W)',
                     min=1, max=5000, step=1, default_value=10,
@@ -560,7 +562,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = anti_noise,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SLConfig(
                     name='R', title='Пороговое значение шума (R)',
                 ),
@@ -602,7 +604,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = scale_values,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SLConfig(
                     name='new_min', title='Новое минимальное значение',
                     min=-1000, max=1000, step=0.001, default_value=-1,    
@@ -621,7 +623,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = normalize_values,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SLConfig(
                     name='new_max', title='Новое максимальное значение (по модулю)',
                     min=0.0001, max=1000, step=0.001, default_value=1,
@@ -636,7 +638,7 @@ class FunctionLibrary:
             type = FunctionType.EDIT,
             function = absolute_value,
             parameters = [
-                DDFDConfig(name='data'),
+                DDFDConfig(),
                 SWConfig(),
             ]
         ),
@@ -653,13 +655,123 @@ class FunctionLibrary:
             ]
         ),
 
+
+
         # ================================================
         # FunctionType.ANALYTIC
         # ================================================
 
-        
+        'statistics': FunctionConfig(
+            key = 'statistics',
+            name = 'Статистические данные',
+            type = FunctionType.ANALYTIC,
+            function = statistics,
+            parameters = [
+                DDFDConfig(),
+            ],
+            main_view = ViewType.TABLE_VERTICAL,
+            view_list = [ViewType.TABLE_VERTICAL]
+        ),
+
+        'stationarity': FunctionConfig(
+            key = 'stationarity',
+            name = 'Стационарность',
+            type = FunctionType.ANALYTIC,
+            function = stationarity,
+            parameters = [
+                DDFDConfig(),
+                SLConfig(
+                    name='M', title='Количество интервалов (M)',
+                    min=2, max=100, step=1, default_value=10,
+                    value_type=ValueType.INT, round_digits=0
+                )
+            ],
+            main_view = ViewType.TABLE_VERTICAL,
+            view_list = [ViewType.TABLE_VERTICAL]
+        ),
+
+        'hist': FunctionConfig(
+            key = 'hist',
+            name = 'Плотность вероятности',
+            type = FunctionType.ANALYTIC,
+            function = hist,
+            parameters = [
+                DDFDConfig(),
+                SLConfig(
+                    name='M', title='Количество интервалов (M)',
+                    min=1, max=100, step=1, default_value=10,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SWConfig(name='is_density', title='Показывать плотность вероятности?'),
+                SWConfig(),
+            ],
+            main_view = ViewType.HISTOGRAM,
+            view_list = [ViewType.HISTOGRAM]
+        ),
+
+        'acf': FunctionConfig(
+            key = 'acf',
+            name = 'Автокорреляция',
+            type = FunctionType.ANALYTIC,
+            function = acf,
+            parameters = [
+                DDFDConfig(),
+                DDConfig(
+                    name='M', title='Тип коэффициента',
+                    options=[
+                        DDOptionItem(key='autocorrelation', text='Автокорреляция'),
+                        DDOptionItem(key='covariance', text='Ковариация'),
+                    ],
+                    default_value='autocorrelation'
+                ),
+                SWConfig(),
+            ]
+        ),
+
+        'ccf': FunctionConfig(
+            key = 'ccf',
+            name = 'Кросс-корреляция',
+            type = FunctionType.ANALYTIC,
+            function = ccf,
+            parameters = [
+                DDFDConfig(name='first_data', title='Выбор первого набора данных'),
+                DDFDConfig(name='second_data', title='Выбор второго набора данных'),
+                SWConfig(),
+            ]
+        ),
+
+        'fourier': FunctionConfig(
+            key = 'fourier',
+            name = 'Прямое преобразование Фурье',
+            type = FunctionType.ANALYTIC,
+            function = fourier,
+            parameters = [
+                DDFDConfig(),
+                SWConfig(),
+                SWConfig(name='show_calculation_table', title='Показывать расчетную таблицу?'),
+            ]
+        ),
+
+        'spectr_fourier': FunctionConfig(
+            key = 'spectr_fourier',
+            name = 'Амплитудный спектр Фурье',
+            type = FunctionType.ANALYTIC,
+            function = spectr_fourier,
+            parameters = [
+                DDFDConfig(),
+                SLConfig(
+                    name='delta_t', title='Шаг дисеретизации (delta_t)',
+                    min=0.0001, max=0.01, step=0.0001, default_value=0.0005,
+                    value_type=ValueType.FLOAT, round_digits=4
+                ),
+                SLConfig(
+                    name='L_window', title='Длина окна (L_window)',
+                    min=1, max=100, step=1, default_value=10,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+                SWConfig(),
+            ]
+        ),
+
+
     }
-
-# ======================================================================================
-# ======================================================================================
-

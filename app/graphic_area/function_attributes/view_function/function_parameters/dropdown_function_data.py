@@ -13,7 +13,7 @@ class DDFDOptionItem:
 
 @dataclass
 class DDFDConfig:
-    name: str   = None
+    name: str   = 'data'
     title: str  = 'Выбор набора данных'
 
     @property

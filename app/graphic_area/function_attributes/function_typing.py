@@ -137,7 +137,10 @@ class FunctionConfig:
                 raise ValueError(f'Недопустимый тип parameters функции: {type(self.parameters)}')
         if not isinstance(self.main_view, ViewType) or not self.main_view:
             raise ValueError(f'Недопустимый тип main_view функции: {type(self.main_view)}, допустимые значения ViewType')
-        if not isinstance(self.view_list, list) or not all(isinstance(view, ViewType) for view in self.view_list):
+        if (
+            not isinstance(self.view_list, list)
+            or not all(isinstance(view, ViewType) for view in self.view_list)
+        ):
             raise ValueError(f'Недопустимый тип view_list функции: {type(self.view_list)}, допустимые значения ViewType')
 
 
