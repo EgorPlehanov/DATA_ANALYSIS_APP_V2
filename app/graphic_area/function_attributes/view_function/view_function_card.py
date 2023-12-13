@@ -2,7 +2,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ...function import Function
 
+from .result_attributes.dialog_color_picker import DialogColorPicker
 from .result_attributes.dialog_save import DialogSaveResultData
+
+import flet as ft
 from flet import (
     Page, Container, border, colors, Ref, Column, IconButton,
     Row, MainAxisAlignment, CrossAxisAlignment, Markdown, Text,
@@ -11,88 +14,23 @@ from flet import (
 )
 
 
-# class FunctionCardView(Container):
-#     def __init__(self, page: Page, function):
-#         super().__init__()
-#         self.page = page
-#         self.function = function
-#         self.key = self.function.id
-        
-#         self.ref_card_result = Ref[Column]()
-#         self.ref_show_button = Ref[IconButton]()
-#         self.ref_result_data = Ref[Markdown]()
-#         self.ref_card_signature = Ref[Markdown]()
-
-#         self.content = self._create_card_content()
-#         self.on_click = self.function._on_click
-#         # self.ink = True
-        
-#         self.border = border.all(color=colors.BLACK)
-#         self.bgcolor = colors.BLACK54
-#         self.border_radius = 10
-#         self.padding = 10
-
-#         self.save_result_data_dialog = self._create_save_result_data_dialog()
-
-
-# def change_selection(self):
-    #     '''Изменяет выделение карточки'''
-    #     if self.function.selected:
-    #         self.border = border.all(color=colors.BLUE)
-    #         self.bgcolor = colors.BLACK26
-    #     else:
-    #         self.border = border.all(color=colors.BLACK)
-    #         self.bgcolor = colors.BLACK54
-
-
-    # def _create_card_content(self):
-    #     '''Coздает содержимое карточки функции'''
-    #     card_content = Column(
-    #         controls=[
-    #             self._create_card_title(),
-    #             self._create_card_signature(),
-    #             self._create_card_result_title(),
-    #             self._create_card_result_data(),
-    #         ]
-    #     )
-    #     return card_content
-    
-
-    # def change_selection(self):
-    #     '''Изменяет выделение карточки'''
-    #     if self.function.selected:
-    #         self.border = border.all(color=colors.BLUE)
-    #         self.bgcolor = colors.BLACK26
-    #     else:
-    #         self.border = border.all(color=colors.BLACK)
-    #         self.bgcolor = colors.BLACK54
-
-
-    # def _create_card_content(self):
-    #     '''Coздает содержимое карточки функции'''
-    #     card_content = Column(
-    #         controls=[
-    #             self._create_card_title(),
-    #             self._create_card_signature(),
-    #             self._create_card_result_title(),
-    #             self._create_card_result_data(),
-    #         ]
-    #     )
-    #     return card_content
-
-
-
 class FunctionCardView(DragTarget):
     def __init__(self, page: Page, function: "Function"):
         super().__init__()
         self.page = page
         self.function = function
+        self.key = function.id
         
         self.ref_card_conteiner = Ref[Container]()
         self.ref_card_result = Ref[Column]()
         self.ref_result_show_button = Ref[IconButton]()
         self.ref_result_data = Ref[Markdown]()
         self.ref_card_signature = Ref[Markdown]()
+        self.ref_card_title_indicator = Ref[Container]()
+        self.ref_draggable_title_indicator = Ref[Container]()
+
+        self.dialog_color_picker = DialogColorPicker(function.color, function.update_color)
+        self.page.overlay.append(self.dialog_color_picker)
 
         self.dialog_save_result_data = DialogSaveResultData(function)
         self.page.overlay.append(self.dialog_save_result_data)
@@ -120,21 +58,22 @@ class FunctionCardView(DragTarget):
     def drag_accept(self, e: DragTargetAcceptEvent):
         '''Перемещает карточку (срабатывает при подтверждении перетаскивания)'''
         src: Container = self.page.get_control(e.src_id)
-        from_function = src.content.data['function']
+        from_function = src.content.data
         to_function = self.function
+
         if from_function == to_function:
+            self.change_selection()
+            self.update()
             return
         
         self.function._graphic_area.change_card_positions(
             from_function, to_function
         )
-        function_card: FunctionCardView = src.content.data['card']
-        function_card.change_selection()
 
 
     def will_drag_accept(self, e: ControlEvent):
         '''Срабатывает при наведении курсора с перетаскиваемой карточкой на эту карточку'''
-        self.ref_card_conteiner.current.bgcolor = colors.GREEN
+        self.ref_card_conteiner.current.bgcolor = colors.GREEN_500
         self.update()
 
 
@@ -152,10 +91,10 @@ class FunctionCardView(DragTarget):
             content_feedback = Container(
                 bgcolor = colors.BLACK87,
                 width = 300,
-                border = border.all(color=colors.WHITE),
+                border = border.all(color=colors.WHITE54),
                 border_radius = 10,
                 padding = 10,
-                content = Text(self.function.formatted_name, size=20, color=colors.WHITE),
+                content = self._create_title_indicator(self.ref_draggable_title_indicator),
             ),
         )
 
@@ -165,10 +104,7 @@ class FunctionCardView(DragTarget):
         return Container(
             ref = self.ref_card_conteiner,
             key = self.function.id,
-            data = {
-                "card": self,
-                "function": self.function
-            },
+            data = self.function,
             border = border.all(color=colors.BLACK),
             bgcolor = colors.BLACK54,
             border_radius = 10,
@@ -187,52 +123,74 @@ class FunctionCardView(DragTarget):
         
     def _create_card_title(self) -> Row:
         '''Создает заголовок карточки'''
-        return Row([Row(
+        return Row(
             alignment = MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment = CrossAxisAlignment.START,
-            expand = True,
+            width = 300,
             controls=[
-                Row(
-                    vertical_alignment = CrossAxisAlignment.CENTER,
-                    controls=[
-                        Column(
-                            spacing = 0,
-                            horizontal_alignment = CrossAxisAlignment.CENTER,
-                            controls=[
-                                Icon(icons.CIRCLE, color=self.function.color, size=16),
-                                Markdown(
-                                    extension_set = MarkdownExtensionSet.GITHUB_WEB,
-                                    value = f"*id:*\u00A0***{self.function.id}***"
-                                ),
-                            ]
-                        ),
-                        Row(
-                            width = 230,
-                            wrap = True,
-                            controls=[Markdown(
-                                extension_set = MarkdownExtensionSet.GITHUB_WEB,
-                                value = f"#### **{self.function.name}**"
-                            )]
-                        )
-                    ]
-                ),
+                self._create_title_indicator(self.ref_card_title_indicator),
                 IconButton(icons.DELETE, on_click=self.function.delete)
             ]
-        )])
+        )
     
+
+    def _create_title_indicator(self, ref):
+        '''Создает индикатор цвета карточки с номером'''
+        return Row(
+            vertical_alignment = CrossAxisAlignment.CENTER,
+            controls=[
+                Column(
+                    spacing = 0,
+                    horizontal_alignment = CrossAxisAlignment.CENTER,
+                    controls=[
+                        Container(
+                            ref = ref,
+                            height = 16,
+                            width = 16,
+                            border_radius = 30,
+                            bgcolor = self.function.color,
+                            on_click = self.dialog_color_picker.open_dialog,
+                            on_hover = self._on_hover_color_indicator,
+                        ),
+                        Markdown(
+                            extension_set = MarkdownExtensionSet.GITHUB_WEB,
+                            value = f"*id:*\u00A0***{self.function.id}***"
+                        ),
+                    ]
+                ),
+                Row(
+                    width = 230,
+                    wrap = True,
+                    controls=[Markdown(
+                        extension_set = MarkdownExtensionSet.GITHUB_WEB,
+                        value = f"#### **{self.function.name}**"
+                    )]
+                )
+            ]
+        )
+    
+
+    def _on_hover_color_indicator(self, e: ControlEvent):
+        '''Устанавливает тень вокруг индикатора'''
+        if e.data == "true":
+            e.control.shadow = ft.BoxShadow(
+                spread_radius = 15,
+                color = ft.colors.WHITE10,
+                blur_style = ft.ShadowBlurStyle.NORMAL,
+            )
+        else: 
+            e.control.shadow = None
+        e.control.update()
 
 
     def _create_card_signature(self) -> Row:
         '''Создает строку с представление сигнатуры функции'''
-        return Row([Row(
-            expand=True,
-            wrap=True,
-            controls=[Markdown(
-                    ref = self.ref_card_signature,
-                    extension_set = MarkdownExtensionSet.GITHUB_WEB,
-                    value = self._create_function_signature()
-            )]
-        )])
+        return Markdown(
+            ref = self.ref_card_signature,
+            width = 300,
+            extension_set = MarkdownExtensionSet.GITHUB_WEB,
+            value = self._create_function_signature()
+        )
 
 
     def _create_function_signature(self):
@@ -336,4 +294,14 @@ class FunctionCardView(DragTarget):
         self.ref_card_signature.current.value = self._create_function_signature()
         self.ref_result_data.current.value = self._get_result_table()
         self.update()
-    
+
+
+    def update_color(self):
+        '''Обновляет цвет индикатора карточки'''
+        title = self.ref_card_title_indicator.current
+        title.bgcolor = self.function.color
+        title.update()
+
+        draggable = self.ref_draggable_title_indicator.current
+        draggable.bgcolor = self.function.color
+        draggable.update()

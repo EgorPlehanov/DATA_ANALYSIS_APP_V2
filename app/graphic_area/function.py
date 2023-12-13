@@ -8,8 +8,7 @@ from itertools import count
 from copy import deepcopy
 from typing import List
 from pandas import DataFrame
-from random import choice
-from flet import Page, colors, ContainerTapEvent, ControlEvent
+from flet import Page, ContainerTapEvent, ControlEvent
 
 
 class Function:
@@ -112,23 +111,22 @@ class Function:
             function.list_dependent_from.remove(self)
 
     
-
     def _get_random_color(self) -> str:
         '''Возвращает случайный цвет'''
-        colors_variable = set([
-            colors.RED,
-            colors.BLUE,
-            colors.GREEN,
-            colors.YELLOW,
-            colors.ORANGE,
-            colors.PURPLE,
-            colors.PINK,
-            colors.BROWN,
-            colors.LIGHT_BLUE,
-            colors.LIGHT_GREEN,
-            colors.WHITE,
-            colors.GREY,
-            colors.AMBER,
-        ])
-        return choice(list(colors_variable))
+        return Color.random()
+    
+
+    def update_color(self, color: str) -> None:
+        '''Изменяет цвет функции'''
+        self.color = color
+
+        result = self.calculate.result
+        if result is None:
+            return
+        result.color = color
+        if result.extra_data is not None:
+            for extra_data in result.extra_data:
+                extra_data.color = color
+
+        self.view.update_color()
     

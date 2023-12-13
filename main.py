@@ -18,6 +18,6 @@ app(target=main)#, view=AppView.WEB_BROWSER)
 |     ЗАПУСК ПРИЛОЖЕНИЯ     |
 =============================
 venv\Scripts\activate
-flet run .\main.py -d
+flet run main.py -d
 =============================
 '''

@@ -33,4 +33,9 @@ class FunctionView:
     def update_dependencies_parameters(self):
         '''Вызывает методы для обновления параметров зависимых функций'''
         self.parameters_view.update_dependencies_parameters()
-        
+    
+
+    def update_color(self):
+        '''Вызывает методы для обновления цвета'''
+        self.results_view.update_values()
+        self.card_view.update_color()

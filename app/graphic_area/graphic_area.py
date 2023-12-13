@@ -66,7 +66,7 @@ class GraphicArea(Column):
                 controls = [
                     PopupMenuButton(
                         content = Container(
-                            content = Row(controls = [
+                            content = Row([
                                 Text(type, size=16), Icon('add')
                             ]),
                             tooltip = type,
@@ -231,5 +231,7 @@ class GraphicArea(Column):
         # self.list_cards[to_index], self.list_cards[from_index] = self.list_cards[from_index], self.list_cards[to_index]
         # self.list_results[to_index], self.list_results[from_index] = self.list_results[from_index], self.list_results[to_index]
         
+        self._scroll_view_to(self.ref_cards_view.current, from_function.id)
+        self._scroll_view_to(self.ref_result_view.current, from_function.id)
         self.update()
         
