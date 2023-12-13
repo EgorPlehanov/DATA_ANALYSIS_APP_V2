@@ -40,8 +40,9 @@ class DialogAddTab(AlertDialog):
         ]
 
 
-    def open_dialog(self, e: ControlEvent, tab_mode: TabMode) -> None:
+    def open_dialog(self, e: ControlEvent) -> None:
         '''Открывает диалоговое окно для добавления вкладки'''
+        tab_mode: TabMode = e.control.data
         self.title.value = tab_mode.dialog_title
         self.data = tab_mode
         self.open = True

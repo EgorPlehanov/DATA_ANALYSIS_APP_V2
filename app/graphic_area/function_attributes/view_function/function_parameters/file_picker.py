@@ -9,9 +9,9 @@ from typing import List, Any
 from dataclasses import dataclass, field
 from collections import namedtuple
 from flet import (
-    Container, FilePickerFileType, FilePicker, Ref,
+    Container, FilePickerFileType, FilePicker, Ref, padding, 
     Text, Column, Row, icons, MainAxisAlignment, TextButton,
-    FilePickerResultEvent, IconButton, colors, padding
+    FilePickerResultEvent, IconButton, colors, ControlEvent
 )
 
 
@@ -88,7 +88,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
         ])
     
 
-    def _open_file_picker(self, e):
+    def _open_file_picker(self, e: ControlEvent) -> None:
         '''Открывает диалоговое окно выбора файлов'''
         self.file_picker_dialog.pick_files(
             dialog_title        = self.settings.dialog_title,
@@ -115,7 +115,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
             self._update_picked_files()
     
 
-    def _update_picked_files(self):
+    def _update_picked_files(self) -> None:
         '''Обновляет список файлов в редакторе'''
         self.ref_files.current.controls = [
             Container(
@@ -141,7 +141,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
         self.update()
 
 
-    def _delete_file(self, e):
+    def _delete_file(self, e: ControlEvent) -> None:
         '''Удаляет выбранный файл'''
         file_idx = e.control.data
         self.list_picked_files.remove(self.list_picked_files[file_idx])
@@ -149,7 +149,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
         self._update_picked_files()
     
 
-    def _convert_size(self, size):
+    def _convert_size(self, size) -> str:
         '''Конвертирует размер файла в байтах в строку'''
         if not size:
             return "0 байт"

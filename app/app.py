@@ -1,9 +1,10 @@
-from .tabs_modes import TabsModes
+from .tabs_modes import TabsModes, TabMode
 from .dialog_add_tab import DialogAddTab
+from .appbar import ApplicationBar
 
 from flet import (
-    Page, AppBar, Container, Row, FilledButton, Icon,
-    icons, Text, colors, Ref, Tab, IconButton, Tabs, Container
+    Page, Container, Row, Icon, icons, Text, Tab, 
+    ControlEvent, Ref, IconButton, Tabs, Container
 )
 
 
@@ -18,7 +19,7 @@ class DataAnalysisApp(Container):
         self.dialog_add_tab = DialogAddTab(self._add_tab)
         self.page.dialog = self.dialog_add_tab
         
-        self.appbar = self._create_appbar()
+        self.appbar = ApplicationBar(self.tabs_modes, self.dialog_add_tab.open_dialog)
         self.page.appbar = self.appbar
 
         self.ref_tabs_bar = Ref[Tab]()
@@ -26,6 +27,7 @@ class DataAnalysisApp(Container):
 
 
     def _create_content(self) -> Tabs:
+        '''Создает содержимое приложения'''
         return Tabs(
             ref = self.ref_tabs_bar,
             animation_duration = 200,
@@ -33,58 +35,12 @@ class DataAnalysisApp(Container):
         )
     
 
-    def _create_appbar(self) -> AppBar:
-        '''Создает и возвращает экземпляр класса AppBar'''
-        appbar_actions = [
-            Container(
-                content = Row(
-                    controls = [
-                        FilledButton(
-                            icon = "add",
-                            text = mode.name,
-                            data = mode.type,
-                            on_click = self.open_dialog
-                        )
-                        for mode in self.tabs_modes.values()
-                    ],
-                ),
-                margin = 10
-            )
-        ]
-        appbar = AppBar(
-            leading = Icon(icons.ANALYTICS),
-            leading_width = 40,
-            title = Text(value = "Data Analysis App", text_align = "start"),
-            center_title = False,
-            bgcolor = colors.SURFACE_VARIANT,
-            actions = appbar_actions,
-        )
-        return appbar
-    
-
-    def open_dialog(self, e) -> None:
-        tab_mode = self.tabs_modes[e.control.data]
-        self.dialog_add_tab.open_dialog(e, tab_mode)
-
-
-    def _add_tab(self, e) -> None:
+    def _add_tab(self, e: ControlEvent) -> None:
         '''Добавляет вкладку в список вкладок tabs_bar'''
-        mode = self.dialog_add_tab.data
-
-        icon = mode.tab_icon
-        content = mode.tab_content(self, self.page)
-
+        mode: TabMode = self.dialog_add_tab.data
         title = self.dialog_add_tab.content.value
-        if not title:
-            title = 'Вкладка ' + mode.default_tab_title
-        
-        tab_ref = Ref[Tab]()
-        tab = self._create_tab(
-            ref = tab_ref,
-            icon = icon,
-            title = title,
-            content = content
-        )
+
+        tab = self._create_tab(mode, title)
 
         tabs_control: Tabs = self.ref_tabs_bar.current
         tabs_control.tabs.append(tab)
@@ -93,20 +49,23 @@ class DataAnalysisApp(Container):
         self.dialog_add_tab.close_dialog(self)
 
 
-    def _create_tab(self, ref, icon, title, content) -> Tab:
+    def _create_tab(self, tab_mode: TabMode, title: str = '') -> Tab:
         '''Создает вкладку'''
+        ref = Ref[Tab]()
+        if not title:
+            title = 'Вкладка ' + tab_mode.default_tab_title
         return Tab(
-            ref=ref,
-            tab_content=Row([
-                    Icon(name=icon),
+            ref = ref,
+            tab_content = Row([
+                    Icon(name=tab_mode.tab_icon),
                     Text(value=title),
                     IconButton(icon=icons.CLOSE, data=ref, on_click = self._delete_tab),
             ]),
-            content=content
+            content = tab_mode.tab_content(self, self.page)
         )
     
 
-    def _delete_tab(self, e) -> None:
+    def _delete_tab(self, e: ControlEvent) -> None:
         '''Удаляет вкладку'''
         deleted_tab = e.control.data.current
         self.ref_tabs_bar.current.tabs.remove(deleted_tab)

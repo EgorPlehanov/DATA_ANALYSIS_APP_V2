@@ -7,7 +7,7 @@ from ...function_typing import ParameterType
 
 from typing import List
 from dataclasses import dataclass, field
-from flet import Container, Dropdown, dropdown
+from flet import Container, Dropdown, dropdown, ControlEvent
 
 
 @dataclass
@@ -55,7 +55,7 @@ class DropdownEditor(ParamEditorInterface, Container):
         )
     
 
-    def _on_change(self, e) -> None:
+    def _on_change(self, e: ControlEvent) -> None:
         '''Обновляет значение параметра в экземпляре класса Function и карточке функции'''
         self.function.calculate.set_parameter_value(self._name, e.control.value)
         self.update()

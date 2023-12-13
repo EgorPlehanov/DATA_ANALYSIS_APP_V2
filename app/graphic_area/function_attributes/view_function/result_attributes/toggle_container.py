@@ -1,7 +1,7 @@
 from typing import Any
 from flet import (
-    Row, colors, border, BorderSide, Container,animation, Markdown,
-    AnimationCurve, Ref, IconButton, Icon, CrossAxisAlignment, icons
+    Row, colors, border, BorderSide, Container,animation, Markdown, icons,
+    AnimationCurve, Ref, IconButton, Icon, CrossAxisAlignment, ControlEvent
 )
 
 
@@ -66,7 +66,7 @@ class ResultToggleContainer(Container):
         return button
             
 
-    def _change_control_visible(self, e) -> None:
+    def _change_control_visible(self, e: ControlEvent) -> None:
         '''Изменяет видимость блока при нажатии на кнопку'''
         button: IconButton = e.control
         control = self.ref_control.current

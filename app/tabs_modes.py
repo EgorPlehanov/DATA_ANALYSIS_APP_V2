@@ -22,7 +22,6 @@ class TabsModes:
             mode.type: mode
             for mode in TabsModes.modes
         }
-    
 
     modes = [
         TabMode(

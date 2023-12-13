@@ -6,7 +6,9 @@ from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ParameterType
 
 from dataclasses import dataclass
-from flet import Container, Row, Text, Switch, LabelPosition, MainAxisAlignment
+from flet import (
+    Container, Row, Text, Switch, LabelPosition, MainAxisAlignment, ControlEvent
+)
 
 
 @dataclass
@@ -49,7 +51,7 @@ class SwitchEditor(ParamEditorInterface, Container):
         )
     
     
-    def _on_change(self, e) -> None:
+    def _on_change(self, e: ControlEvent) -> None:
         '''Обновляет значение параметра переключателя в экземпляре класса Function'''
         value = e.control.value
         self.function.calculate.set_parameter_value(self.name, value)

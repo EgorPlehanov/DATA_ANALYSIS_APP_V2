@@ -133,12 +133,12 @@ class FunctionCardView(DragTarget):
 
 
     def will_drag_accept(self, e: ControlEvent):
-        '''Срабатывает при наведении на целевую карточку'''
+        '''Срабатывает при наведении курсора с перетаскиваемой карточкой на эту карточку'''
         self.ref_card_conteiner.current.bgcolor = colors.GREEN
         self.update()
 
 
-    def drag_leave(self, e):
+    def drag_leave(self, e: ControlEvent):
         '''Срабатывает при отмене перетаскивания карточки'''
         self.change_selection()
         self.update()
@@ -321,7 +321,7 @@ class FunctionCardView(DragTarget):
         return markdown_table
     
 
-    def _change_result_visible(self, e):
+    def _change_result_visible(self, e: ControlEvent) -> None:
         '''Изменяет видимость результата'''
         self.ref_card_result.current.visible = not self.ref_card_result.current.visible
         if self.ref_card_result.current.visible:

@@ -174,7 +174,7 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
         )
     
 
-    def on_datatable_select_changed(self, e) -> None:
+    def on_datatable_select_changed(self, e: ControlEvent) -> None:
         '''Изменяет выделение нажатой строки в таблице'''
         e.control.selected = not e.control.selected
         e.control.update()
@@ -187,7 +187,7 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
         button.update()
 
 
-    def add_datatable_row(self, e) -> None:
+    def add_datatable_row(self, e: ControlEvent) -> None:
         '''Добавляет строку в таблицу'''
         table = self.ref_data_table.current
         table.rows.extend(self._create_datatable_rows(
@@ -210,7 +210,7 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
         self._on_change(e)
 
 
-    def _on_change(self, e) -> None:
+    def _on_change(self, e: ControlEvent) -> None:
         '''Обновляет значение параметра при обновлении значения ячейки таблицы'''
         rows = self.ref_data_table.current.rows
         values = {

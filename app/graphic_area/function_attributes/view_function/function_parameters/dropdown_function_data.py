@@ -3,11 +3,11 @@ if TYPE_CHECKING:
     from ....function import Function
 
 from .parameter_editor_interface import ParamEditorInterface
-from ...function_typing import ResultData, ParameterType
+from ...function_typing import ParameterType
 
 from typing import List, Any
-from dataclasses import dataclass, field
-from flet import Container, Dropdown, dropdown, Ref
+from dataclasses import dataclass
+from flet import Container, Dropdown, dropdown, Ref, ControlEvent
 
 
 @dataclass
@@ -90,7 +90,7 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
         ]
 
 
-    def _on_change(self, e) -> None:
+    def _on_change(self, e: ControlEvent) -> None:
         '''Обновляет значение параметра в экземпляре класса Function и карточке функции'''
         key = e.control.value
         new_function = next((option.function for option in self.options if option.function_name == key), None)

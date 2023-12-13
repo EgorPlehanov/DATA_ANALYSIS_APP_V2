@@ -5,7 +5,7 @@ from .function_attributes.function_typing import FunctionConfig
 from flet_core.scrollable_control import ScrollableControl
 from flet import (
     Row, Page, Ref, Container, Column, PopupMenuButton, PopupMenuItem,
-    Text, Icon, colors, alignment, ScrollMode, border, padding, animation
+    Text, Icon, colors, alignment, ScrollMode, ControlEvent, animation
 )
 from typing import Dict, List
 
@@ -147,7 +147,7 @@ class GraphicArea(Column):
         )
     
 
-    def add_function(self, e) -> None:
+    def add_function(self, e: ControlEvent) -> None:
         '''Добавляет функцию в список'''
         key = e.control.data
         if not key:
@@ -155,10 +155,10 @@ class GraphicArea(Column):
         
         function = Function(self.page, self, key)
         
+        self.list_functions.append(function)
         self.list_cards.append(function.view.card_view)
         self.list_parameters.append(function.view.parameters_view)
         self.list_results.append(function.view.results_view)
-        self.list_functions.append(function)
         self.update_functions_dependencies_parameters(function)
         self.change_selected_function(function)
         self.update()
@@ -218,6 +218,8 @@ class GraphicArea(Column):
         '''Перемещает карточку функций в списке карточек функции и в списке результатов'''
         from_index = self.list_functions.index(from_function)
         to_index = self.list_functions.index(to_function)
+
+        self.list_cards[to_index].change_selection()
         
         # Перемещает элемент с индексом from_index в положениие to_index
         self.list_functions.insert(to_index, self.list_functions.pop(from_index))

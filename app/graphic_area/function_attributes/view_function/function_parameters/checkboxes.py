@@ -7,7 +7,7 @@ from ...function_typing import ParameterType
 
 from typing import List
 from dataclasses import dataclass, field
-from flet import Container, Ref, Checkbox, Column
+from flet import Container, ControlEvent, Checkbox, Column
 
 
 @dataclass
@@ -61,7 +61,7 @@ class CheckboxesEditor(ParamEditorInterface, Container):
         )
     
 
-    def _on_change(self, e) -> None:
+    def _on_change(self, e: ControlEvent) -> None:
         '''
         Обновляет значение параметр в экземпляре класса Function
         Изменяет список выбранных чекбоксов

@@ -4,12 +4,12 @@ if TYPE_CHECKING:
 
 from .function_attributes import *
 
-from flet import Page, colors
 from itertools import count
 from copy import deepcopy
 from typing import List
 from pandas import DataFrame
 from random import choice
+from flet import Page, colors, ContainerTapEvent, ControlEvent
 
 
 class Function:
@@ -62,13 +62,13 @@ class Function:
         return None
 
 
-    def delete(self, e) -> None:
+    def delete(self, e: ControlEvent) -> None:
         '''Вызывает метод удаления функции'''
         self.clear_dependencies()
         self._graphic_area.delete_function(self)
 
 
-    def _on_click(self, e) -> None:
+    def _on_click(self, e: ContainerTapEvent) -> None:
         '''Вызывает метод изменения выделения функции'''
         self._graphic_area.change_selected_function(self)
 

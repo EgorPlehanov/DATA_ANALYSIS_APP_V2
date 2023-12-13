@@ -77,7 +77,7 @@ class FunctionLibrary:
 
         'test': FunctionConfig(
             key = "test",
-            name = "Тест",
+            name = "ТЕСТ",
             type = FunctionType.DATA,
             function = lambda cb, ddfd, dd, fp, sl, sw, tfdt, tf: FunctionResult(None, None, None),
             parameters = [
@@ -569,7 +569,12 @@ class FunctionLibrary:
                 ),
                 TFDTConfig(
                     name='M', title='Кол-во осреднений (M)',
-                    columns=[TFDTColumn(name='M', tooltip='Кол-во осреднений шума', unit='шт', value_type=ValueType.INT)],
+                    columns=[
+                        TFDTColumn(
+                            name='M', tooltip='Кол-во осреднений шума',
+                            unit='шт', value_type=ValueType.INT
+                        )
+                    ],
                     default_value=[
                         TFDTItem(column_name='M', row_index=0, value=1),
                         TFDTItem(column_name='M', row_index=1, value=10),

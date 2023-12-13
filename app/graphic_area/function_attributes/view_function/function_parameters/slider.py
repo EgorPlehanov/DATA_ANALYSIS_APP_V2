@@ -8,7 +8,8 @@ from .parameters_utils import validate_textfield_value
 
 from dataclasses import dataclass
 from flet import (
-    Container, TextField, Slider, Ref, Column, Row, Text, InputBorder, TextThemeStyle
+    Container, TextField, Slider, Ref, Column, Row,
+    Text, InputBorder, TextThemeStyle, ControlEvent
 )
 
 
@@ -109,7 +110,7 @@ class SliderEditor(ParamEditorInterface, Container):
         )
     
     
-    def _on_change(self, e) -> None:
+    def _on_change(self, e: ControlEvent) -> None:
         '''Обнавляет значение параметра и значение текстового поля'''
         if isinstance(e.control, TextField):
             param_editor = self.ref_slider.current

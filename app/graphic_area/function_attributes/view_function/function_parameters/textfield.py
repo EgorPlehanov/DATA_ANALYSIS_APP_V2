@@ -7,7 +7,7 @@ from ...function_typing import ValueType, ParameterType
 from .parameters_utils import validate_textfield_value
 
 from dataclasses import dataclass
-from flet import Container, TextField, TextStyle, TapEvent
+from flet import Container, TextField, TextStyle, ControlEvent
 
 
 @dataclass
@@ -62,7 +62,7 @@ class TextFieldEditor(ParamEditorInterface, Container):
         )
     
 
-    def _on_change(self, e) -> None:
+    def _on_change(self, e: ControlEvent) -> None:
         '''Обновляет значение параметра текстового поля в экземпляре класса Function'''
         if e.control.error_text:
             return
