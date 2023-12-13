@@ -116,17 +116,24 @@ class Function:
         return Color.random()
     
 
-    def update_color(self, color: str) -> None:
+    def update_color(self, color: str = None) -> None:
         '''Изменяет цвет функции'''
-        self.color = color
+        if color is not None:
+            self.color = color
 
-        result = self.calculate.result
-        if result is None:
-            return
-        result.color = color
-        if result.extra_data is not None:
-            for extra_data in result.extra_data:
-                extra_data.color = color
+            result = self.calculate.result
+            if result is None:
+                return
+            result.color = color
+            if result.extra_data is not None:
+                for extra_data in result.extra_data:
+                    extra_data.color = color
 
         self.view.update_color()
+
+        # Обновляем зависимые функции чтобы в исходных данных
+        # в результатах был правильный цвет
+        if len(self.list_dependent_to):
+            for function in self.list_dependent_to:
+                function.recalculate_result()
     
