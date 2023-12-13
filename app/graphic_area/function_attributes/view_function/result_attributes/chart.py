@@ -89,3 +89,10 @@ class ResultChart(Row):
                 dash_pattern = [10, 5],
             )
         )]
+    
+
+    def update_values(self) -> None:
+        '''Обновляет график'''
+        # TODO: добавить логику обновления
+        pass
+    

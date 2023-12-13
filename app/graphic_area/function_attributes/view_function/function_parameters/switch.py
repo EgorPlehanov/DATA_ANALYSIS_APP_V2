@@ -1,3 +1,7 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ....function import Function
+
 from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ParameterType
 
@@ -17,7 +21,7 @@ class SWConfig:
 
 
 class SwitchEditor(ParamEditorInterface, Container):
-    def __init__(self, function, config: SWConfig = SWConfig()):
+    def __init__(self, function: 'Function', config: SWConfig = SWConfig()):
         self._type = ParameterType.SWITCH
         self.function = function
         

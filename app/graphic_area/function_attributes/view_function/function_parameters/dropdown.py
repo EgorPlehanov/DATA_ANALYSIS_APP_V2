@@ -1,3 +1,7 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ....function import Function
+
 from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ParameterType
 
@@ -24,7 +28,7 @@ class DDConfig:
 
 
 class DropdownEditor(ParamEditorInterface, Container):
-    def __init__(self, function, config: DDConfig = DDConfig()):
+    def __init__(self, function: 'Function', config: DDConfig = DDConfig()):
         self._type = ParameterType.DROPDOWN
         self.function = function
         

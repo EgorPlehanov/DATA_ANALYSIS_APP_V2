@@ -76,3 +76,9 @@ class ResultHistogram(Row):
             )
             for x_value, y_value in zip(self.data.iloc[:, 0], self.data.iloc[:, 1])
         ]
+    
+
+    def update_values(self) -> None:
+        '''Обновляет гистограмму'''
+        # TODO: добавить логику обновления
+        pass

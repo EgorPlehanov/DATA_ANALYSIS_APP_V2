@@ -212,3 +212,22 @@ class GraphicArea(Column):
         for function in self.list_functions:
             if function != new_function and function.is_requires_dropdown_update:
                 function.update_dependencies_parameters()
+
+
+    def change_card_positions(self, from_function: Function, to_function: Function) -> None:
+        '''Перемещает карточку функций в списке карточек функции и в списке результатов'''
+        from_index = self.list_functions.index(from_function)
+        to_index = self.list_functions.index(to_function)
+        
+        # Перемещает элемент с индексом from_index в положениие to_index
+        self.list_functions.insert(to_index, self.list_functions.pop(from_index))
+        self.list_cards.insert(to_index, self.list_cards.pop(from_index))
+        self.list_results.insert(to_index, self.list_results.pop(from_index))
+
+        # Меняет местами 2 элемента в списке 
+        # self.list_functions[to_index], self.list_functions[from_index] = self.list_functions[from_index], self.list_functions[to_index]
+        # self.list_cards[to_index], self.list_cards[from_index] = self.list_cards[from_index], self.list_cards[to_index]
+        # self.list_results[to_index], self.list_results[from_index] = self.list_results[from_index], self.list_results[to_index]
+        
+        self.update()
+        

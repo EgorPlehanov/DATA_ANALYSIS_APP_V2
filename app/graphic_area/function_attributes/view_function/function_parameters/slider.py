@@ -1,3 +1,7 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ....function import Function
+
 from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ValueType, ParameterType
 from .parameters_utils import validate_textfield_value
@@ -25,7 +29,7 @@ class SLConfig:
 
 
 class SliderEditor(ParamEditorInterface, Container):
-    def __init__(self, function, config: SLConfig = SLConfig()):
+    def __init__(self, function: 'Function', config: SLConfig = SLConfig()):
         self._type = ParameterType.SLIDER
         self.function = function
 
@@ -49,41 +53,38 @@ class SliderEditor(ParamEditorInterface, Container):
     
     def _create_content(self) -> Column:
         '''Создает модификатор параметра типа Slider'''
-        editor_slider = Column(
+        return Column(
             controls=[
                 self._create_editor_part_textfield(),
                 self._create_editor_part_slider()
             ],
             spacing = 0
         )
-        return editor_slider
     
 
     def _create_editor_part_textfield(self) -> Row:
         '''Создает часть модификатора параметра с текстовым полем'''
-        return Row(
-            controls=[
-                Text(f'{self.title if self.title else self._name}:'),
-                TextField(
-                    ref = self.ref_textfield,
-                    value = self.default_value,
-                    tooltip = f"Задайте значение от {self.min} до {self.max} (шаг {self.step})",
-                    hint_text = f"Задайте {self._name}",
-                    expand = True,
-                    dense = True,
-                    border = InputBorder.UNDERLINE,
-                    data = {
-                        'round_digits': self.round_digits,
-                        'text_type': self.value_type,
-                        'min': self.min,
-                        'max': self.max,
-                    },
-                    on_change = validate_textfield_value,
-                    on_blur = self._on_change,
-                    on_submit = self._on_change,
-                )
-            ],
-        )
+        return Row([
+            Text(f'{self.title if self.title else self._name}:'),
+            TextField(
+                ref = self.ref_textfield,
+                value = self.default_value,
+                tooltip = f"Задайте значение от {self.min} до {self.max} (шаг {self.step})",
+                hint_text = f"Задайте {self._name}",
+                expand = True,
+                dense = True,
+                border = InputBorder.UNDERLINE,
+                data = {
+                    'round_digits': self.round_digits,
+                    'text_type': self.value_type,
+                    'min': self.min,
+                    'max': self.max,
+                },
+                on_change = validate_textfield_value,
+                on_blur = self._on_change,
+                on_submit = self._on_change,
+            )
+        ])
     
 
     def _create_editor_part_slider(self) -> Row:

@@ -1,3 +1,7 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ...function import Function
+
 from ..function_typing import ResultData, ViewType
 from .result_attributes import *
 
@@ -18,7 +22,7 @@ class ResultItem:
 
 
 class FunctionResultView(Container):
-    def __init__(self, function):
+    def __init__(self, function: "Function"):
         super().__init__()
         self.function = function
         self.key = self.function.id
@@ -42,6 +46,7 @@ class FunctionResultView(Container):
 
 
     def create_content(self) -> Column | Row:
+        '''Создает содержимое'''
         if (
             self.result_data.main_data is None
             and self.result_data.extra_data is None

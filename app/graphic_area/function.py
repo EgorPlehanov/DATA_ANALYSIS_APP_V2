@@ -1,3 +1,7 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .graphic_area import GraphicArea
+
 from .function_attributes import *
 
 from flet import Page, colors
@@ -11,7 +15,7 @@ from random import choice
 class Function:
     id_counter = count()
 
-    def __init__(self, page: Page, graphic_area, key):
+    def __init__(self, page: Page, graphic_area: "GraphicArea", key: str):
         self.page = page
         self._graphic_area = graphic_area
 
@@ -32,8 +36,8 @@ class Function:
 
         self.selected: bool = False                     # выбрана ли функция
         self.is_requires_dropdown_update: bool = self._is_update_required()   # требует ли обновление выпадающего списка функций
-        self.list_dependent_from: List[Function] = []     # функции от которых зависит данная функция
-        self.list_dependent_to: List[Function] = []    # функции которые зависят от данной
+        self.list_dependent_from: List[Function] = []   # функции от которых зависит данная функция
+        self.list_dependent_to: List[Function] = []     # функции которые зависят от данной
     
 
     def _create_formatted_name(self) -> str:

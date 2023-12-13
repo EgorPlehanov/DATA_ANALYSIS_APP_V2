@@ -82,3 +82,9 @@ class ResultTableHorizontal(Row):
     #         value = self.transposed_data.to_markdown(),
     #         extension_set = MarkdownExtensionSet.GITHUB_WEB,
     #     )]
+    
+
+    def update_values(self) -> None:
+        '''Обновляет таблицу'''
+        # TODO: добавить логику обновления
+        pass

@@ -62,8 +62,12 @@ def data_download(
             # result_list.append()
             return FunctionResult(error_message=f"Файл '{file_name}' пуст")
             continue
-
-        # result_list.append()
+        
+        if len(data.columns) > 2:
+            # result_list.append()
+            return FunctionResult(error_message=f"Файл '{file_name}' содержит больше двух столбцов")
+            continue
+        
         return FunctionResult(main_data=data)
 
     # return FunctionResult(

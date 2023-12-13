@@ -68,7 +68,7 @@ class ResultToggleContainer(Container):
 
     def _change_control_visible(self, e) -> None:
         '''Изменяет видимость блока при нажатии на кнопку'''
-        button = e.control
+        button: IconButton = e.control
         control = self.ref_control.current
 
         control.visible = not control.visible

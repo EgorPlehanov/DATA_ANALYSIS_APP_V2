@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any
-from flet import border, colors, margin
+from flet import border, colors
 
 
 class ParamEditorInterface(ABC):

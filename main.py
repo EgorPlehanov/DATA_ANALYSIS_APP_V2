@@ -1,4 +1,4 @@
-from data_analysis_app import DataAnalysisApp
+from app import DataAnalysisApp
 
 from flet import Page, app, AppView
 
@@ -18,6 +18,6 @@ app(target=main)#, view=AppView.WEB_BROWSER)
 |     ЗАПУСК ПРИЛОЖЕНИЯ     |
 =============================
 venv\Scripts\activate
-flet run .\app\main.py -d
+flet run .\main.py -d
 =============================
 '''

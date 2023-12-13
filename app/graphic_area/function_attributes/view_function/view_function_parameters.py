@@ -1,3 +1,7 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ...function import Function
+
 from ..function_typing import ParameterType
 from .function_parameters import *
 
@@ -7,7 +11,7 @@ from flet import (
 
 
 class FunctionParametersView(Container):
-    def __init__(self, function):
+    def __init__(self, function: "Function"):
         super().__init__()
         self.function = function
 

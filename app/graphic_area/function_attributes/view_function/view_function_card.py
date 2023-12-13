@@ -1,60 +1,190 @@
-import os
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ...function import Function
+
+from .result_attributes.dialog_save import DialogSaveResultData
 from flet import (
     Page, Container, border, colors, Ref, Column, IconButton,
-    Row, MainAxisAlignment, CrossAxisAlignment, Markdown,
-    MarkdownExtensionSet, icons, animation, AnimationCurve,
-    Text, Icon, FilePicker, FilePickerResultEvent, FilePickerFileType,
-    Stack
+    Row, MainAxisAlignment, CrossAxisAlignment, Markdown, Text,
+    MarkdownExtensionSet, icons, animation, AnimationCurve, Icon,
+    DragTarget, Draggable, DragTargetAcceptEvent, ControlEvent
 )
 
 
-class FunctionCardView(Container):
-    def __init__(self, page: Page, function):
+# class FunctionCardView(Container):
+#     def __init__(self, page: Page, function):
+#         super().__init__()
+#         self.page = page
+#         self.function = function
+#         self.key = self.function.id
+        
+#         self.ref_card_result = Ref[Column]()
+#         self.ref_show_button = Ref[IconButton]()
+#         self.ref_result_data = Ref[Markdown]()
+#         self.ref_card_signature = Ref[Markdown]()
+
+#         self.content = self._create_card_content()
+#         self.on_click = self.function._on_click
+#         # self.ink = True
+        
+#         self.border = border.all(color=colors.BLACK)
+#         self.bgcolor = colors.BLACK54
+#         self.border_radius = 10
+#         self.padding = 10
+
+#         self.save_result_data_dialog = self._create_save_result_data_dialog()
+
+
+# def change_selection(self):
+    #     '''Изменяет выделение карточки'''
+    #     if self.function.selected:
+    #         self.border = border.all(color=colors.BLUE)
+    #         self.bgcolor = colors.BLACK26
+    #     else:
+    #         self.border = border.all(color=colors.BLACK)
+    #         self.bgcolor = colors.BLACK54
+
+
+    # def _create_card_content(self):
+    #     '''Coздает содержимое карточки функции'''
+    #     card_content = Column(
+    #         controls=[
+    #             self._create_card_title(),
+    #             self._create_card_signature(),
+    #             self._create_card_result_title(),
+    #             self._create_card_result_data(),
+    #         ]
+    #     )
+    #     return card_content
+    
+
+    # def change_selection(self):
+    #     '''Изменяет выделение карточки'''
+    #     if self.function.selected:
+    #         self.border = border.all(color=colors.BLUE)
+    #         self.bgcolor = colors.BLACK26
+    #     else:
+    #         self.border = border.all(color=colors.BLACK)
+    #         self.bgcolor = colors.BLACK54
+
+
+    # def _create_card_content(self):
+    #     '''Coздает содержимое карточки функции'''
+    #     card_content = Column(
+    #         controls=[
+    #             self._create_card_title(),
+    #             self._create_card_signature(),
+    #             self._create_card_result_title(),
+    #             self._create_card_result_data(),
+    #         ]
+    #     )
+    #     return card_content
+
+
+
+class FunctionCardView(DragTarget):
+    def __init__(self, page: Page, function: "Function"):
         super().__init__()
         self.page = page
         self.function = function
-        self.key = self.function.id
         
+        self.ref_card_conteiner = Ref[Container]()
         self.ref_card_result = Ref[Column]()
-        self.ref_show_button = Ref[IconButton]()
+        self.ref_result_show_button = Ref[IconButton]()
         self.ref_result_data = Ref[Markdown]()
         self.ref_card_signature = Ref[Markdown]()
 
-        self.content = self._create_card_content()
-        self.on_click = self.function._on_click
-        
-        self.border = border.all(color=colors.BLACK)
-        self.bgcolor = colors.BLACK54
-        self.border_radius = 10
-        self.padding = 10
+        self.dialog_save_result_data = DialogSaveResultData(function)
+        self.page.overlay.append(self.dialog_save_result_data)
+        self.page.update()
 
-        self.save_result_data_dialog = self._create_save_result_data_dialog()
-        
+        self.group = "card"
+        self.content = self._create_content()
 
-    
+        self.on_will_accept = self.will_drag_accept
+        self.on_accept = self.drag_accept
+        self.on_leave = self.drag_leave
+
+
     def change_selection(self):
         '''Изменяет выделение карточки'''
+        control = self.ref_card_conteiner.current
         if self.function.selected:
-            self.border = border.all(color=colors.BLUE)
-            self.bgcolor = colors.BLACK26
+            control.border = border.all(color=colors.BLUE)
+            control.bgcolor = colors.BLACK26
         else:
-            self.border = border.all(color=colors.BLACK)
-            self.bgcolor = colors.BLACK54
+            control.border = border.all(color=colors.BLACK)
+            control.bgcolor = colors.BLACK54
 
 
-    def _create_card_content(self):
-        '''Coздает содержимое карточки функции'''
-        card_content = Column(
-            controls=[
-                self._create_card_title(),
-                self._create_card_signature(),
-                self._create_card_result_title(),
-                self._create_card_result_data(),
-            ]
+    def drag_accept(self, e: DragTargetAcceptEvent):
+        '''Перемещает карточку (срабатывает при подтверждении перетаскивания)'''
+        src: Container = self.page.get_control(e.src_id)
+        from_function = src.content.data['function']
+        to_function = self.function
+        if from_function == to_function:
+            return
+        
+        self.function._graphic_area.change_card_positions(
+            from_function, to_function
         )
-        return card_content
-    
+        function_card: FunctionCardView = src.content.data['card']
+        function_card.change_selection()
 
+
+    def will_drag_accept(self, e: ControlEvent):
+        '''Срабатывает при наведении на целевую карточку'''
+        self.ref_card_conteiner.current.bgcolor = colors.GREEN
+        self.update()
+
+
+    def drag_leave(self, e):
+        '''Срабатывает при отмене перетаскивания карточки'''
+        self.change_selection()
+        self.update()
+
+
+    def _create_content(self) -> Draggable:
+        '''Coздает содержимое карточки функции'''
+        return Draggable(
+            group = self.group,
+            content = self._create_draggable_content(),
+            content_feedback = Container(
+                bgcolor = colors.BLACK87,
+                width = 300,
+                border = border.all(color=colors.WHITE),
+                border_radius = 10,
+                padding = 10,
+                content = Text(self.function.formatted_name, size=20, color=colors.WHITE),
+            ),
+        )
+
+
+    def _create_draggable_content(self) -> Container:
+        '''Создает содержимое перетаскиваемого элемента'''
+        return Container(
+            ref = self.ref_card_conteiner,
+            key = self.function.id,
+            data = {
+                "card": self,
+                "function": self.function
+            },
+            border = border.all(color=colors.BLACK),
+            bgcolor = colors.BLACK54,
+            border_radius = 10,
+            padding = 10,
+            on_click = self.function._on_click,
+            content = Column(
+                controls = [
+                    self._create_card_title(),
+                    self._create_card_signature(),
+                    self._create_card_result_title(),
+                    self._create_card_result_data(),
+                ]
+            )
+        )
+        
+        
     def _create_card_title(self) -> Row:
         '''Создает заголовок карточки'''
         return Row([Row(
@@ -121,19 +251,17 @@ class FunctionCardView(Container):
             alignment=MainAxisAlignment.SPACE_BETWEEN,
             controls=[
                 Markdown("#### Результат:"),
-                Row(
-                    controls=[
-                        IconButton(
-                            icon=icons.SAVE,
-                            on_click=self._open_dialog_save_to_file
-                        ),
-                        IconButton(
-                            icon=icons.KEYBOARD_ARROW_DOWN,
-                            ref=self.ref_show_button,
-                            on_click=self._change_result_visible
-                        ),
-                    ]
-                )
+                Row([
+                    IconButton(
+                        icon=icons.SAVE,
+                        on_click=self.dialog_save_result_data.open_dialog
+                    ),
+                    IconButton(
+                        icon=icons.KEYBOARD_ARROW_DOWN,
+                        ref=self.ref_result_show_button,
+                        on_click=self._change_result_visible
+                    ),
+                ])
             ]
         )
     
@@ -197,63 +325,10 @@ class FunctionCardView(Container):
         '''Изменяет видимость результата'''
         self.ref_card_result.current.visible = not self.ref_card_result.current.visible
         if self.ref_card_result.current.visible:
-            self.ref_show_button.current.icon = icons.KEYBOARD_ARROW_UP
+            self.ref_result_show_button.current.icon = icons.KEYBOARD_ARROW_UP
         else:
-            self.ref_show_button.current.icon = icons.KEYBOARD_ARROW_DOWN
+            self.ref_result_show_button.current.icon = icons.KEYBOARD_ARROW_DOWN
         self.update()
-    
-
-    def _create_save_result_data_dialog(self) -> FilePicker:
-        '''Создает диалоговое окно для сохранения результата'''
-        save_result_data_dialog = FilePicker(
-            on_result=self._save_result_data,
-        )
-        self.page.overlay.append(save_result_data_dialog)
-        self.page.update()
-        return save_result_data_dialog
-    
-
-    def _save_result_data(self, e: FilePickerResultEvent) -> None:
-        '''Сохраняет результаты в файл'''
-        path = e.path
-        if not path:
-            return
-        file_format = os.path.splitext(path)[-1][1:].lower()
-
-        if file_format not in ['csv', 'json']:
-            path = f'{path}.csv'
-            file_format = 'csv'
-
-        try:
-            with open(path, 'w') as file:
-                data_to_save = self.function.get_result_main_data()
-                match file_format:
-                    case 'csv':
-                        data_to_save.to_csv(file, index=False)
-                    case 'json':
-                        data_to_save.to_json(file, orient='records')
-                    case _:
-                        raise Exception(f'Неизвестный формат файла: {file_format}')
-                        
-        except Exception as ex:
-            print(f'Ошибка при сохранении: {ex}')
-    
-
-    def _open_dialog_save_to_file(self, e) -> None:
-        '''Открывает диалоговое окно cохранения результата'''
-        parameters_text = "; ".join([
-            f"{param}={value}".replace(': ', '-')
-            for param, value in self.function.calculate.get_current_parameters_formatted().items()
-            if 'show' not in param
-        ])
-        parameters_text = (parameters_text[:100] + '...') if len(parameters_text) > 100 else parameters_text
-
-        self.save_result_data_dialog.save_file(
-            dialog_title = f"Сохрание результата функции {self.function.formatted_name}",
-            file_name = f"{self.function.name}({parameters_text}).csv",
-            file_type = FilePickerFileType.CUSTOM,
-            allowed_extensions = ['csv', 'json'],
-        )
 
 
     def update_values(self) -> None:

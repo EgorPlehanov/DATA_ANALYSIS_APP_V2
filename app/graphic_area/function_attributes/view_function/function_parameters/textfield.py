@@ -1,3 +1,7 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ....function import Function
+
 from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ValueType, ParameterType
 from .parameters_utils import validate_textfield_value
@@ -23,7 +27,7 @@ class TFConfig:
 
 
 class TextFieldEditor(ParamEditorInterface, Container):
-    def __init__(self, function, config: TFConfig = TFConfig()):
+    def __init__(self, function: 'Function', config: TFConfig = TFConfig()):
         self._type = ParameterType.TEXTFIELD
         self.function = function
 

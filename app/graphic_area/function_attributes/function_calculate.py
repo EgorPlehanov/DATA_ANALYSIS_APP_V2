@@ -1,3 +1,7 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..function import Function
+
 from .function_typing import ParameterType, ResultData, ViewType, FunctionResult
 
 from copy import deepcopy
@@ -7,7 +11,7 @@ from collections import defaultdict
 
 
 class FunctionCalculate:
-    def __init__(self, function):
+    def __init__(self, function: "Function"):
         self.function = function
 
         self.calculate_function = self.function.config.function
@@ -174,7 +178,7 @@ class FunctionCalculate:
                 data.color = self.function.color
 
 
-    def _get_result_data_type(self, initial_data: list[ResultData]):
+    def _get_result_data_type(self, initial_data: list[ResultData]) -> str:
         '''Возвращает тип результата функции'''
         result_data_type = self.function.calculate_function_name
         initial_data_types = [data.type for data in initial_data]

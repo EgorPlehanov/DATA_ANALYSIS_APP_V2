@@ -1,10 +1,14 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..function import Function
+
 from .view_function import *
 
 from flet import Page
 
 
 class FunctionView:
-    def __init__(self, page: Page, function):
+    def __init__(self, page: Page, function: "Function"):
         self.page = page
         self.function = function
 

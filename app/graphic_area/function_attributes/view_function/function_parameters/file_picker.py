@@ -1,3 +1,7 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ....function import Function
+
 from .parameter_editor_interface import ParamEditorInterface
 from ...function_typing import ParameterType
 
@@ -6,8 +10,8 @@ from dataclasses import dataclass, field
 from collections import namedtuple
 from flet import (
     Container, FilePickerFileType, FilePicker, Ref,
-    Text, Column, ElevatedButton, Row, icons, MainAxisAlignment,
-    FilePickerResultEvent, IconButton, colors, padding, TextButton
+    Text, Column, Row, icons, MainAxisAlignment, TextButton,
+    FilePickerResultEvent, IconButton, colors, padding
 )
 
 
@@ -37,7 +41,7 @@ class FPConfig:
 class FilePickerEditor(ParamEditorInterface, Container):
     FileData = namedtuple('FileData', ['name', 'path', 'size'])
 
-    def __init__(self, function, config: FPConfig = FPConfig()):
+    def __init__(self, function: 'Function', config: FPConfig = FPConfig()):
         self._type = ParameterType.FILE_PICKER
         self.function = function
 
@@ -80,7 +84,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
                     )
                 ],
             ),
-            Row([Column(ref = self.ref_files)])
+            Row([Column(ref=self.ref_files)])
         ])
     
 
@@ -137,7 +141,6 @@ class FilePickerEditor(ParamEditorInterface, Container):
         self.update()
 
 
-    
     def _delete_file(self, e):
         '''Удаляет выбранный файл'''
         file_idx = e.control.data

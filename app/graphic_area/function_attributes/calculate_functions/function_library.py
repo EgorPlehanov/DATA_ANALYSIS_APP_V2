@@ -656,6 +656,106 @@ class FunctionLibrary:
             ]
         ),
 
+        'lpf': FunctionConfig(
+            key = 'lpf',
+            name = 'Фильтр Низких Частот (ФНЧ)',
+            type = FunctionType.EDIT,
+            function = lpf,
+            parameters = [
+                DDFDConfig(),
+                SLConfig(
+                    name='dt', title='Параметр (dt)',
+                    min=0.0001, max=0.01, step=0.0001, default_value=0.002,    
+                ),
+                SLConfig(
+                    name='Fc', title='Граничное значение (Fc)',
+                    min=0.1, max=1000, step=0.01, default_value=50,    
+                ),
+                SLConfig(
+                    name='M', title='Ширина окна (M)',
+                    min=1, max=1000, step=1, default_value=64,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+            ]
+        ),
+
+        'hpf': FunctionConfig(
+            key = 'hpf',
+            name = 'Фильтра Высоких Частот (ФВЧ)',
+            type = FunctionType.EDIT,
+            function = hpf,
+            parameters = [
+                DDFDConfig(),
+                SLConfig(
+                    name='dt', title='Параметр (dt)',
+                    min=0.0001, max=0.01, step=0.0001, default_value=0.002,    
+                ),
+                SLConfig(
+                    name='Fc', title='Граничное значение (Fc)',
+                    min=0.1, max=1000, step=0.01, default_value=50,    
+                ),
+                SLConfig(
+                    name='M', title='Ширина окна (M)',
+                    min=1, max=1000, step=1, default_value=64,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+            ]
+        ),
+
+        'bpf': FunctionConfig(
+            key = 'bpf',
+            name = 'Полосовой Фильтр (ПФ)',
+            type = FunctionType.EDIT,
+            function = bpf,
+            parameters = [
+                DDFDConfig(),
+                SLConfig(
+                    name='dt', title='Параметр (dt)',
+                    min=0.0001, max=0.01, step=0.0001, default_value=0.002,    
+                ),
+                SLConfig(
+                    name='Fc1', title='Нижняя граница (Fc1)',
+                    min=0.1, max=1000, step=0.01, default_value=35,    
+                ),
+                SLConfig(
+                    name='Fc2', title='Верхняя граница (Fc2)',
+                    min=0.1, max=1000, step=0.01, default_value=75,    
+                ),
+                SLConfig(
+                    name='M', title='Ширина окна (M)',
+                    min=1, max=1000, step=1, default_value=64,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+            ]
+        ),
+
+        'bsf': FunctionConfig(
+            key = 'bsf',
+            name = 'Режекторный Фильтр (РФ)',
+            type = FunctionType.EDIT,
+            function = bsf,
+            parameters = [
+                DDFDConfig(),
+                SLConfig(
+                    name='dt', title='Параметр (dt)',
+                    min=0.0001, max=0.01, step=0.0001, default_value=0.002,    
+                ),
+                SLConfig(
+                    name='Fc1', title='Нижняя граница (Fc1)',
+                    min=0.1, max=1000, step=0.01, default_value=35,    
+                ),
+                SLConfig(
+                    name='Fc2', title='Верхняя граница (Fc2)',
+                    min=0.1, max=1000, step=0.01, default_value=75,    
+                ),
+                SLConfig(
+                    name='M', title='Ширина окна (M)',
+                    min=1, max=1000, step=1, default_value=64,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+            ]
+        ),
+
 
 
         # ================================================

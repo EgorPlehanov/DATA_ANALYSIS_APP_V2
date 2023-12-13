@@ -1,4 +1,4 @@
-from ....function_typing import FunctionResult, ResultData
+from ....function_typing import FunctionResult, ResultData, ViewType
 
 import numpy as np
 import pandas as pd
@@ -168,8 +168,10 @@ def anti_noise(
 
     std_deviation_df = pd.DataFrame({'M': M_values, 'std': std_deviation})
     extra_data.append(ResultData(
-        type='anti_noise_M_std',
-        main_data=std_deviation_df
+        type = 'anti_noise_M_std',
+        main_data = std_deviation_df,
+        view_table_horizontal = True,
+        main_view = ViewType.TABLE_HORIZONTAL
     ))
 
     return FunctionResult(main_data=data_noised_df, extra_data=extra_data)

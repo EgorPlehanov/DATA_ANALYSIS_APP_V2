@@ -10,7 +10,6 @@ class ResultTableVertical(Row):
     def __init__(self, data: DataFrame):
         super().__init__()
         self.data = data
-
         self.controls = self.create_controls()
 
 
@@ -34,3 +33,9 @@ class ResultTableVertical(Row):
             border_radius = 10,
             expand = True,
         )]
+    
+
+    def update_values(self) -> None:
+        '''Обновляет таблицу'''
+        # TODO: добавить логику обновления
+        pass
