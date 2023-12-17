@@ -2,8 +2,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ...function import Function
 
-from .result_attributes.dialog_color_picker import DialogColorPicker
-from .result_attributes.dialog_save import DialogSaveResultData
+from .card_attributes import *
 
 import flet as ft
 from flet import (

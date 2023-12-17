@@ -34,6 +34,7 @@ class DialogColorPicker(AlertDialog):
 
     def open_dialog(self, e: ControlEvent) -> None:
         '''Открывает диалог'''
+        self.content.color = self.color
         self.open = True
         self.page.update()
 
