@@ -1,4 +1,4 @@
-from ....function_typing import FunctionResult
+from ....function_typing import FunctionResult, ResultData
 
 import numpy as np
 from pandas import DataFrame
@@ -57,7 +57,7 @@ def mult_model(
 def convol_model(
     first_data: DataFrame,   # Первый набор данных (из другой функции)
     second_data: DataFrame,  # Второй набор данных (из другой функции)
-    M: int              # Ширина окна
+    M: int                   # Ширина окна
 ) -> FunctionResult:
     '''
     Дискретная светрка
@@ -75,6 +75,9 @@ def convol_model(
     first_values = first_values[:N]
     second_values = second_values[:N]
 
+    if M > N:
+        raise ValueError('Ширина окна не может быть больше длины набора данных')
+
     y = np.zeros(N + M)
 
     for k in range(N + M):
@@ -87,7 +90,9 @@ def convol_model(
     y = y[M//2:-M//2]
     
     result_df = DataFrame({'x': np.arange(0, len(y)), 'y': y})
-    return FunctionResult(main_data=result_df)
+    test = np.convolve(first_values, second_values)
+    extra_data = ResultData(DataFrame({'x': np.arange(0, len(test)), 'y': test}))
+    return FunctionResult(main_data=result_df, extra_data=extra_data)
 
 
 def extend_model(

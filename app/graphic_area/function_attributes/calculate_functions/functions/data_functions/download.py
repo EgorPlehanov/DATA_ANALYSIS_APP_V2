@@ -11,7 +11,6 @@ def data_download(
     '''
     Обрабатывает данные из файлов
     '''
-    print('input_data:', input_data)
     if len(input_data) == 0:
         return FunctionResult()
     

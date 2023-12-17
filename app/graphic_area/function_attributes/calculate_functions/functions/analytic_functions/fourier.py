@@ -12,18 +12,21 @@ def get_fourier(
     Вычисление прямого преобразования Фурье
     '''
     N = len(y_values)
-
     # Вычисление прямого преобразования Фурье
     real_part = np.zeros(N)  # Для действительной части
     imag_part = np.zeros(N)  # Для мнимой части
 
-    for n in range(N):
-        for k in range(len(y_values)):
-            real_part[n] += y_values[k] * np.cos(2 * np.pi * n * k / N)
-            imag_part[n] += y_values[k] * np.sin(2 * np.pi * n * k / N)            
-    
+    k_values = np.arange(N)
+    n_values = np.arange(N)
+
+    cos_values = np.cos(2 * np.pi * np.outer(n_values, k_values) / N)
+    sin_values = np.sin(2 * np.pi * np.outer(n_values, k_values) / N)
+
+    real_part = np.dot(y_values, cos_values)
+    imag_part = np.dot(y_values, sin_values)
+
     # Вычисление амплитудного спектра
-    X_amp = [np.sqrt(real_part[k] ** 2 + imag_part[k] ** 2) for k in range(N)]
+    X_amp = np.sqrt(real_part ** 2 + imag_part ** 2)
     return DataFrame({'Re[Xn]': real_part, 'Im[Xn]': imag_part, '|Xn|': X_amp})
 
 

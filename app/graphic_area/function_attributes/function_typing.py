@@ -105,7 +105,9 @@ class FunctionResult:
         if self.main_data is not None and isinstance(self.main_data, DataFrame):
             self.main_data = self.main_data.map(round_and_clip)
 
-        if self.extra_data is not None and len(self.extra_data) > 0:
+        if self.extra_data is not None:
+            if not isinstance(self.extra_data, list):
+                self.extra_data = [self.extra_data]
             for data in self.extra_data:
                 if data.main_data is not None and isinstance(data.main_data, DataFrame):
                     data.main_data = data.main_data.map(round_and_clip)

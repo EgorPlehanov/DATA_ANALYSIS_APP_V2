@@ -153,6 +153,7 @@ class FunctionCalculate:
             if (
                 param.type == ParameterType.DROPDOWN_FUNCTION_DATA
                 and self.parameters_value[name] is not None
+                and self.parameters_value[name].get_result().main_data is not None
             )
         ]
     

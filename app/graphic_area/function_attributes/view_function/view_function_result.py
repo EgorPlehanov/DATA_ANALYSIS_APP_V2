@@ -8,8 +8,8 @@ from .result_attributes import *
 from dataclasses import dataclass
 from typing import Any, List
 from flet import (
-    Container, colors, padding, border, Column,
-    Ref, Text, Row, MainAxisAlignment, FontWeight
+    Container, colors, padding, border, Column, Text,
+    TextAlign, Ref, Row, MainAxisAlignment, FontWeight
 )
 
 
@@ -52,13 +52,13 @@ class FunctionResultView(Container):
             and self.result_data.extra_data is None
             and self.result_data.error_message is None
         ):
-            self.ref_title.current.value = "Нет данных для построения графиков функции " \
-                + self.function.calculate_function_name
+            self.ref_title.current.value = self.function.name \
+                + "\nНет данных для построения графиков функции"
             return self.view_title
 
         is_many_graphs = self._is_result_data_have_many_graphs()
         self.ref_title.current.value = f"График{'и' if is_many_graphs else ''} " \
-            + f"функции {self.function.calculate_function_name}"
+            + f"функции {self.function.name}"
         
         return Column([
             self.view_title,
@@ -88,7 +88,8 @@ class FunctionResultView(Container):
             controls = [Text(
                 ref = self.ref_title,
                 weight = FontWeight.BOLD,
-                size = 20
+                size = 20,
+                text_align = TextAlign.CENTER
             )]
         )
 
@@ -120,7 +121,7 @@ class FunctionResultView(Container):
         if result_data.initial_data:
             for data in result_data.initial_data:
                 result_items.append(self._create_result_item('initial_data', data))
-
+        
         return Column(self._create_view_list_result_item(result_items))
     
 

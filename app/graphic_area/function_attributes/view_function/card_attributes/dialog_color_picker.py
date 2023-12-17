@@ -21,7 +21,7 @@ class DialogColorPicker(AlertDialog):
 
     def _create_content(self) -> ColorPicker:
         '''Создает содержимое карточки функции'''
-        return ColorPicker(self.color) # color=self.color, width=300)
+        return ColorPicker(self.color)
     
 
     def _create_actions(self) -> List[TextButton]:
