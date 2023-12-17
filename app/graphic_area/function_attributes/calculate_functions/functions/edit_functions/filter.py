@@ -111,13 +111,7 @@ def fourier_spectrum(data: DataFrame) -> DataFrame:
 
 
 def convolution(x, h, N, M):
-    out_data = []
-    for i in range(N):
-        y = 0
-        for j in range(M):
-            y += x[i - j] * h[j]
-        out_data.append(y)
-    return out_data
+    return [sum(x[i - j] * h[j] for j in range(M) if i - j >= 0) for i in range(N)]
 
 
 def lpf(
@@ -150,8 +144,6 @@ def lpf(
         type='Cпектр исходного сигнала',
     ))
 
-    # convolve_data = convol_model(data, filter, M).main_data
-    # convolve_data = np.convolve(y_values, lpw)
     convolve_data = convolution(y_values, lpw, len(y_values), M)
     filtered_data = DataFrame({'x': np.arange(0, len(convolve_data)), 'y': convolve_data})
     
@@ -185,10 +177,22 @@ def hpf(
     if data is None:
         return FunctionResult(main_data=filter, extra_data=filter_spectr)
     
-    extra_data = []
     y_values = data.iloc[:, 1].copy()
+    extra_data = [filter_spectr]
 
-    filtered_data = None
+    extra_data.append(ResultData(
+        main_data=fourier_spectrum(data),
+        type='Cпектр исходного сигнала',
+    ))
+
+    convolve_data = convolution(y_values, hpw, len(y_values), M)
+    filtered_data = DataFrame({'x': np.arange(0, len(convolve_data)), 'y': convolve_data})
+    
+    extra_data.append(ResultData(
+        main_data=fourier_spectrum(filtered_data),
+        type='Cпектр отфильтрованного сигнала',
+    ))
+
     return FunctionResult(main_data=filtered_data, extra_data=extra_data)
 
 
@@ -215,10 +219,22 @@ def bpf(
     if data is None:
         return FunctionResult(main_data=filter, extra_data=filter_spectr)
     
-    extra_data = []
     y_values = data.iloc[:, 1].copy()
+    extra_data = [filter_spectr]
 
-    filtered_data = None
+    extra_data.append(ResultData(
+        main_data=fourier_spectrum(data),
+        type='Cпектр исходного сигнала',
+    ))
+
+    convolve_data = convolution(y_values, bpw, len(y_values), M)
+    filtered_data = DataFrame({'x': np.arange(0, len(convolve_data)), 'y': convolve_data})
+    
+    extra_data.append(ResultData(
+        main_data=fourier_spectrum(filtered_data),
+        type='Cпектр отфильтрованного сигнала',
+    ))
+
     return FunctionResult(main_data=filtered_data, extra_data=extra_data)
 
 
@@ -245,8 +261,20 @@ def bsf(
     if data is None:
         return FunctionResult(main_data=filter, extra_data=filter_spectr)
     
-    extra_data = []
     y_values = data.iloc[:, 1].copy()
+    extra_data = [filter_spectr]
 
-    filtered_data = None
+    extra_data.append(ResultData(
+        main_data=fourier_spectrum(data),
+        type='Cпектр исходного сигнала',
+    ))
+
+    convolve_data = convolution(y_values, bsw, len(y_values), M)
+    filtered_data = DataFrame({'x': np.arange(0, len(convolve_data)), 'y': convolve_data})
+    
+    extra_data.append(ResultData(
+        main_data=fourier_spectrum(filtered_data),
+        type='Cпектр отфильтрованного сигнала',
+    ))
+
     return FunctionResult(main_data=filtered_data, extra_data=extra_data)
