@@ -111,6 +111,7 @@ def fourier_spectrum(data: DataFrame) -> DataFrame:
 
 
 def convolution(x, h, N, M):
+    '''Расчет свертки'''
     return [sum(x[i - j] * h[j] for j in range(M) if i - j >= 0) for i in range(N)]
 
 
