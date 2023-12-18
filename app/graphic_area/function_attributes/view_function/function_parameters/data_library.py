@@ -179,7 +179,7 @@ class DataLibraryEditor(ParamEditorInterface, Container):
                     content = Row(
                         alignment = MainAxisAlignment.SPACE_BETWEEN,
                         controls = [
-                            Text(f"{item.name}"),
+                            Text(item.name),
                             Text(f"({item.size})"),
                         ]
                     ),
