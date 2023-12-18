@@ -24,6 +24,7 @@ class DLFile:
         self.name = os.path.basename(self.path)
         self.extension = self.path.split('.')[-1].lower()
         self.size = convert_size(os.path.getsize(self.path))
+        self.fomatted_name = f"{self.name} ({self.size})"
 
 
 
@@ -103,6 +104,8 @@ class DLConfig:
             if isinstance(item, DLFile) and item.name == file_name:
                 return item
             elif isinstance(item, DLFolder):
+                if item.name not in self.valid_folders:
+                    continue
                 found_file = self._find_file_by_name(item.items, file_name)
                 if found_file:
                     return found_file
@@ -143,7 +146,7 @@ class DataLibraryEditor(ParamEditorInterface, Container):
                                 Icon(icons.FILE_OPEN_OUTLINED),
                                 Text(
                                     ref = self.ref_title,
-                                    value = self.title,
+                                    value = self.title if self.default_value is None else self.default_value.fomatted_name,
                                     size = 16
                                 ),
                             ],
@@ -231,6 +234,6 @@ class DataLibraryEditor(ParamEditorInterface, Container):
         '''Обновляет значение параметр в экземпляре класса Function'''
         value = e.control.data
         self.ref_cancel.current.visible = value is not None
-        self.ref_title.current.value = f"{value.name} ({value.size})"
+        self.ref_title.current.value = value.fomatted_name
         self.function.calculate.set_parameter_value(self._name, value)
         self.update()
