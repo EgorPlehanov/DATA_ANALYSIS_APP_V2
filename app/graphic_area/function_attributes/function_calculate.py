@@ -32,6 +32,8 @@ class FunctionCalculate:
                     self.parameters_value[config.name] = self._get_textfields_datatable_default_values(config)
                 case ParameterType.DROPDOWN_FUNCTION_DATA:
                     self.parameters_value[config.name] = None
+                # case ParameterType.DATA_LIBRARY:
+                #     self.parameters_value[config.name] = None
                 case _:
                     self.parameters_value[config.name] = config.default_value
 
@@ -76,15 +78,16 @@ class FunctionCalculate:
         for name, value in self.parameters_value.items():
             match self.parameters_configs[name].type:
                 case ParameterType.DROPDOWN_FUNCTION_DATA:
-                    formatted_parameters[name] = value.formatted_name if value is not None else empty_value
+                    str_value = value.formatted_name if value is not None else empty_value
                 case ParameterType.FILE_PICKER:
                     str_value = ', '.join([file.name for file in value]) if value is not None and len(value) else empty_value
-                    formatted_parameters[name] = str_value
                 case ParameterType.TEXTFIELDS_DATATABLE:
                     str_value = str(value).replace('**', '\*\*') if value else empty_value
-                    formatted_parameters[name] = str_value
+                case ParameterType.DATA_LIBRARY:
+                    str_value = value.name if value is not None else empty_value
                 case _:
-                    formatted_parameters[name] = str(value)
+                    str_value = str(value)
+            formatted_parameters[name] = str_value
         return formatted_parameters
     
     
@@ -139,7 +142,7 @@ class FunctionCalculate:
                 "Количество параметров не совпадает, "
                 + f"ожидалось {len(function_parameters)} и получено {len(valid_parameters)}\n"
                 + f"Параметры: {function_parameters}"
-                + f"Вальные: {valid_parameters}"
+                + f"Валидные: {valid_parameters}"
             )
 
         return valid_parameters

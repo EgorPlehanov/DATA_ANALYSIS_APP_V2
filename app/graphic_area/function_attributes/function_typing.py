@@ -19,6 +19,7 @@ class ParameterType(Enum):
     SWITCH = 'switch'
     TEXTFIELDS_DATATABLE = 'textfields_datatable'
     TEXTFIELD = 'textfield'
+    DATA_LIBRARY = 'data_library'
 
     def __str__(self):
         return self.value

@@ -6,3 +6,4 @@ from .slider import SliderEditor, SLConfig
 from .switch import SwitchEditor, SWConfig
 from .textfealds_datatable import TextFieldsDataTableEditor, TFDTConfig, TFDTColumn, TFDTItem
 from .textfield import TextFieldEditor, TFConfig
+from .data_library import DataLibraryEditor, DLConfig, DLFolder, DLFile

@@ -3,6 +3,7 @@ if TYPE_CHECKING:
     from ....function import Function
 
 from .parameter_editor_interface import ParamEditorInterface
+from .parameters_utils import convert_size
 from ...function_typing import ParameterType
 
 from typing import List, Any
@@ -132,7 +133,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
                             data = idx,
                             on_click = self._delete_file,
                         ),
-                        Text(f"{file.name} ({self._convert_size(file.size)})")
+                        Text(f"{file.name} ({convert_size(file.size)})")
                     ]
                 )
             )
@@ -147,18 +148,4 @@ class FilePickerEditor(ParamEditorInterface, Container):
         self.list_picked_files.remove(self.list_picked_files[file_idx])
         self.function.calculate.set_parameter_value(self._name, self.list_picked_files)
         self._update_picked_files()
-    
-
-    def _convert_size(self, size) -> str:
-        '''Конвертирует размер файла в байтах в строку'''
-        if not size:
-            return "0 байт"
-        elif size < 1024:
-            return f"{size} байт"
-        elif size < 1024 * 1024:
-            return f"{size / 1024:.2f} КБ"
-        elif size < 1024 * 1024 * 1024:
-            return f"{size / (1024 * 1024):.2f} МБ"
-        else:
-            return f"{size / (1024 * 1024 * 1024):.2f} ГБ"
     

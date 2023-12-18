@@ -79,7 +79,7 @@ class FunctionLibrary:
             key = "test",
             name = "ТЕСТ",
             type = FunctionType.DATA,
-            function = lambda cb, ddfd, dd, fp, sl, sw, tfdt, tf: FunctionResult(None, None, None),
+            function = lambda cb, ddfd, dd, fp, sl, sw, tfdt, tf, dl: FunctionResult(None, None, None),
             parameters = [
                 CBConfig(
                     name='cb',
@@ -149,6 +149,11 @@ class FunctionLibrary:
                     helper_text = 'help Функция',
                     autocorrect = False,
                     default_value = 'x**2'
+                ),
+                DLConfig(
+                    name='dl',
+                    valid_folders=['dat', 'wav', 'jpg', 'grace', 'rect'],
+                    default_value='pgp_2ms.dat'
                 )
             ],
         ),
@@ -367,6 +372,16 @@ class FunctionLibrary:
             parameters = [
                 FPConfig(name='input_data'),
                 SWConfig(),
+            ]
+        ),
+
+        'data_library': FunctionConfig(
+            key = 'data_library',
+            name = 'Из библиотеки данных',
+            type = FunctionType.DATA,
+            function = data_library,
+            parameters = [
+                DLConfig(valid_folders = ['dat', 'wav']),
             ]
         ),
 
