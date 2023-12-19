@@ -381,7 +381,8 @@ class FunctionLibrary:
             type = FunctionType.DATA,
             function = data_library,
             parameters = [
-                DLConfig(valid_folders = ['dat', 'wav']),
+                DLConfig(valid_folders = ['dat', 'wav', 'роза']),
+                SWConfig(),
             ]
         ),
 

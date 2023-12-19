@@ -7,6 +7,7 @@ from ....function_typing import FunctionResult
 import numpy as np
 import pandas as pd
 import csv
+import wave
 
 
 def data_library(
@@ -48,6 +49,17 @@ def data_library(
 
                 data = pd.DataFrame({'x': np.arange(0, len(float_data)), 'y': float_data})
             
+            case 'wav':
+                with wave.open(path, 'rb') as wav_file:
+                    sample_width = wav_file.getsampwidth()
+                    n_channels = wav_file.getnchannels()
+                    framerate = wav_file.getframerate()
+                    n_frames = wav_file.getnframes()
+                    frames = wav_file.readframes(n_frames)
+                    audio_data = np.frombuffer(frames, dtype=np.int16)
+
+                time = np.arange(0, n_frames) / framerate
+                data = pd.DataFrame({'Time': time, 'Amplitude': audio_data})
             case _:
                 return FunctionResult(error_message=f"Формат {extension} не поддерживается")
                 
