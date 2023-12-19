@@ -153,7 +153,7 @@ class FunctionLibrary:
                 DLConfig(
                     name='dl',
                     valid_folders=['dat', 'wav', 'jpg', 'grace', 'rect'],
-                    default_value='pgp_2ms.dat'
+                    default_value='birches_changed.jpg'#'pgp_2ms.dat'
                 )
             ],
         ),

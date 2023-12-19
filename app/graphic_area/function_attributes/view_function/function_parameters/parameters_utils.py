@@ -50,13 +50,13 @@ def validate_textfield_value(e) -> None:
 def convert_size(size) -> str:
     '''Конвертирует размер файла в байтах в строку'''
     if not size:
-        return "0 байт"
+        return "0\u00A0байт"
     elif size < 1024:
-        return f"{size} байт"
+        return f"{size}\u00A0байт"
     elif size < 1024 * 1024:
-        return f"{size / 1024:.2f} КБ"
+        return f"{size / 1024:.2f}\u00A0КБ"
     elif size < 1024 * 1024 * 1024:
-        return f"{size / (1024 * 1024):.2f} МБ"
+        return f"{size / (1024 * 1024):.2f}\u00A0МБ"
     else:
-        return f"{size / (1024 * 1024 * 1024):.2f} ГБ"
+        return f"{size / (1024 * 1024 * 1024):.2f}\u00A0ГБ"
         

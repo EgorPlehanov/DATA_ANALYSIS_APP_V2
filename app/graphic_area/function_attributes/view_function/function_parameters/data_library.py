@@ -9,9 +9,12 @@ from ...function_typing import ParameterType
 from typing import List
 from dataclasses import dataclass, field
 import os
+import re
 from flet import (
-    Container, ControlEvent, Column, PopupMenuButton, Row, border, IconButton,
-    PopupMenuItem, Text, Icon, icons, MainAxisAlignment, colors, Ref
+    Container, ControlEvent, Column, PopupMenuButton, Row,
+    border, Ref, PopupMenuItem, Icon, MainAxisAlignment,
+    icons, colors, IconButton, TextField, Markdown, Text,
+    ScrollMode, animation
 )
 
 
@@ -24,7 +27,9 @@ class DLFile:
         self.name = os.path.basename(self.path)
         self.extension = self.path.split('.')[-1].lower()
         self.size = convert_size(os.path.getsize(self.path))
-        self.fomatted_name = f"{self.name} ({self.size})"
+        self.formatted_name = f"{self.name} ({self.size})"
+        self.data_file_path = self.path.replace("DATA\\", "").replace("\\", " > ")
+        self.folder = os.path.basename(os.path.dirname(self.path))
 
 
 
@@ -35,9 +40,6 @@ class DLFolder:
 
     def __post_init__(self):
         self.items = self._sort_folders_and_files()
-        self.folder_count = self._count_items(count_folders=True)
-        self.file_count = self._count_items(count_folders=False)
-
 
     def _sort_folders_and_files(self):
         '''Сортировка папок и файлов'''
@@ -47,6 +49,14 @@ class DLFolder:
         sorted_files = sorted(files, key=lambda x: x.name)
         return sorted_folders + sorted_files
 
+
+    @property
+    def folder_count(self):
+        return self._count_items(count_folders=True)
+
+    @property
+    def file_count(self):
+        return self._count_items(count_folders=False)
 
     def _count_items(self, count_folders: bool):
         '''Подсчет количества папок или файлов в списке'''
@@ -72,10 +82,11 @@ class DLConfig:
         return ParameterType.DATA_LIBRARY
     
     def __post_init__(self):
-        self.folders_files = self._create_folder().items
+        main_folder = self._create_folder()
+        self.folders_files = main_folder.items
+        self.all_files = self.get_all_files(main_folder)
         self.default_value = self.find_file_by_name(self.default_value) \
             if isinstance(self.default_value, str) else None
-
 
     def _create_folder(self, root: str = 'DATA') -> DLFolder:
         '''Создает структуру папок и файлов'''
@@ -89,28 +100,21 @@ class DLConfig:
                     items.append(self._create_folder(path))
         return DLFolder(name=os.path.basename(root), items=items)
     
+    def get_all_files(self, folder: DLFolder) -> List[DLFile]:
+        '''Получение всех файлов в папке'''
+        files = [item for item in folder.items if isinstance(item, DLFile)]
+        for item in folder.items:
+            if isinstance(item, DLFolder):
+                files.extend(self.get_all_files(item))
+        return files
 
     def find_file_by_name(self, file_name: str) -> DLFile:
         '''Поиск файла по имени'''
-        return self._find_file_by_name(self.folders_files, file_name)
-
-
-    def _find_file_by_name(self,
-        items: List[DLFile | DLFolder],
-        file_name: str
-    ) -> DLFile:
-        '''Поиск файла по имени'''
-        for item in items:
-            if isinstance(item, DLFile) and item.name == file_name:
-                return item
-            elif isinstance(item, DLFolder):
-                if item.name not in self.valid_folders:
-                    continue
-                found_file = self._find_file_by_name(item.items, file_name)
-                if found_file:
-                    return found_file
-        return None
-
+        return next((
+            item for item in self.all_files
+            if (item.name == file_name and item.folder in self.valid_folders)
+        ), None)
+    
 
 
 class DataLibraryEditor(ParamEditorInterface, Container):
@@ -121,11 +125,17 @@ class DataLibraryEditor(ParamEditorInterface, Container):
         self._name = config.name
         self.title = config.title
         self.valid_folders = config.valid_folders
+        self.all_files = config.all_files
         self.folders_files = config.folders_files
         self.default_value = config.default_value
 
+        self.selected_file = self.default_value
+
         self.ref_title = Ref[Text]()
         self.ref_cancel = Ref[IconButton]()
+        self.ref_textfield = Ref[TextField]()
+        self.ref_files_options = Ref[Column]()
+        self.ref_selected_file_option = Ref[Container]()
 
         super().__init__()
         self._set_styles()
@@ -133,69 +143,86 @@ class DataLibraryEditor(ParamEditorInterface, Container):
 
 
     def _create_content(self) -> Column:
-        return Row(
-            spacing=0,
+        '''Создает содержимое элемента'''
+        return Column(
             controls=[
-                PopupMenuButton(
-                    expand = True,
-                    tooltip = None,
-                    animate_size = 1000,
-                    content = Container(
-                        content = Row(
-                            controls=[
-                                Icon(icons.FILE_OPEN_OUTLINED),
-                                Text(
-                                    ref = self.ref_title,
-                                    value = self.title if self.default_value is None else self.default_value.fomatted_name,
-                                    size = 16
-                                ),
-                            ],
-                        ),
-                        tooltip = None,
-                        border = border.all(1, colors.BLACK),
-                        padding = 5,
-                        border_radius = 5,
-                    ),
-                    items = self._create_menu(self.folders_files)
-                ),
-                IconButton(
-                    ref = self.ref_cancel,
-                    visible = self.default_value is not None,
-                    icon = icons.CLOSE,
-                    tooltip = "Отменить выбор",
-                    on_click = self._on_cancel
-                )
+                self._create_popup_menu_button(),
+                self._create_textfield_search(),
             ]
         )
     
 
+    def _create_popup_menu_button(self) -> Row:
+        '''Создание меню выбора'''
+        menu_button = PopupMenuButton(
+            expand = True,
+            tooltip = None,
+            animate_size = 1000,
+            content = Container(
+                content = Row(
+                    controls=[
+                        Icon(icons.FILE_OPEN_OUTLINED),
+                        Text(
+                            ref = self.ref_title,
+                            value = self.title if self.default_value is None \
+                                else self.default_value.formatted_name,
+                            size = 16
+                        ),
+                    ],
+                ),
+                tooltip = None,
+                border = border.all(1, colors.BLACK),
+                padding = 5,
+                border_radius = 5,
+            ),
+            items = self._create_menu(self.folders_files)
+        )
+        cancel_button = IconButton(
+            ref = self.ref_cancel,
+            visible = self.default_value is not None,
+            icon = icons.CLOSE,
+            tooltip = "Отменить выбор",
+            on_click = self._on_cancel
+        )
+        return Row(
+            spacing=0,
+            controls=[
+                menu_button,
+                cancel_button
+            ]
+        )
+
+
     def _create_menu(self, structure: List[DLFolder | DLFile]):
         '''Создание элементов оснровного меню'''
         menu_items = []
-
         for item in structure:
             if isinstance(item, DLFile):
-                menu_items.append(PopupMenuItem(
-                    content = Row(
-                        alignment = MainAxisAlignment.SPACE_BETWEEN,
-                        controls = [
-                            Text(item.name),
-                            Text(f"({item.size})"),
-                        ]
-                    ),
-                    data = item,
-                    on_click = self._on_change
-                ))
+                menu_items.append(self._create_manu_items(item))
             elif isinstance(item, DLFolder):
                 submenu = self._create_menu(item.items)
                 menu_items.append(PopupMenuItem(
-                    content=self._create_menu_item(item, submenu)
+                    content=self._create_submenu(item, submenu)
                 ))
-
         return menu_items
     
 
-    def _create_menu_item(self, item: DLFolder, submenu: List[DLFolder | DLFile]):
+    def _create_manu_items(self, file: DLFile) -> PopupMenuItem:
+        '''Создание элемента меню'''
+        return PopupMenuItem(
+            content = Row(
+                alignment = MainAxisAlignment.SPACE_BETWEEN,
+                controls = [
+                    Text(file.name),
+                    Text(f"({file.size})"),
+                ]
+            ),
+            data = file,
+            on_click = self._on_change
+        )
+    
+
+    def _create_submenu(self, item: DLFolder, submenu: List[DLFolder | DLFile]):
         '''Создание подменю'''
         return PopupMenuButton(
             items = submenu,
@@ -222,10 +249,113 @@ class DataLibraryEditor(ParamEditorInterface, Container):
         return Column(controls=controls, spacing=0)
     
 
+    def _create_textfield_search(self) -> Column:
+        '''Создание элемента поиска'''
+        return Column([
+            TextField(
+                ref = self.ref_textfield,
+                label = "Поиск файла",
+                hint_text = "Введите имя файла",
+                border_radius = 5,
+                dense = True,
+                on_change = self._on_change_textfield
+            ),
+            Column(
+                ref = self.ref_files_options,
+                scroll = ScrollMode.AUTO,
+            )
+        ])
+    
+
+    def _on_change_textfield(self, e: ControlEvent) -> None:
+        '''Обработка изменения текстового поля'''
+        self._set_files_options()
+
+
+    def _set_files_options(self) -> None:
+        '''Создание списка опций выбора файла'''
+        input_str = self.ref_textfield.current.value
+        files_options = self.suggest_files(input_str)
+
+        options_control = self.ref_files_options.current
+        options_control.height = 400 if len(files_options) > 10 else None
+        options_control.controls = [
+            self._create_file_option(file, input_str)            
+            for file in files_options
+        ]
+        if self.selected_file is not None:
+            options_control.scroll_to(
+                key = self.selected_file.path,
+                duration = 500,
+                curve = animation.AnimationCurve.FAST_OUT_SLOWIN
+            )
+        self._set_textfield_counter_text()
+        options_control.update()
+
+
+    def _set_textfield_counter_text(self) -> None:
+        '''Обновление текста счетчика'''
+        count = len(self.ref_files_options.current.controls)
+        textfield = self.ref_textfield.current
+        textfield.counter_text = f"Найдено: {count}" if count > 0 else None
+        textfield.update()
+
+
+    def suggest_files(self, input_str: str) -> List[DLFile]:
+        '''Поиск файла по имени'''
+        if input_str == "":
+            return []
+        input_str = input_str.lower()
+        matching_files = [
+            file for file in self.all_files
+            if input_str in file.data_file_path.lower()
+        ]
+        matching_files.sort(
+            key=lambda x: abs(len(x.data_file_path)) - len(input_str) - x.data_file_path.lower().count(input_str)
+        )
+        return matching_files
+
+
+    def _create_file_option(self, file: DLFile, input_str: str) -> Container:
+        '''Создание опции выбора файла'''
+        formatted_name = re.sub(f"(?i){re.escape(input_str)}", r"**\g<0>**", file.data_file_path)
+        border_color = colors.WHITE38
+        if (self.selected_file is not None and file.path == self.selected_file.path):
+            border_color = colors.BLUE
+        return Container(
+            content = Row(
+                alignment = MainAxisAlignment.SPACE_BETWEEN,
+                controls = [
+                    Markdown(formatted_name, expand=True),
+                    Text(f"({file.size}, {file.extension})"),
+                ]
+            ),
+            key = file.path,
+            width = 320,
+            padding = 5,
+            border_radius = 5,
+            border = border.all(1, border_color),
+            data = file,
+            on_hover = self._on_hover,
+            on_click = self._on_change,
+        )
+    
+
+    def _on_hover(self, e: ControlEvent):
+        '''Устанавливает тень вокруг индикатора'''
+        e.control.bgcolor = colors.WHITE12 \
+            if e.data == "true" and e.control.data != self.selected_file else None
+        e.control.update()
+    
+
     def _on_cancel(self, e: ControlEvent) -> None:
         '''Отмена выбора'''
         self.ref_title.current.value = self.title
         self.ref_cancel.current.visible = False
+        self.selected_file = None
+
+        self._set_files_options()
+
         self.function.calculate.set_parameter_value(self._name, None)
         self.update()
 
@@ -234,6 +364,13 @@ class DataLibraryEditor(ParamEditorInterface, Container):
         '''Обновляет значение параметр в экземпляре класса Function'''
         value = e.control.data
         self.ref_cancel.current.visible = value is not None
-        self.ref_title.current.value = value.fomatted_name
+        self.ref_title.current.value = value.formatted_name
+
+        self.selected_file = value
+        if self.ref_selected_file_option.current is not None: 
+            self.ref_selected_file_option.current.bgcolor = None
+        
+        self._set_files_options()
+
         self.function.calculate.set_parameter_value(self._name, value)
         self.update()
