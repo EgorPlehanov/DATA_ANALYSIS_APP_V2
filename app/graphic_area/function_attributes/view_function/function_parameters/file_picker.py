@@ -3,12 +3,10 @@ if TYPE_CHECKING:
     from ....function import Function
 
 from .parameter_editor_interface import ParamEditorInterface
-from .parameters_utils import convert_size
-from ...function_typing import ParameterType
+from ...function_typing import ParameterType, File
 
 from typing import List, Any
 from dataclasses import dataclass, field
-from collections import namedtuple
 from flet import (
     Container, FilePickerFileType, FilePicker, Ref, padding, 
     Text, Column, Row, icons, MainAxisAlignment, TextButton,
@@ -40,8 +38,6 @@ class FPConfig:
 
 
 class FilePickerEditor(ParamEditorInterface, Container):
-    FileData = namedtuple('FileData', ['name', 'path', 'size'])
-
     def __init__(self, function: 'Function', config: FPConfig = FPConfig()):
         self._type = ParameterType.FILE_PICKER
         self.function = function
@@ -53,7 +49,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
         self.default_value = config.default_value
 
         self.ref_files = Ref[Column]()
-        self.list_picked_files = []
+        self.list_picked_files: List[File] = []
         self.file_picker_dialog = self._create_file_picker_dialog()
 
         super().__init__()
@@ -105,13 +101,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
         self.list_picked_files = []
         if e.files is not None:
             for file in e.files:
-                self.list_picked_files.append(
-                    self.FileData(
-                        name = file.name,
-                        path = file.path,
-                        size = file.size,
-                    )
-                )
+                self.list_picked_files.append(File(file.path))
             self.function.calculate.set_parameter_value(self._name, self.list_picked_files)
             self._update_picked_files()
     
@@ -133,7 +123,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
                             data = idx,
                             on_click = self._delete_file,
                         ),
-                        Text(f"{file.name} ({convert_size(file.size)})")
+                        Text(f"{file.name} ({file.size_formatted})")
                     ]
                 )
             )

@@ -1,12 +1,81 @@
-from ....function_typing import FunctionResult
+from ....function_typing import FunctionResult, File
 
+from typing import List
 import numpy as np
 import pandas as pd
 import csv
+import wave
+
+
+def read_csv(path: str) -> pd.DataFrame:
+    '''Возвращает DataFrame из CSV-файла'''
+    with open(path, 'r', newline='') as csvfile:
+        sample_data = csvfile.read(1024)
+        sniffer = csv.Sniffer()
+        delimiter = sniffer.sniff(sample_data).delimiter
+    return pd.read_csv(path, delimiter=delimiter)
+
+
+def read_dat(path: str) -> pd.DataFrame:
+    '''Возвращает DataFrame из DAT-файла'''
+    with open(path, "rb") as file:
+        binary_data = file.read()
+    float_data = np.frombuffer(binary_data, dtype=np.float32)
+    return pd.DataFrame({'x': np.arange(0, len(float_data)), 'y': float_data})
+
+
+def read_wav(path: str) -> pd.DataFrame:
+    '''Возвращает DataFrame из WAV-файла'''
+    with wave.open(path, 'rb') as wav_file:
+        sample_width = wav_file.getsampwidth()
+        n_channels = wav_file.getnchannels()
+        framerate = wav_file.getframerate()
+        n_frames = wav_file.getnframes()
+        frames = wav_file.readframes(n_frames)
+        audio_data = np.frombuffer(frames, dtype=np.int16)
+
+    time = np.arange(0, n_frames) / framerate
+    return pd.DataFrame({'Time': time, 'Amplitude': audio_data})
+
+
+def read_data(path: str) -> FunctionResult:
+    '''Чтение данных из файлов'''
+    read_data = {
+        'csv': read_csv,
+        'xls': lambda path: pd.read_excel(path),
+        'xlsx': lambda path: pd.read_excel(path),
+        'xlsm': lambda path: pd.read_excel(path),
+        'xlsb': lambda path: pd.read_excel(path),
+        'odf': lambda path: pd.read_excel(path),
+        'ods': lambda path: pd.read_excel(path),
+        'odt': lambda path: pd.read_excel(path),
+        'json': lambda path: pd.read_json(path),
+        'txt': lambda path: pd.read_table(path, sep=';'),
+        'dat': read_dat,
+        'wav': read_wav,
+    }
+
+    name = path.split('\\')[-1]
+    extension = path.split('.')[-1].lower()
+
+    try:
+        if extension in read_data:
+            data: pd.DataFrame = read_data[extension](path)
+        else: 
+            raise ValueError(f"Формат {extension} не поддерживается")
+    except Exception as e:
+        raise ValueError(f"При чтении файла '{name}' произошла ошибка: {str(e)}")
+    
+    if data.empty:
+        raise ValueError(f"Файл '{name}' пуст")
+    if len(data.columns) != 2:
+        raise ValueError(f"Файл '{name}' должен содержать 2 столбца, а не {len(data.columns)}")
+    
+    return FunctionResult(main_data=data)
 
 
 def data_download(
-    input_data: list    # Список файлов
+    input_data: List[File]    # Список файлов
 ) -> FunctionResult:
     '''
     Обрабатывает данные из файлов
@@ -16,61 +85,4 @@ def data_download(
     
     # result_list = []
     for file in input_data:
-        file_name = file.name
-        file_path = file.path
-
-        # Определение формата файла на основе расширения
-        file_extension = file_path.split('.')[-1].lower()
-        
-        try:
-            match file_extension:
-                case 'csv':
-                    # Определение разделителя
-                    with open(file_path, 'r', newline='') as csvfile:
-                        sample_data = csvfile.read(1024)
-                        sniffer = csv.Sniffer()
-                        delimiter = sniffer.sniff(sample_data).delimiter
-                    # Чтение CSV файла с указанием определенного разделителя
-                    data = pd.read_csv(file_path, delimiter=delimiter)
-                case 'xls' | 'xlsx' | 'xlsm' | 'xlsb' | 'odf' | 'ods' | 'odt':
-                    data = pd.read_excel(file_path)
-
-                case 'json':
-                    data = pd.read_json(file_path)
-
-                case 'txt':
-                    data = pd.read_table(file_path, sep=';')
-
-                case 'dat':
-                    with open(file_path, "rb") as file:
-                        binary_data = file.read()
-                    float_data = np.frombuffer(binary_data, dtype=np.float32)
-
-                    data = pd.DataFrame({'x': np.arange(0, len(float_data)), 'y': float_data})
-                
-                case _:
-                    # result_list.append()
-                    return FunctionResult(error_message=f"Формат {file_extension} не поддерживается")
-                    continue
-        except Exception as e:
-            # result_list.append()
-            return FunctionResult(error_message=f"При чтении файла '{file_name}' произошла ошибка: {str(e)}")
-            continue
-
-        if data.empty:
-            # result_list.append()
-            return FunctionResult(error_message=f"Файл '{file_name}' пуст")
-            continue
-        
-        if len(data.columns) > 2:
-            # result_list.append()
-            return FunctionResult(error_message=f"Файл '{file_name}' содержит больше двух столбцов")
-            continue
-        
-        return FunctionResult(main_data=data)
-
-    # return FunctionResult(
-    #     main_data = result_list[0].main_data if len(result_list) > 0 else None,
-    #     extra_data = result_list[1:] if len(result_list) > 1 else None,
-    #     error_message = '; '.join([r.error_message for r in result_list if r.error_message])
-    # )
+        return read_data(file.path)

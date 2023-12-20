@@ -1,17 +1,17 @@
 from ....function_typing import FunctionResult, ResultData
-from .add_mult_convol_model import convol_model
-from ..analytic_functions.fourier import get_fourier, spectr_fourier
 
+from enum import Enum
 import numpy as np
 from pandas import DataFrame
+from functools import partial
 
 
-def lpf_reverse(lpw):
-    '''Возвращает список в обратном порядке'''
+def reverse_and_mirror(lpw):
+    '''Функция для развернуть и зеркалить массив'''
     return lpw[:0:-1] + lpw
 
 
-def lp_filter(dt, Fc, m):
+def lp_values(dt, Fc, m):
     '''Функция для генерации фильтра Низких Частот'''
     fact = 2 * Fc * dt
     lpw = [fact]
@@ -33,9 +33,14 @@ def lp_filter(dt, Fc, m):
     return lpw
 
 
+def lp_filter(dt, Fc, m):
+    '''Функция для генерации фильтра Низких Частот'''
+    return reverse_and_mirror(lp_values(dt, Fc, m))
+
+
 def hp_filter(dt, Fc, m):
     '''Функция для генерации фильтра Высоких Частот'''
-    lpw = lpf_reverse(lp_filter(dt, Fc, m))
+    lpw = lp_filter(dt, Fc, m)
     hpw = []
     Loper = 2 * m + 1
     for k in range(Loper):
@@ -46,10 +51,10 @@ def hp_filter(dt, Fc, m):
     return hpw
 
 
-def bpf_filter(dt, Fc1, Fc2, m):
+def bp_filter(dt, Fc1, Fc2, m):
     '''Функция для генерации Полосового Фильтра'''
-    lpw1 = lpf_reverse(lp_filter(dt, Fc1, m))
-    lpw2 = lpf_reverse(lp_filter(dt, Fc2, m))
+    lpw1 = lp_filter(dt, Fc1, m)
+    lpw2 = lp_filter(dt, Fc2, m)
     bpw = []
     Loper = 2 * m + 1
     for k in range(Loper):
@@ -60,8 +65,8 @@ def bpf_filter(dt, Fc1, Fc2, m):
 def bs_filter(dt, Fc1, Fc2, m):
     '''Функция для генерации Режекторного Фильтра'''
     bsw = []
-    lpw1 = lpf_reverse(lp_filter(dt, Fc1, m))
-    lpw2 = lpf_reverse(lp_filter(dt, Fc2, m))
+    lpw1 = lp_filter(dt, Fc1, m)
+    lpw2 = lp_filter(dt, Fc2, m)
     Loper = 2 * m + 1
     for k in range(0, Loper):
         if k == m:
@@ -104,6 +109,8 @@ def fourier_spectrum(data: DataFrame) -> DataFrame:
     x_values = data.iloc[:, 0].copy()
 
     spectrum = np.fft.fft(y_values)
+    frequency = np.fft.fftfreq(len(y_values), d=x_values.iloc[1] - x_values.iloc[0])
+    print(frequency)
     return DataFrame({
         'Amp': np.arange(0, len(spectrum) // 2),
         'f': np.abs(spectrum[: len(spectrum) // 2])
@@ -115,6 +122,68 @@ def convolution(x, h, N, M):
     return [sum(x[i - j] * h[j] for j in range(M) if i - j >= 0) for i in range(N)]
 
 
+
+class FilterType(Enum):
+    lpf = 1
+    hpf = 2
+    bpf = 3
+    bsf = 4
+
+
+def get_filtered_data(
+    type: FilterType,   # Тип фильтра
+    data: DataFrame,    # Набор данных (из другой функции)
+    dt: float,          # 
+    m: int,             # Ширина окна Поттера
+    Fc_down: float = None,  # Нижняя граница
+    Fc_up: float = None,  # Верхняя граница
+) -> FunctionResult:
+    '''
+    Функция для получения отфильтрованного сигнала
+    '''
+    filter_by_type = {
+        # Филтр Низких Частот (ФНЧ)
+        FilterType.lpf: partial(lp_filter, dt, Fc_up, m),
+        # Филтр Высоких Частот (ФВЧ)
+        FilterType.hpf: partial(hp_filter, dt, Fc_down, m),
+        # Полосовый Фильтр (ПФ)
+        FilterType.bpf: partial(bp_filter, dt, Fc_down, Fc_up, m),
+        # Режекторный Фильтр (РФ)
+        FilterType.bsf: partial(bs_filter, dt, Fc_down, Fc_up, m),
+    }
+    
+    filter_values = filter_by_type[type]()
+    filter = DataFrame({'x': np.arange(0, len(filter_values)), 'y': filter_values})
+    
+    M = 2 * m + 1
+    filter_freq = frequency_response(filter_values, M)
+    data_len = len(filter_freq) // 2
+    extra_data = [ResultData(
+        main_data=DataFrame({'Amp': np.arange(0, data_len), 'f': filter_freq[: data_len]}),
+        type='Частотный спектр',
+    )]
+    if data is None:
+        return FunctionResult(main_data=filter, extra_data=extra_data)
+    
+    y_values = data.iloc[:, 1].copy()
+    
+    extra_data.append(ResultData(
+        main_data=fourier_spectrum(data),
+        type='Cпектр исходного сигнала',
+    ))
+
+    convolve_data = convolution(y_values, filter_values, len(y_values), M)
+    filtered_data = DataFrame({'x': np.arange(0, len(convolve_data)), 'y': convolve_data})
+    
+    extra_data.append(ResultData(
+        main_data=fourier_spectrum(filtered_data),
+        type='Cпектр отфильтрованного сигнала',
+    ))
+
+    return FunctionResult(main_data=filtered_data, extra_data=extra_data)
+
+
+
 def lpf(
     data: DataFrame,    # Набор данных (из другой функции)
     dt: float,          # 
@@ -124,36 +193,7 @@ def lpf(
     '''
     Фильтра Низких Частот (ФНЧ)
     '''
-    lpw = lpf_reverse(lp_filter(dt, Fc, m))
-    filter = DataFrame({'x': np.arange(0, len(lpw)), 'y': lpw})
-
-    M = 2 * m + 1
-    filter_freq = frequency_response(lpw, M)
-    data_len = len(filter_freq) // 2
-    filter_spectr = ResultData(
-        main_data=DataFrame({'Amp': np.arange(0, data_len), 'f': filter_freq[: data_len]}),
-        type='Частотный спектр ФНЧ',
-    )
-    if data is None:
-        return FunctionResult(main_data=filter, extra_data=filter_spectr)
-    
-    y_values = data.iloc[:, 1].copy()
-    extra_data = [filter_spectr]
-
-    extra_data.append(ResultData(
-        main_data=fourier_spectrum(data),
-        type='Cпектр исходного сигнала',
-    ))
-
-    convolve_data = convolution(y_values, lpw, len(y_values), M)
-    filtered_data = DataFrame({'x': np.arange(0, len(convolve_data)), 'y': convolve_data})
-    
-    extra_data.append(ResultData(
-        main_data=fourier_spectrum(filtered_data),
-        type='Cпектр отфильтрованного сигнала',
-    ))
-
-    return FunctionResult(main_data=filtered_data, extra_data=extra_data)
+    return get_filtered_data(FilterType.lpf, data, dt, m, Fc_up=Fc)
 
 
 def hpf(
@@ -165,36 +205,7 @@ def hpf(
     '''
     Фильтра Высоких Частот (ФВЧ)
     '''
-    hpw = hp_filter(dt, Fc, m)
-    filter = DataFrame({'x': np.arange(0, len(hpw)), 'y': hpw})
-
-    M = 2 * m + 1
-    filter_freq = frequency_response(hpw, M)
-    data_len = len(filter_freq) // 2
-    filter_spectr = ResultData(
-        main_data=DataFrame({'Amp': np.arange(0, data_len), 'f': filter_freq[: data_len]}),
-        type='Частотный спектр ФВЧ',
-    )
-    if data is None:
-        return FunctionResult(main_data=filter, extra_data=filter_spectr)
-    
-    y_values = data.iloc[:, 1].copy()
-    extra_data = [filter_spectr]
-
-    extra_data.append(ResultData(
-        main_data=fourier_spectrum(data),
-        type='Cпектр исходного сигнала',
-    ))
-
-    convolve_data = convolution(y_values, hpw, len(y_values), M)
-    filtered_data = DataFrame({'x': np.arange(0, len(convolve_data)), 'y': convolve_data})
-    
-    extra_data.append(ResultData(
-        main_data=fourier_spectrum(filtered_data),
-        type='Cпектр отфильтрованного сигнала',
-    ))
-
-    return FunctionResult(main_data=filtered_data, extra_data=extra_data)
+    return get_filtered_data(FilterType.hpf, data, dt, m, Fc_down=Fc)
 
 
 def bpf(
@@ -207,36 +218,7 @@ def bpf(
     '''
     Полосовой Фильтр (ПФ)
     '''
-    bpw = bpf_filter(dt, Fc1, Fc2, m)
-    filter = DataFrame({'x': np.arange(0, len(bpw)), 'y': bpw})
-    
-    M = 2 * m + 1
-    filter_freq = frequency_response(bpw, M)
-    data_len = len(filter_freq) // 2
-    filter_spectr = ResultData(
-        main_data=DataFrame({'Amp': np.arange(0, data_len), 'f': filter_freq[: data_len]}),
-        type='Частотный спектр ПФ',
-    )
-    if data is None:
-        return FunctionResult(main_data=filter, extra_data=filter_spectr)
-    
-    y_values = data.iloc[:, 1].copy()
-    extra_data = [filter_spectr]
-
-    extra_data.append(ResultData(
-        main_data=fourier_spectrum(data),
-        type='Cпектр исходного сигнала',
-    ))
-
-    convolve_data = convolution(y_values, bpw, len(y_values), M)
-    filtered_data = DataFrame({'x': np.arange(0, len(convolve_data)), 'y': convolve_data})
-    
-    extra_data.append(ResultData(
-        main_data=fourier_spectrum(filtered_data),
-        type='Cпектр отфильтрованного сигнала',
-    ))
-
-    return FunctionResult(main_data=filtered_data, extra_data=extra_data)
+    return get_filtered_data(FilterType.bpf, data, dt, m, Fc_down=Fc1, Fc_up=Fc2)
 
 
 def bsf(
@@ -249,33 +231,4 @@ def bsf(
     '''
     Режекторный Фильтр (РФ)
     '''
-    bsw = bs_filter(dt, Fc1, Fc2, m)
-    filter = DataFrame({'x': np.arange(0, len(bsw)), 'y': bsw})
-    
-    M = 2 * m + 1
-    filter_freq = frequency_response(bsw, M)
-    data_len = len(filter_freq) // 2
-    filter_spectr = ResultData(
-        main_data=DataFrame({'Amp': np.arange(0, data_len), 'f': filter_freq[: data_len]}),
-        type='Частотный спектр РФ',
-    )
-    if data is None:
-        return FunctionResult(main_data=filter, extra_data=filter_spectr)
-    
-    y_values = data.iloc[:, 1].copy()
-    extra_data = [filter_spectr]
-
-    extra_data.append(ResultData(
-        main_data=fourier_spectrum(data),
-        type='Cпектр исходного сигнала',
-    ))
-
-    convolve_data = convolution(y_values, bsw, len(y_values), M)
-    filtered_data = DataFrame({'x': np.arange(0, len(convolve_data)), 'y': convolve_data})
-    
-    extra_data.append(ResultData(
-        main_data=fourier_spectrum(filtered_data),
-        type='Cпектр отфильтрованного сигнала',
-    ))
-
-    return FunctionResult(main_data=filtered_data, extra_data=extra_data)
+    return get_filtered_data(FilterType.bsf, data, dt, m, Fc_down=Fc1, Fc_up=Fc2)

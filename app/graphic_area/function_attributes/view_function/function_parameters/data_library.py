@@ -3,8 +3,7 @@ if TYPE_CHECKING:
     from ....function import Function
 
 from .parameter_editor_interface import ParamEditorInterface
-from .parameters_utils import convert_size
-from ...function_typing import ParameterType
+from ...function_typing import ParameterType, File
 
 from typing import List
 from dataclasses import dataclass, field
@@ -20,23 +19,9 @@ from flet import (
 
 
 @dataclass
-class DLFile:
-    path: str = None
-
-    def __post_init__(self):
-        self.name = os.path.basename(self.path)
-        self.extension = self.path.split('.')[-1].lower()
-        self.size = convert_size(os.path.getsize(self.path))
-        self.formatted_name = f"{self.name} ({self.size})"
-        self.data_file_path = self.path.replace("DATA\\", "").replace("\\", " > ")
-        self.folder = os.path.basename(os.path.dirname(self.path))
-
-
-
-@dataclass
 class DLFolder:
     name: str           = None
-    items: List[DLFile] = field(default_factory=list)
+    items: List[File] = field(default_factory=list)
 
     def __post_init__(self):
         self.items = self._sort_folders_and_files()
@@ -44,7 +29,7 @@ class DLFolder:
     def _sort_folders_and_files(self):
         '''Сортировка папок и файлов'''
         folders = [item for item in self.items if isinstance(item, DLFolder)]
-        files = [item for item in self.items if isinstance(item, DLFile)]
+        files = [item for item in self.items if isinstance(item, File)]
         sorted_folders = sorted(folders, key=lambda x: x.name)
         sorted_files = sorted(files, key=lambda x: x.name)
         return sorted_folders + sorted_files
@@ -64,7 +49,7 @@ class DLFolder:
             1 for item in self.items
             if (
                 (count_folders and isinstance(item, DLFolder))
-                or (not count_folders and isinstance(item, DLFile))
+                or (not count_folders and isinstance(item, File))
             )
         )
 
@@ -75,7 +60,7 @@ class DLConfig:
     name: str                   = 'library_data'
     title: str                  = 'Выбор набора данных'
     valid_folders: List[str]    = field(default_factory=list)
-    default_value: str | DLFile = None
+    default_value: str | File = None
 
     @property
     def type(self) -> ParameterType:
@@ -94,21 +79,21 @@ class DLConfig:
         for file in os.listdir(root):
             path = os.path.join(root, file)
             if os.path.isfile(path):
-                items.append(DLFile(path))
+                items.append(File(path))
             elif os.path.isdir(path):
                 if os.path.basename(path) in self.valid_folders:
                     items.append(self._create_folder(path))
         return DLFolder(name=os.path.basename(root), items=items)
     
-    def get_all_files(self, folder: DLFolder) -> List[DLFile]:
+    def get_all_files(self, folder: DLFolder) -> List[File]:
         '''Получение всех файлов в папке'''
-        files = [item for item in folder.items if isinstance(item, DLFile)]
+        files = [item for item in folder.items if isinstance(item, File)]
         for item in folder.items:
             if isinstance(item, DLFolder):
                 files.extend(self.get_all_files(item))
         return files
 
-    def find_file_by_name(self, file_name: str) -> DLFile:
+    def find_file_by_name(self, file_name: str) -> File:
         '''Поиск файла по имени'''
         return next((
             item for item in self.all_files
@@ -157,7 +142,6 @@ class DataLibraryEditor(ParamEditorInterface, Container):
         menu_button = PopupMenuButton(
             expand = True,
             tooltip = None,
-            animate_size = 1000,
             content = Container(
                 content = Row(
                     controls=[
@@ -193,11 +177,11 @@ class DataLibraryEditor(ParamEditorInterface, Container):
         )
 
 
-    def _create_menu(self, structure: List[DLFolder | DLFile]):
+    def _create_menu(self, structure: List[DLFolder | File]):
         '''Создание элементов оснровного меню'''
         menu_items = []
         for item in structure:
-            if isinstance(item, DLFile):
+            if isinstance(item, File):
                 menu_items.append(self._create_manu_items(item))
             elif isinstance(item, DLFolder):
                 submenu = self._create_menu(item.items)
@@ -207,14 +191,14 @@ class DataLibraryEditor(ParamEditorInterface, Container):
         return menu_items
     
 
-    def _create_manu_items(self, file: DLFile) -> PopupMenuItem:
+    def _create_manu_items(self, file: File) -> PopupMenuItem:
         '''Создание элемента меню'''
         return PopupMenuItem(
             content = Row(
                 alignment = MainAxisAlignment.SPACE_BETWEEN,
                 controls = [
                     Text(file.name),
-                    Text(f"({file.size})"),
+                    Text(f"({file.size_formatted})"),
                 ]
             ),
             data = file,
@@ -222,7 +206,7 @@ class DataLibraryEditor(ParamEditorInterface, Container):
         )
     
 
-    def _create_submenu(self, item: DLFolder, submenu: List[DLFolder | DLFile]):
+    def _create_submenu(self, item: DLFolder, submenu: List[DLFolder | File]):
         '''Создание подменю'''
         return PopupMenuButton(
             items = submenu,
@@ -301,24 +285,24 @@ class DataLibraryEditor(ParamEditorInterface, Container):
         textfield.update()
 
 
-    def suggest_files(self, input_str: str) -> List[DLFile]:
+    def suggest_files(self, input_str: str) -> List[File]:
         '''Поиск файла по имени'''
         if input_str == "":
             return []
         input_str = input_str.lower()
         matching_files = [
             file for file in self.all_files
-            if input_str in file.data_file_path.lower()
+            if input_str in file.data_path.lower()
         ]
         matching_files.sort(
-            key=lambda x: abs(len(x.data_file_path)) - len(input_str) - x.data_file_path.lower().count(input_str)
+            key=lambda x: abs(len(x.data_path)) - len(input_str) - x.data_path.lower().count(input_str)
         )
         return matching_files
 
 
-    def _create_file_option(self, file: DLFile, input_str: str) -> Container:
+    def _create_file_option(self, file: File, input_str: str) -> Container:
         '''Создание опции выбора файла'''
-        formatted_name = re.sub(f"(?i){re.escape(input_str)}", r"**\g<0>**", file.data_file_path)
+        formatted_name = re.sub(f"(?i){re.escape(input_str)}", r"**\g<0>**", file.data_path)
         border_color = colors.WHITE38
         if (self.selected_file is not None and file.path == self.selected_file.path):
             border_color = colors.BLUE
@@ -327,7 +311,7 @@ class DataLibraryEditor(ParamEditorInterface, Container):
                 alignment = MainAxisAlignment.SPACE_BETWEEN,
                 controls = [
                     Markdown(formatted_name, expand=True),
-                    Text(f"({file.size}, {file.extension})"),
+                    Text(f"({file.size_formatted}, {file.extension})"),
                 ]
             ),
             key = file.path,

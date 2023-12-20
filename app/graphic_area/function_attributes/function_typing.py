@@ -1,11 +1,10 @@
 from typing import Optional, Callable, List, Dict
-from collections import namedtuple
 from dataclasses import dataclass, field
 from pandas import DataFrame
 from enum import Enum
 from random import choice
 from flet import colors
-
+import os
 
 
 
@@ -118,12 +117,12 @@ class FunctionResult:
 @dataclass
 class FunctionConfig:
     '''Конфигурация функции'''
-    key: str            = 'Unknown'
-    name: str           = 'Неизвестная'
-    type: FunctionType  = FunctionType.DATA
-    function: Callable  = lambda: None
-    parameters: Dict | List = field(default_factory=dict)
-    main_view: ViewType = ViewType.CHART
+    key: str                  = 'Unknown'
+    name: str                 = 'Неизвестная'
+    type: FunctionType        = FunctionType.DATA
+    function: Callable        = lambda: None
+    parameters: Dict | List   = field(default_factory=dict)
+    main_view: ViewType       = ViewType.CHART
     view_list: List[ViewType] = field(default_factory=lambda: [ViewType.CHART])
 
     def __post_init__(self):
@@ -151,7 +150,11 @@ class FunctionConfig:
 
 
 # Функция для меню выбора
-FunctionMenuOption = namedtuple('FunctionOption', ['key', 'name'])
+@dataclass
+class FunctionMenuOption:
+    '''Опция меню выбора функции'''
+    key: str
+    name: str
 
 
 
@@ -167,6 +170,7 @@ class ValueType(Enum):
 
 
 class Color(Enum):
+    '''Цвет'''
     RED         = "#ff0000"
     PINK        = "#ff0072"
     PURPLE      = "#AA00FF"
@@ -189,4 +193,34 @@ class Color(Enum):
     
     @classmethod
     def random(cls):
+        '''Возвращает случайное значение цвета'''
         return choice(list(cls))
+
+
+
+@dataclass
+class File:
+    '''Файл'''
+    path: str = None
+
+    def __post_init__(self):
+        self.name = os.path.basename(self.path)
+        self.extension = self.path.split('.')[-1].lower()
+        self.size = os.path.getsize(self.path)
+        self.size_formatted = self.convert_size(self.size)
+        self.formatted_name = f"{self.name} ({self.size_formatted})"
+        self.data_path = self.path.replace("DATA\\", "").replace("\\", " > ")
+        self.folder = os.path.basename(os.path.dirname(self.path))
+    
+    def convert_size(self, size) -> str:
+        '''Конвертирует размер файла в байтах в строку'''
+        if not size:
+            return "0\u00A0байт"
+        elif size < 1024:
+            return f"{size}\u00A0байт"
+        elif size < 1024 * 1024:
+            return f"{size / 1024:.2f}\u00A0КБ"
+        elif size < 1024 * 1024 * 1024:
+            return f"{size / (1024 * 1024):.2f}\u00A0МБ"
+        else:
+            return f"{size / (1024 * 1024 * 1024):.2f}\u00A0ГБ"

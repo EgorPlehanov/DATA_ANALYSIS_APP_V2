@@ -45,18 +45,4 @@ def validate_textfield_value(e) -> None:
 
         e.control.error_text = error_message
         e.control.update()
-    
-
-def convert_size(size) -> str:
-    '''Конвертирует размер файла в байтах в строку'''
-    if not size:
-        return "0\u00A0байт"
-    elif size < 1024:
-        return f"{size}\u00A0байт"
-    elif size < 1024 * 1024:
-        return f"{size / 1024:.2f}\u00A0КБ"
-    elif size < 1024 * 1024 * 1024:
-        return f"{size / (1024 * 1024):.2f}\u00A0МБ"
-    else:
-        return f"{size / (1024 * 1024 * 1024):.2f}\u00A0ГБ"
         
