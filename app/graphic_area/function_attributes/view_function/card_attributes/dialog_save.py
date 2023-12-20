@@ -11,6 +11,10 @@ class DialogSaveResultData(FilePicker):
         super().__init__()
         self.function = function
 
+        self.initial_directory = os.path.join(
+            os.path.abspath(__file__).split('\\app')[0],
+            'DATA\\User_Saved_Data\\'
+        )
         self.on_result = self._save_result_data
     
 
@@ -22,6 +26,7 @@ class DialogSaveResultData(FilePicker):
             file_name = f"{self.function.name}({parameters_text}).csv",
             file_type = FilePickerFileType.CUSTOM,
             allowed_extensions = ['csv', 'json'],
+            initial_directory = self.initial_directory,
         )
 
 
