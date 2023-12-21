@@ -40,8 +40,6 @@ class FunctionCalculate:
             match config.type:
                 case ParameterType.TEXTFIELDS_DATATABLE:
                     self.parameters_value[config.name] = self._get_default_values_textfields_datatable(config)
-                # case ParameterType.DROPDOWN_FUNCTION_DATA:
-                #     self.parameters_value[config.name] = None
                 case _:
                     self.parameters_value[config.name] = config.default_value
 
