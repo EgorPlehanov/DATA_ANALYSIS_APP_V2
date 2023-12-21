@@ -1,4 +1,4 @@
-from .graphic_area.graphic_area import GraphicArea
+from .graphic_area import GraphicArea
 
 from dataclasses import dataclass
 from typing import Any
@@ -6,6 +6,7 @@ from typing import Any
 
 @dataclass
 class TabMode:
+    '''Режим работы вкладки'''
     type: str               = "unknown"          # Код режима
     name: str               = "Не задано"        # Название режима
     dialog_title: str       = "Добавить вкладку" # Название в диалоговом окне создания вкладки
@@ -15,6 +16,7 @@ class TabMode:
 
 
 class TabsModes:
+    '''Режимы работы вкладок'''
     @staticmethod
     def get_tabs_modes() -> dict[str, TabMode]:
         '''Возвращает словарь режимов работы вкладок'''

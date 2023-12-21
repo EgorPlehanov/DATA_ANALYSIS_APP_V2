@@ -2,7 +2,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .graphic_area import GraphicArea
 
-from .function_attributes import *
+from .function_attributes import (
+    FunctionCalculate, Color, ParameterType, 
+    FunctionLibrary, FunctionView, ResultData
+)
 
 from itertools import count
 from copy import deepcopy

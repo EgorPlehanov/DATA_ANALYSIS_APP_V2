@@ -11,6 +11,7 @@ class FunctionLibrary:
     def get_russian_type_name(type: FunctionType) -> str:
         '''Возвращает русское название типа функции'''
         russian_type_name = {
+            FunctionType.TEST: 'Тест',
             FunctionType.DATA: 'Данные',
             FunctionType.EDIT: 'Обработка',
             FunctionType.ANALYTIC: 'Аналитика',
@@ -21,10 +22,12 @@ class FunctionLibrary:
 
 
     @staticmethod
-    def get_dict_functions_configs() -> Dict[str, FunctionConfig]:
+    def get_dict_functions_configs(enabled: bool = True) -> Dict[str, FunctionConfig]:
         '''Возвращает словарь функций в виде {'type': [namedtuple(key, name), ...], ...}'''
         grouped_functions = defaultdict(list)
         for function in FunctionLibrary.function_by_key.values():
+            if function.enabled != enabled:
+                continue
             function_data = FunctionMenuOption(key=function.key, name=function.name)
             type = FunctionLibrary.get_russian_type_name(function.type)
             grouped_functions[type].append(function_data)
@@ -42,7 +45,7 @@ class FunctionLibrary:
     @staticmethod
     def get_function_config_attribute_by_key_attribute(
         key: str,
-        attribute: Literal['name', 'type', 'function', 'parameters']
+        attribute: Literal['name', 'type', 'enabled', 'function', 'parameters', 'main_view', 'view_list']
     ) -> Any:
         '''Возвращает аттрибут конфигурации функции по ее имени и названию атрибута'''
         function_config = FunctionLibrary.get_function_config_by_key(key)
@@ -50,12 +53,12 @@ class FunctionLibrary:
     
 
     @staticmethod
-    def get_functions_by_type(type: FunctionType) -> list[FunctionConfig]:
+    def get_functions_by_type(type: FunctionType, enabled: bool = True) -> list[FunctionConfig]:
         '''Возвращает список функций определенного типа'''
         return [
             function_config
             for function_config in FunctionLibrary.function_by_key.values()
-            if function_config.type == type
+            if function_config.type == type and function_config.enabled == enabled
         ]
     
 
@@ -78,8 +81,9 @@ class FunctionLibrary:
         'test': FunctionConfig(
             key = "test",
             name = "ТЕСТ",
-            type = FunctionType.DATA,
-            function = lambda cb, ddfd, dd, fp, sl, sw, tfdt, tf, dl: FunctionResult(None, None, None),
+            enabled = True,
+            type = FunctionType.TEST,
+            function = test,
             parameters = [
                 CBConfig(
                     name='cb',
@@ -152,7 +156,7 @@ class FunctionLibrary:
                 ),
                 DLConfig(
                     name='dl',
-                    valid_folders=['dat', 'wav', 'jpg', 'grace', 'rect'],
+                    valid_folders=['User_Saved_Data', 'dat', 'wav', 'jpg', 'grace', 'rect'],
                     default_value='birches_changed.jpg'#'pgp_2ms.dat'
                 )
             ],
@@ -168,12 +172,12 @@ class FunctionLibrary:
                     name='type',
                     title='Тип тренда',
                     options=[
-                        DDOptionItem(key='linear_rising', text='Линейный восходящий'),
-                        DDOptionItem(key='linear_falling', text='Линейный нисходящий'),
-                        DDOptionItem(key='nonlinear_rising', text='Нелинейный восходящий'),
-                        DDOptionItem(key='nonlinear_falling', text='Нелинейный нисходящий'),
+                        DDOptionItem(key=TrendType.LINEAR_RISING, text='Линейный восходящий'),
+                        DDOptionItem(key=TrendType.LINEAR_FALLING, text='Линейный нисходящий'),
+                        DDOptionItem(key=TrendType.NONLINEAR_RISING, text='Нелинейный восходящий'),
+                        DDOptionItem(key=TrendType.NONLINEAR_FALLING, text='Нелинейный нисходящий'),
                     ],
-                    default_value='linear_rising'
+                    default_value=TrendType.LINEAR_RISING
                 ),
                 SLConfig(
                     name='a', title='Параметр a',
@@ -245,12 +249,15 @@ class FunctionLibrary:
                     name='type_list',
                     title='Тип тренда',
                     checkboxes=[
-                        CBItem('linear_rising', 'Линейно восходящий'),
-                        CBItem('linear_falling', 'Линейно нисходящий'),
-                        CBItem('nonlinear_rising', 'Нелинейно восходящий'),
-                        CBItem('nonlinear_falling', 'Нелинейно нисходящий'),
+                        CBItem(TrendType.LINEAR_RISING, 'Линейно восходящий'),
+                        CBItem(TrendType.LINEAR_FALLING, 'Линейно нисходящий'),
+                        CBItem(TrendType.NONLINEAR_RISING, 'Нелинейно восходящий'),
+                        CBItem(TrendType.NONLINEAR_FALLING, 'Нелинейно нисходящий'),
                     ],
-                    default_value=['linear_rising', 'linear_falling', 'nonlinear_rising', 'nonlinear_falling']
+                    default_value=[
+                        TrendType.LINEAR_RISING, TrendType.LINEAR_FALLING,
+                        TrendType.NONLINEAR_RISING, TrendType.NONLINEAR_FALLING
+                    ]
                 ),
                 SLConfig(
                     name='a', title='Параметр a',

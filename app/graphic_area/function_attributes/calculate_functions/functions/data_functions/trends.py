@@ -1,26 +1,36 @@
 from ....function_typing import FunctionResult
 
-from typing import Literal
+from typing import List
 import numpy as np
 import pandas as pd
+from enum import Enum
+
+
+class TrendType(Enum):
+    '''Тип тренда'''
+    LINEAR_RISING = 'linear_rising'
+    LINEAR_FALLING = 'linear_falling'
+    NONLINEAR_RISING = 'nonlinear_rising'
+    NONLINEAR_FALLING = 'nonlinear_falling'
+
+    def __str__(self):
+        return self.value
 
 
 trend_type_to_function = {
-    "linear_rising":     lambda t, a, b: a * t + b,          # Линейно восходящий
-    "linear_falling":    lambda t, a, b: -a * t + b,         # Линейно нисходящий
-    "nonlinear_rising":  lambda t, a, b: b * np.exp(a * t),  # Нелинейно восходящий
-    "nonlinear_falling": lambda t, a, b: b * np.exp(-a * t), # Нелинейно нисходящий
+    # Возвращает функцию тренда по типу
+    TrendType.LINEAR_RISING:     lambda t, a, b: a * t + b,          # Линейно восходящий
+    TrendType.LINEAR_FALLING:    lambda t, a, b: -a * t + b,         # Линейно нисходящий
+    TrendType.NONLINEAR_RISING:  lambda t, a, b: b * np.exp(a * t),  # Нелинейно восходящий
+    TrendType.NONLINEAR_FALLING: lambda t, a, b: b * np.exp(-a * t), # Нелинейно нисходящий
 }
 
 
 def trend(
-    type: Literal[      # Тип тренда
-        'linear_rising', 'linear_falling',
-        'nonlinear_rising', 'nonlinear_falling'
-    ],
-    a: float,            # Коэффициент a
-    b: float,            # Коэффициент b
-    step: float,         # Шаг генерации данных
+    type: TrendType,    # Тип тренда
+    a: float,           # Коэффициент a
+    b: float,           # Коэффициент b
+    step: float,        # Шаг генерации данных
     N: int              # Длина данных
 ) -> FunctionResult:
     '''
@@ -28,10 +38,10 @@ def trend(
     '''
     t = np.arange(0, N * step, step)
 
-    data = None
-    if type in trend_type_to_function:
-        data = trend_type_to_function[type](t, a, b)
-    
+    if type not in trend_type_to_function:
+        raise ValueError(f"Тип {type} не поддерживается")
+
+    data = trend_type_to_function[type](t, a, b)
     trend_data = pd.DataFrame({'x': t, 'y': data})
     return FunctionResult(main_data=trend_data)
 
@@ -54,18 +64,18 @@ def trend(
 
 
 def combinate_trend(
-    type_list: list,    # Список типов функций тренда
-    a: float,           # Коэффициент a
-    b: float,           # Коэффициент b
-    step: float,        # Шаг генерации данных
-    N: int              # Длина данных
+    type_list: List[TrendType], # Список типов функций тренда
+    a: float,       # Коэффициент a
+    b: float,       # Коэффициент b
+    step: float,    # Шаг генерации данных
+    N: int          # Длина данных
 ) -> FunctionResult:
     '''
     Создает график комбинированной функции тренда
     '''
     num_parts = len(type_list)
     if num_parts == 0:
-        raise ValueError("Нет данных для построения графика")
+        raise ValueError("Выберите хотя бы один тип тренда для построения графика")
 
     # Разделить период t на равные части
     t_parts = np.array_split(np.arange(0, N * step, step), num_parts)
@@ -75,7 +85,7 @@ def combinate_trend(
     for i, type in enumerate(type_list):
         # Сгенерировать данные для каждой части
         if type not in trend_type_to_function:
-            continue
+            raise ValueError(f"Тип {type} не поддерживается")
         data = trend_type_to_function[type](t_parts[i], a, b)
 
         # Смещение начала графика до уровня конца предыдущей части

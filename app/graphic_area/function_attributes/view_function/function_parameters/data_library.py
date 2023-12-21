@@ -60,6 +60,7 @@ class DLConfig:
     name: str                   = 'library_data'
     title: str                  = 'Выбор набора данных'
     valid_folders: List[str]    = field(default_factory=list)
+    # TODO: add valid_file_types
     default_value: str | File = None
 
     @property
@@ -82,7 +83,9 @@ class DLConfig:
                 items.append(File(path))
             elif os.path.isdir(path):
                 if os.path.basename(path) in self.valid_folders:
-                    items.append(self._create_folder(path))
+                    folder = self._create_folder(path)
+                    if folder.file_count > 0 or folder.folder_count > 0:
+                        items.append(folder)
         return DLFolder(name=os.path.basename(root), items=items)
     
     def get_all_files(self, folder: DLFolder) -> List[File]:

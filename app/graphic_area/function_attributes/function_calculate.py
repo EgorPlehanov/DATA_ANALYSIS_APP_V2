@@ -4,8 +4,7 @@ if TYPE_CHECKING:
 
 from .function_typing import ParameterType, ResultData, ViewType, FunctionResult
 
-from copy import deepcopy
-from typing import Any
+from typing import Any, get_type_hints
 from inspect import signature
 from collections import defaultdict
 
@@ -15,6 +14,7 @@ class FunctionCalculate:
         self.function = function
 
         self.calculate_function = self.function.config.function
+        self.calculate_function_type_hints = self.get_signature_type_hints()
 
         self.parameters_configs = self.function.config.parameters
         self.parameters_value = {}
@@ -24,21 +24,29 @@ class FunctionCalculate:
         self.calculate()
 
 
+    def get_signature_type_hints(self):
+        '''Возвращает типы параметров функции'''
+        type_hints = get_type_hints(self.calculate_function)
+        type_hints.pop('return', None)
+        return {
+            name: type_hints.get(name)
+            for name in signature(self.calculate_function).parameters
+        }
+
+
     def set_default_parameters_values(self) -> None:
         '''Устанавливает дефолтные значения параметров'''
         for config in self.parameters_configs.values():
             match config.type:
                 case ParameterType.TEXTFIELDS_DATATABLE:
-                    self.parameters_value[config.name] = self._get_textfields_datatable_default_values(config)
-                case ParameterType.DROPDOWN_FUNCTION_DATA:
-                    self.parameters_value[config.name] = None
-                # case ParameterType.DATA_LIBRARY:
+                    self.parameters_value[config.name] = self._get_default_values_textfields_datatable(config)
+                # case ParameterType.DROPDOWN_FUNCTION_DATA:
                 #     self.parameters_value[config.name] = None
                 case _:
                     self.parameters_value[config.name] = config.default_value
 
 
-    def _get_textfields_datatable_default_values(self, config) -> dict:
+    def _get_default_values_textfields_datatable(self, config) -> dict:
         '''Возвращает значение по умолчанию для параметра с типом TEXTFIELDS_DATATABLE'''
         rows = defaultdict(list)
         for cell in config.default_value:
@@ -85,6 +93,10 @@ class FunctionCalculate:
                     str_value = str(value).replace('**', '\*\*') if value else empty_value
                 case ParameterType.DATA_LIBRARY:
                     str_value = value.name if value is not None else empty_value
+                case ParameterType.CHECKBOXES:
+                    str_value = f"[{', '.join([str(key) for key in value])}]" if len(value) else empty_value
+                case ParameterType.TEXTFIELD:
+                    str_value = value if value != '' else empty_value
                 case _:
                     str_value = str(value)
             formatted_parameters[name] = str_value
@@ -122,8 +134,6 @@ class FunctionCalculate:
 
     def _get_valid_parameters(self) -> dict:
         '''Возвращает текущие значения параметров функции с учетом сигнатуры функции'''
-        function_parameters = signature(self.calculate_function).parameters
-
         valid_parameters = {
             name:
                 self.parameters_value[name].get_result_main_data()
@@ -132,20 +142,36 @@ class FunctionCalculate:
                     and self.parameters_value[name] is not None
                 )
                 else self.parameters_value[name]
-            for name in function_parameters
-            if name in self.parameters_value
+            for name in self.calculate_function_type_hints
+            if self.is_valid_parameter(name)
         }
-        # TODO: добавить проверку типов с выбрасыванием исключения
 
-        if len(valid_parameters) != len(function_parameters):
+        if len(valid_parameters) != len(self.calculate_function_type_hints):
             raise ValueError(
                 "Количество параметров не совпадает, "
-                + f"ожидалось {len(function_parameters)} и получено {len(valid_parameters)}\n"
-                + f"Параметры: {function_parameters}"
-                + f"Валидные: {valid_parameters}"
+                + f"ожидалось {len(self.calculate_function_type_hints)} и получено {len(valid_parameters)}\n"
+                + f"\nПараметры: {self.calculate_function_type_hints}"
+                + f"\nВалидные: {valid_parameters}"
             )
 
         return valid_parameters
+    
+
+    def is_valid_parameter(self, name: str) -> bool:
+        '''Возвращает True, если параметр имеет допустимый тип'''
+        if name not in self.parameters_value:
+            return False
+        if (
+            (
+                self.calculate_function_type_hints[name] in [bool, int, str]
+                and not type(self.parameters_value[name]) == self.calculate_function_type_hints[name]
+            ) or (
+                self.calculate_function_type_hints[name] in [float]
+                and not isinstance(self.parameters_value[name], (float, int))
+            )
+        ):
+            raise TypeError(f"Тип параметра {name} должен быть типа {self.calculate_function_type_hints[name]}, а не {type(self.parameters_value[name])}")
+        return True
 
 
     def _get_parameters_initial_data(self) -> list[ResultData]:

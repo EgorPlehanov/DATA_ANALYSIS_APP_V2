@@ -77,7 +77,7 @@ class SliderEditor(ParamEditorInterface, Container):
                 border = InputBorder.UNDERLINE,
                 data = {
                     'round_digits': self.round_digits,
-                    'text_type': self.value_type,
+                    'value_type': self.value_type,
                     'min': self.min,
                     'max': self.max,
                 },

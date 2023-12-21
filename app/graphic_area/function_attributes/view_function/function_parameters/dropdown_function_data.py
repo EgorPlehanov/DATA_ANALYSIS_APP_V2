@@ -23,6 +23,9 @@ class DDFDConfig:
     @property
     def type(self) -> ParameterType:
         return ParameterType.DROPDOWN_FUNCTION_DATA
+    
+    def __post_init__(self):
+        self.default_value = None
 
 
 class DropdownFunctionDataEditor(ParamEditorInterface, Container):
@@ -32,6 +35,7 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
         
         self._name = config.name
         self.title = config.title
+        self.default_value = config.default_value
         self.options = self._get_current_options()
 
         self.ref_dropdown_function_data = Ref[Dropdown]()
@@ -49,7 +53,7 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
             label = self.title,
             options = self._get_options_formatted(),
             on_change = self._on_change,
-            value = 'default',
+            value = 'default' if self.default_value is None else self.default_value,
         )
     
 

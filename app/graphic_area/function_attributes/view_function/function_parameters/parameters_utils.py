@@ -1,11 +1,12 @@
 from ...function_typing import ValueType
 
+from flet import ControlEvent
 import re
 import ast
 import sympy as sp
 
 
-def validate_textfield_value(e) -> None:
+def validate_textfield_value(e: ControlEvent) -> None:
         '''Проверка валидности значения текстового поля'''
         text_type = e.control.data.get('value_type')
         text_field_value = e.control.value

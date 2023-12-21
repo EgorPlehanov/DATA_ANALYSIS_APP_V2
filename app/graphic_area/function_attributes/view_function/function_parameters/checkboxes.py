@@ -42,6 +42,11 @@ class CheckboxesEditor(ParamEditorInterface, Container):
         self.checkboxes = config.checkboxes
         self.default_value = config.default_value
 
+        self.key_str_to_value = {
+            str(option.key): option.key
+            for option in self.checkboxes
+        }
+
         super().__init__()
         self._set_styles()
         self.content = self._create_content()
@@ -66,7 +71,7 @@ class CheckboxesEditor(ParamEditorInterface, Container):
         Обновляет значение параметр в экземпляре класса Function
         Изменяет список выбранных чекбоксов
         '''
-        key = e.control.key
+        key = self.key_str_to_value[e.control.key]
         value = e.control.value
 
         current_value = self.function.calculate.get_current_parameter_value(self._name)

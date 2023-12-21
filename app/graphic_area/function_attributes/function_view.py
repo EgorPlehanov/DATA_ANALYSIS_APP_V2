@@ -39,3 +39,4 @@ class FunctionView:
         '''Вызывает методы для обновления цвета'''
         self.results_view.update_values()
         self.card_view.update_color()
+        

@@ -27,6 +27,7 @@ class ParameterType(Enum):
 
 class FunctionType(Enum):
     '''Тип функции'''
+    TEST = 'test'
     DATA = 'data'
     EDIT = 'edit'
     ANALYTIC = 'analytic'
@@ -116,10 +117,21 @@ class FunctionResult:
 
 @dataclass
 class FunctionConfig:
-    '''Конфигурация функции'''
+    '''Конфигурация функции
+    
+    key - ключ функции
+    name - название функции
+    type - тип функции
+    function - функция
+    parameters - параметры функции
+    main_view - основное представление функции
+    view_list - список представлений функции
+    enabled - активна ли функция
+    '''
     key: str                  = 'Unknown'
     name: str                 = 'Неизвестная'
     type: FunctionType        = FunctionType.DATA
+    enabled: bool             = True
     function: Callable        = lambda: None
     parameters: Dict | List   = field(default_factory=dict)
     main_view: ViewType       = ViewType.CHART
@@ -200,7 +212,17 @@ class Color(Enum):
 
 @dataclass
 class File:
-    '''Файл'''
+    '''Файл
+    
+    path - путь к файлу
+    name - имя файла
+    extension - расширение файла
+    size - размер файла (байт)
+    size_formatted - размер файла в строку
+    formatted_name - имя файла и его размер
+    data_path - путь к файлу внутри папки "DATA"
+    folder - имя папки, в которой находится файл
+    '''
     path: str = None
 
     def __post_init__(self):

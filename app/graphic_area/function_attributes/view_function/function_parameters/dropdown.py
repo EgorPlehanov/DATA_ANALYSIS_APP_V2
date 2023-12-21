@@ -37,6 +37,11 @@ class DropdownEditor(ParamEditorInterface, Container):
         self.options = config.options
         self.default_value = config.default_value
 
+        self.key_str_to_value = {
+            str(option.key): option.key
+            for option in self.options
+        }
+
         super().__init__()
         self._set_styles()
         self.content = self._create_content()
@@ -57,5 +62,6 @@ class DropdownEditor(ParamEditorInterface, Container):
 
     def _on_change(self, e: ControlEvent) -> None:
         '''Обновляет значение параметра в экземпляре класса Function и карточке функции'''
-        self.function.calculate.set_parameter_value(self._name, e.control.value)
+        value = self.key_str_to_value[e.control.value]
+        self.function.calculate.set_parameter_value(self._name, value)
         self.update()

@@ -1,6 +1,5 @@
 from .function import Function
-from .function_attributes.calculate_functions.function_library import FunctionLibrary
-from .function_attributes.function_typing import FunctionConfig
+from .function_attributes import FunctionLibrary, FunctionConfig
 
 from flet_core.scrollable_control import ScrollableControl
 from flet import (
