@@ -107,7 +107,7 @@ class FunctionResultView(Container):
                 result_items.append(self._create_result_item(ViewType.CHART, result_data))
 
             if result_data.view_audio:
-                result_items.append(self._create_result_item(ViewType.AUDIO, result_data))
+                result_items.append(self._create_result_item(ViewType.AUDIO_PLAYER, result_data))
 
             if result_data.view_histogram:
                 result_items.append(self._create_result_item(ViewType.HISTOGRAM, result_data))
@@ -167,10 +167,10 @@ class FunctionResultView(Container):
                     is_main = main_view == ViewType.TABLE_VERTICAL,
                     button_name = f"Показать таблицу статистических параметров: ***{function_type}***",
                 )
-            case ViewType.AUDIO:
+            case ViewType.AUDIO_PLAYER:
                 return ResultItem(
                     control = ResultAudio(self.function.page, main_data),
-                    is_main = True, # main_view == ViewType.AUDIO,
+                    is_main = True, # main_view == ViewType.AUDIO_PLAYER,
                     button_name = f"Показать аудио: ***{function_type}***"
                 )
             case 'extra_data':

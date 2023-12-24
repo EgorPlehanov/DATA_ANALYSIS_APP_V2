@@ -11,13 +11,12 @@ class ResultErrorMessage(Row):
         super().__init__()
         self.error_message = error_message
 
-        self.ref_error_message = Ref[Text]()
-
         self.controls = self.create_controls()
 
 
     def create_controls(self) -> List[Container]:
         '''Создает карточку с ошибкой'''
+        self.ref_error_message = Ref[Text]()
         return [Container(
             content = Row(
                 controls = [

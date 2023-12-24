@@ -43,7 +43,7 @@ class ViewType(Enum):
     HISTOGRAM = 'histogram'
     TABLE_HORIZONTAL = 'table_horizontal'
     TABLE_VERTICAL = 'table_vertical'
-    AUDIO = 'audio'
+    AUDIO_PLAYER = 'audio_player'
 
     def __str__(self):
         return self.value

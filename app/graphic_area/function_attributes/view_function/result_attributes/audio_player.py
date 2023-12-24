@@ -2,22 +2,12 @@ from typing import List
 from enum import Enum
 from pandas import DataFrame
 import base64
-from dataclasses import dataclass
 from flet import (
-    Row, IconButton, icons, Text, Ref, TextButton, colors, Slider, Icon, 
-    ControlEvent, Audio, BoxShadow, Column, Container, MainAxisAlignment,
-    PopupMenuButton, PopupMenuItem, margin, Page, ShadowBlurStyle
+    Row, IconButton, icons, Text, TextButton, colors, Page,
+    Slider, Icon, ControlEvent, Audio, ShadowBlurStyle, Column, 
+    Container, PopupMenuButton, PopupMenuItem, Ref, BoxShadow,
+    ProgressBar
 )
-
-
-
-@dataclass
-class Speed:
-    '''Скорость воспроизведения'''
-    speed: float
-    text: str
-    def __str__(self):
-        return f"{self.speed}x {self.text}"
 
 
 class ResultAudio(Row):
@@ -37,16 +27,6 @@ class ResultAudio(Row):
         super().__init__()
         self.page = page
         self.data = data
-
-        # self.ref_audio = Ref[Audio]()
-        # self.ref_button_play = Ref[IconButton]()
-        # self.ref_current_time = Ref[Text]()
-        # self.ref_progress_track = Ref[Slider]()
-        # self.ref_remaining_time = Ref[Text]()
-        # self.ref_volume_icon = Ref[IconButton]()
-        # self.ref_volume_slider = Ref[Slider]()
-        # self.ref_speed = Ref[Text]()
-        # self.ref_speed_slider_text = Ref[Text]()
 
         self.disabled = True
 
@@ -90,9 +70,14 @@ class ResultAudio(Row):
         return base64_string
     
 
-    def _on_loaded(self, e: ControlEvent):
+    def _on_loaded(self, e: ControlEvent) -> None:
         '''Срабатывает после загрузки трека'''
-        self.duration = self.audio.get_duration()
+        while True:
+            try:
+                self.duration = self.audio.get_duration()
+                break
+            except Exception as ex:
+                print('audio_player:', ex)
 
         progress_track: Slider = self.ref_progress_track.current
         progress_track.max = self.duration
@@ -102,10 +87,11 @@ class ResultAudio(Row):
         self._update_time()
 
         self.disabled = False
+        self._loading_progress_bar_change_visible()
         self.update()
 
 
-    def _on_position_changed(self, e: ControlEvent):
+    def _on_position_changed(self, e: ControlEvent) -> None:
         '''Обновляет текущее время трека'''
         self.current_position = int(e.data)
 
@@ -117,7 +103,7 @@ class ResultAudio(Row):
             progress_track.update()
 
     
-    def _on_state_changed(self, e: ControlEvent):
+    def _on_state_changed(self, e: ControlEvent) -> None:
         '''Срадатывает при смене состояния трека'''
         if e.data == 'completed':
             self.state = self.State.COMPLITED
@@ -138,9 +124,11 @@ class ResultAudio(Row):
                     self._create_speed_control(),
                     self._create_timer()
                 ]),
+                self._create_loading_progress_bar()
             ])
         )]
         
+
 
     def _create_progress_track(self) -> Slider:
         '''Создает полосу прокрутки трека'''
@@ -160,22 +148,23 @@ class ResultAudio(Row):
         )
     
 
-    def _change_position_start(self, e: ControlEvent):
+    def _change_position_start(self, e: ControlEvent) -> None:
         '''Устанавливает режим изменения позиции'''
         self.is_position_changing = True
 
 
-    def _change_position(self, e: ControlEvent):
+    def _change_position(self, e: ControlEvent) -> None:
         '''Изменяет позицию трека'''
         ms = int(e.control.value)
         self._update_time(ms)
 
 
-    def _change_position_end(self, e: ControlEvent):
+    def _change_position_end(self, e: ControlEvent) -> None:
         '''Устанавливает позицию трека в проигрывателе'''
         ms = int(e.control.value)
         self.audio.seek(ms)
         self.is_position_changing = False
+
 
 
     def _create_button_play(self) -> IconButton:
@@ -189,7 +178,7 @@ class ResultAudio(Row):
         )
     
 
-    def _play_track(self, e: ControlEvent):
+    def _play_track(self, e: ControlEvent) -> None:
         '''Запускает трек'''
         if self.state == self.State.COMPLITED:
             self.state = self.State.PLAYING
@@ -203,7 +192,7 @@ class ResultAudio(Row):
         self._update_button_play_icon()
 
 
-    def _update_button_play_icon(self):
+    def _update_button_play_icon(self) -> None:
         '''Обновляет иконку кнопки'''
         btn_play = self.ref_button_play.current
         if self.state == self.State.PLAYING:
@@ -212,6 +201,7 @@ class ResultAudio(Row):
             btn_play.icon = icons.PLAY_CIRCLE
         btn_play.update()
         
+
 
     def _create_volume(self) -> Row:
         '''Создает кнопку для изменения громкости'''
@@ -242,7 +232,7 @@ class ResultAudio(Row):
         )
     
 
-    def _toggle_sound(self, e: ControlEvent):
+    def _toggle_sound(self, e: ControlEvent) -> None:
         '''Изменяет громкость трека'''
         volume_slider: Slider = self.ref_volume_slider.current
         
@@ -262,7 +252,7 @@ class ResultAudio(Row):
         self._save_changes(e)
         
 
-    def _volume_change(self, e: ControlEvent):
+    def _volume_change(self, e: ControlEvent) -> None:
         '''Изменяет громкость трека'''
         value = e.control.value
         if value > 0:
@@ -271,12 +261,12 @@ class ResultAudio(Row):
         self._update_volume_icon()
         
 
-    def _save_changes(self, e: ControlEvent):
+    def _save_changes(self, e: ControlEvent) -> None:
         '''Применяет изменение громкости'''
         self.page.update()
 
 
-    def _update_volume_icon(self):
+    def _update_volume_icon(self) -> None:
         '''Обновляет иконку громкости'''
         volume = int(self.audio.volume * 100)
         volume_icon = self.ref_volume_icon.current
@@ -289,90 +279,8 @@ class ResultAudio(Row):
             volume_icon.icon = icons.VOLUME_UP
 
         volume_icon.update()
-
-
-    def _create_timer(self) -> Row:
-        '''Создает время трека'''
-        self.ref_current_time = Ref[Text]()
-        self.ref_remaining_time = Ref[Text]()
-        return Row(
-            spacing = 0,
-            controls = [
-                TextButton(
-                    content = Text(
-                        ref = self.ref_current_time,
-                        value = "0:00",
-                        color = colors.WHITE60
-                    ),
-                    tooltip = 'Показывать миллисекунды',
-                    on_click = self._toggle_time_precision
-                ),
-                Text('/'),
-                TextButton(
-                    content = Text(
-                        ref = self.ref_remaining_time,
-                        value = '0:00',
-                        color = colors.WHITE60
-                    ),
-                    tooltip = 'Показывать дительность трека',
-                    on_click = self._toggle_time_display
-                ),
-            ]
-        )
     
 
-    def _toggle_time_precision(self, e: ControlEvent):
-        '''Переключает отображение миллисекунд'''
-        self.time_with_ms = not self.time_with_ms
-        self._update_time()
-        e.control.tooltip = f"{'Не показывать' if self.time_with_ms else 'Показывать'} миллисекунды"
-        e.control.update()
-
-
-    def _toggle_time_display(self, e: ControlEvent):
-        '''Переключает отображение времени между оставшееся до конца и длительность трека'''
-        self.time_display = (
-            self.TimeDisplay.DURATION
-            if self.time_display == self.TimeDisplay.REMAINING
-            else self.TimeDisplay.REMAINING
-        )
-        self._update_time()
-        e.control.tooltip = (
-            "Показывать длительность трека"
-            if self.time_display == self.TimeDisplay.REMAINING
-            else "Показывать оставшееся до конца трека время"
-        )
-        e.control.update()
-
-
-    def _update_time(self, time: int = None):
-        '''Обновляет поля текущее время и оставшееся время до конца трека'''
-        if time is None:
-            time = self.current_position
-
-        current_time: Text = self.ref_current_time.current
-        remaining_time: Text = self.ref_remaining_time.current
-        
-        current_time.value = self._converter_time(time)
-
-        if self.time_display == self.TimeDisplay.REMAINING:
-            remaining_value = f"-{self._converter_time(max(self.duration - time, 0))}"
-        elif self.time_display == self.TimeDisplay.DURATION:
-            remaining_value = self._converter_time(self.audio.get_duration())
-
-        remaining_time.value = remaining_value
-
-        current_time.update()
-        remaining_time.update()
-        
-
-    def _converter_time(self, time_ms: int) -> str:
-        '''Конвертирует миллисекунды в минуты и секунды'''
-        ms = time_ms % 1000
-        seconds = (time_ms // 1000) % 60
-        minutes = time_ms // 60000
-        return f"{minutes}:{seconds:02d}" + (f".{ms:03d}" if self.time_with_ms else "")
-    
 
     def _create_speed_control(self) -> PopupMenuButton:
         '''Создает кнопку изменения скорости'''
@@ -428,7 +336,7 @@ class ResultAudio(Row):
         )
     
 
-    def _on_hover_speed(self, e: ControlEvent):
+    def _on_hover_speed(self, e: ControlEvent) -> None:
         '''Устанавливает тень вокруг индикатора'''
         e.control.shadow = (
             BoxShadow(
@@ -462,7 +370,7 @@ class ResultAudio(Row):
                         round = 1,
                         value = 1.0,
                         divisions = 24,
-                        label = "{value}x",
+                        # label = "{value}x",
                         on_change = self._change_speed_slider,
                         on_change_end = self._change_speed
                     )
@@ -471,12 +379,12 @@ class ResultAudio(Row):
         )
 
 
-    def _change_speed_slider(self, e: ControlEvent):
+    def _change_speed_slider(self, e: ControlEvent) -> None:
         '''Изменяет скорость'''
         self._update_speed_value(e.control.value)
     
 
-    def _change_speed(self, e: ControlEvent):
+    def _change_speed(self, e: ControlEvent) -> None:
         '''Изменяет скорость'''
         if isinstance(e.control, PopupMenuItem):
             self._update_speed_value(e.control.data)
@@ -485,8 +393,7 @@ class ResultAudio(Row):
         self.page.update()
 
 
-
-    def _update_speed_value(self, value: int | float | str):
+    def _update_speed_value(self, value: int | float | str) -> None:
         '''Обновляет значение скорости'''
         value = round(value, 1)
         new_value = f"{value}x"
@@ -506,10 +413,116 @@ class ResultAudio(Row):
             self.current_speed = value
             
     
-    def _update_speed_item_checked(self, value: int | float):
+    def _update_speed_item_checked(self, value: int | float) -> None:
         '''Обновляет отметку выбранной скорости'''
         if value in self.speed_items.keys():
             last_speed: Icon = self.speed_items[value].content.controls[0]
             last_speed.name = None if value == self.current_speed else icons.CHECK
             last_speed.update()
+
+
+
+    def _create_timer(self) -> Row:
+        '''Создает время трека'''
+        self.ref_current_time = Ref[Text]()
+        self.ref_remaining_time = Ref[Text]()
+        return Row(
+            spacing = 0,
+            controls = [
+                TextButton(
+                    content = Text(
+                        ref = self.ref_current_time,
+                        value = "0:00",
+                        color = colors.WHITE60
+                    ),
+                    tooltip = 'Показывать миллисекунды',
+                    on_click = self._toggle_time_precision
+                ),
+                Text('/'),
+                TextButton(
+                    content = Text(
+                        ref = self.ref_remaining_time,
+                        value = '0:00',
+                        color = colors.WHITE60
+                    ),
+                    tooltip = 'Показывать дительность трека',
+                    on_click = self._toggle_time_display
+                ),
+            ]
+        )
+    
+
+    def _toggle_time_precision(self, e: ControlEvent) -> None:
+        '''Переключает отображение миллисекунд'''
+        self.time_with_ms = not self.time_with_ms
+        self._update_time()
+        e.control.tooltip = f"{'Не показывать' if self.time_with_ms else 'Показывать'} миллисекунды"
+        e.control.update()
+
+
+    def _toggle_time_display(self, e: ControlEvent) -> None:
+        '''Переключает отображение времени между оставшееся до конца и длительность трека'''
+        self.time_display = (
+            self.TimeDisplay.DURATION
+            if self.time_display == self.TimeDisplay.REMAINING
+            else self.TimeDisplay.REMAINING
+        )
+        self._update_time()
+        e.control.tooltip = (
+            "Показывать длительность трека"
+            if self.time_display == self.TimeDisplay.REMAINING
+            else "Показывать оставшееся до конца трека время"
+        )
+        e.control.update()
+
+
+    def _update_time(self, time: int = None) -> None:
+        '''Обновляет поля текущее время и оставшееся время до конца трека'''
+        if time is None:
+            time = self.current_position
+
+        current_time: Text = self.ref_current_time.current
+        remaining_time: Text = self.ref_remaining_time.current
+        
+        current_time.value = self._converter_time(time)
+
+        if self.time_display == self.TimeDisplay.REMAINING:
+            remaining_value = f"-{self._converter_time(max(self.duration - time, 0))}"
+        elif self.time_display == self.TimeDisplay.DURATION:
+            remaining_value = self._converter_time(self.audio.get_duration())
+
+        remaining_time.value = remaining_value
+
+        current_time.update()
+        remaining_time.update()
+        
+
+    def _converter_time(self, time_ms: int) -> str:
+        '''Конвертирует миллисекунды в минуты и секунды'''
+        ms = time_ms % 1000
+        seconds = (time_ms // 1000) % 60
+        minutes = time_ms // 60000
+        return f"{minutes}:{seconds:02d}" + (f".{ms:03d}" if self.time_with_ms else "")
+    
+
+
+    def _create_loading_progress_bar(self) -> Container:
+        '''Создает индикатор загрузки аудио файла'''
+        self.ref_loading_progress = Ref[Container]()
+        return Container(
+            ref = self.ref_loading_progress,
+            visible = self.disabled,
+            content = Column(
+                spacing = 0,
+                controls = [
+                    Text("   Загрузка аудео файла..."),
+                    ProgressBar()
+                ]
+            )
+        )
+        
+
+    def _loading_progress_bar_change_visible(self) -> None:
+        '''Изменяет видимость индикатора загрузки аудио файла'''
+        self.ref_loading_progress.current.visible = self.disabled
         

@@ -17,9 +17,6 @@ class ResultToggleContainer(Container):
         self.button_name = button_name
         self.is_open = is_open
 
-        self.ref_control = Ref[Container]()
-        self.ref_button = Ref[IconButton]()
-
         self.content = self.create_content()
 
         self.animate_size = animation.Animation(200, AnimationCurve.FAST_OUT_SLOWIN)
@@ -29,6 +26,7 @@ class ResultToggleContainer(Container):
 
     def create_content(self) -> Row:
         '''Создает блок с кнопкой для скрытия/открытия переданного виджета'''
+        self.ref_control = Ref[Container]()
         return Row(
         controls = [
             self._create_button(),
@@ -46,6 +44,7 @@ class ResultToggleContainer(Container):
 
     def _create_button(self) -> IconButton:
         '''Создает кнопку для скрытия/открытия переданного виджета'''
+        self.ref_button = Ref[IconButton]()
         button = IconButton(
             ref = self.ref_button,
             icon = icons.KEYBOARD_ARROW_UP,

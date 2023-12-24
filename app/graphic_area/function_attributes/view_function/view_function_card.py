@@ -21,7 +21,7 @@ class FunctionCardView(DragTarget):
         self.function = function
         self.key = function.id
         
-        self.ref_card_conteiner = Ref[Container]()
+        # self.ref_card_conteiner = Ref[Container]()
         self.ref_card_result = Ref[Column]()
         self.ref_result_show_button = Ref[IconButton]()
         self.ref_result_data = Ref[Markdown]()
@@ -85,6 +85,7 @@ class FunctionCardView(DragTarget):
 
     def _create_content(self) -> Draggable:
         '''Coздает содержимое карточки функции'''
+        # self.ref_draggable_title_indicator = Ref[Container]()
         return Draggable(
             group = self.group,
             content = self._create_draggable_content(),
@@ -101,6 +102,7 @@ class FunctionCardView(DragTarget):
 
     def _create_draggable_content(self) -> Container:
         '''Создает содержимое перетаскиваемого элемента'''
+        self.ref_card_conteiner = Ref[Container]()
         return Container(
             ref = self.ref_card_conteiner,
             key = self.function.id,
@@ -123,6 +125,7 @@ class FunctionCardView(DragTarget):
         
     def _create_card_title(self) -> Row:
         '''Создает заголовок карточки'''
+        # self.ref_card_title_indicator = Ref[Container]()
         return Row(
             alignment = MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment = CrossAxisAlignment.START,
@@ -186,6 +189,7 @@ class FunctionCardView(DragTarget):
 
     def _create_card_signature(self) -> Row:
         '''Создает строку с представление сигнатуры функции'''
+        # self.ref_card_signature = Ref[Markdown]()
         return Markdown(
             ref = self.ref_card_signature,
             width = 300,
@@ -206,19 +210,20 @@ class FunctionCardView(DragTarget):
 
     def _create_card_result_title(self) -> Row:
         '''Создает заголовок результата'''
+        # self.ref_result_show_button = Ref[IconButton]
         return Row(
-            alignment=MainAxisAlignment.SPACE_BETWEEN,
-            controls=[
+            alignment = MainAxisAlignment.SPACE_BETWEEN,
+            controls = [
                 Markdown("#### Результат:"),
                 Row([
                     IconButton(
-                        icon=icons.SAVE,
-                        on_click=self.dialog_save_result_data.open_dialog
+                        icon = icons.SAVE,
+                        on_click = self.dialog_save_result_data.open_dialog
                     ),
                     IconButton(
-                        icon=icons.KEYBOARD_ARROW_DOWN,
-                        ref=self.ref_result_show_button,
-                        on_click=self._change_result_visible
+                        icon = icons.KEYBOARD_ARROW_DOWN,
+                        ref = self.ref_result_show_button,
+                        on_click = self._change_result_visible
                     ),
                 ])
             ]
@@ -227,6 +232,8 @@ class FunctionCardView(DragTarget):
 
     def _create_card_result_data(self) -> Container:
         '''Создает содержимое результата карточки'''
+        # self.ref_card_result = Ref[Column]
+        # self.ref_result_data = Ref[Markdown]
         return Container(
             animate_size = animation.Animation(200, AnimationCurve.FAST_OUT_SLOWIN),
             content = Column(
@@ -283,10 +290,11 @@ class FunctionCardView(DragTarget):
     def _change_result_visible(self, e: ControlEvent) -> None:
         '''Изменяет видимость результата'''
         self.ref_card_result.current.visible = not self.ref_card_result.current.visible
-        if self.ref_card_result.current.visible:
-            self.ref_result_show_button.current.icon = icons.KEYBOARD_ARROW_UP
-        else:
-            self.ref_result_show_button.current.icon = icons.KEYBOARD_ARROW_DOWN
+        self.ref_result_show_button.current.icon = (
+            icons.KEYBOARD_ARROW_UP
+            if self.ref_card_result.current.visible
+            else icons.KEYBOARD_ARROW_DOWN
+        )
         self.update()
 
 
