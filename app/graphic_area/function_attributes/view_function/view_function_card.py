@@ -21,13 +21,9 @@ class FunctionCardView(DragTarget):
         self.function = function
         self.key = function.id
         
-        # self.ref_card_conteiner = Ref[Container]()
         self.ref_card_result = Ref[Column]()
         self.ref_result_show_button = Ref[IconButton]()
         self.ref_result_data = Ref[Markdown]()
-        self.ref_card_signature = Ref[Markdown]()
-        self.ref_card_title_indicator = Ref[Container]()
-        self.ref_draggable_title_indicator = Ref[Container]()
 
         self.dialog_color_picker = DialogColorPicker(function.color, function.update_color)
         self.page.overlay.append(self.dialog_color_picker)
@@ -85,7 +81,7 @@ class FunctionCardView(DragTarget):
 
     def _create_content(self) -> Draggable:
         '''Coздает содержимое карточки функции'''
-        # self.ref_draggable_title_indicator = Ref[Container]()
+        self.ref_draggable_title_indicator = Ref[Container]()
         return Draggable(
             group = self.group,
             content = self._create_draggable_content(),
@@ -125,7 +121,7 @@ class FunctionCardView(DragTarget):
         
     def _create_card_title(self) -> Row:
         '''Создает заголовок карточки'''
-        # self.ref_card_title_indicator = Ref[Container]()
+        self.ref_card_title_indicator = Ref[Container]()
         return Row(
             alignment = MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment = CrossAxisAlignment.START,
@@ -189,7 +185,7 @@ class FunctionCardView(DragTarget):
 
     def _create_card_signature(self) -> Row:
         '''Создает строку с представление сигнатуры функции'''
-        # self.ref_card_signature = Ref[Markdown]()
+        self.ref_card_signature = Ref[Markdown]()
         return Markdown(
             ref = self.ref_card_signature,
             width = 300,
@@ -232,8 +228,6 @@ class FunctionCardView(DragTarget):
 
     def _create_card_result_data(self) -> Container:
         '''Создает содержимое результата карточки'''
-        # self.ref_card_result = Ref[Column]
-        # self.ref_result_data = Ref[Markdown]
         return Container(
             animate_size = animation.Animation(200, AnimationCurve.FAST_OUT_SLOWIN),
             content = Column(

@@ -58,9 +58,6 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
         self.columns = config.columns
         self.default_value = config.default_value
 
-        self.ref_data_table = Ref[DataTable]()
-        self.ref_delete_button = Ref[IconButton]()
-
         super().__init__()
         self._set_styles()
         self.content = self._create_content()
@@ -77,6 +74,8 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
     
 
     def _create_datatable(self) -> DataTable:
+        '''Создает таблицу'''
+        self.ref_data_table = Ref[DataTable]()
         row_count = max([item.row_index for item in self.default_value]) + 1
         return DataTable(
             columns                    = self._create_datatable_columns(),
@@ -155,6 +154,7 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
 
     def _create_datatable_edit_button(self) -> Row:
         '''Создает кнопку добавления и удаления строк в таблице'''
+        self.ref_delete_button = Ref[IconButton]()
         return Row(
             controls = [
                 IconButton(

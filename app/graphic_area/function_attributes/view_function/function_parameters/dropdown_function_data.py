@@ -38,8 +38,6 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
         self.default_value = config.default_value
         self.options = self._get_current_options()
 
-        self.ref_dropdown_function_data = Ref[Dropdown]()
-
         super().__init__()
         self._set_styles()
         self.content = self._create_content()
@@ -47,6 +45,7 @@ class DropdownFunctionDataEditor(ParamEditorInterface, Container):
 
     def _create_content(self) -> Dropdown:
         '''Создает виджет с выпадающим списком функций'''
+        self.ref_dropdown_function_data = Ref[Dropdown]()
         return Dropdown(
             ref = self.ref_dropdown_function_data,
             dense = True,

@@ -4,4 +4,4 @@ from .error_message         import ResultErrorMessage
 from .histogram             import ResultHistogram
 from .table_horizontal      import ResultTableHorizontal
 from .table_vertical        import ResultTableVertical
-from .audio_player          import ResultAudio
+from .audio_player          import ResultAudioPlayer

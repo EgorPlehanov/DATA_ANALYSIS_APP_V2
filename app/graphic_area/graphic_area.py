@@ -29,10 +29,6 @@ class GraphicArea(Column):
         self.list_parameters = []
         self.list_results = []
 
-        # Ссылки на элементы управления графической области
-        self.ref_result_view = Ref[Column]()
-        self.ref_cards_view = Ref[Column]()
-
         self.controls = self.create_graphic_area_controls()
 
 
@@ -92,6 +88,7 @@ class GraphicArea(Column):
 
     def create_cards_menu(self) -> Container:
         '''Создает меню представления созданных функций'''
+        self.ref_cards_view = Ref[Column]()
         return Container(
             width = 350,
             bgcolor = colors.BLACK12,
@@ -127,6 +124,7 @@ class GraphicArea(Column):
 
     def create_result_view(self) -> Container:
         '''Создает меню представления результата'''
+        self.ref_result_view = Ref[Column]()
         return Container(
             expand = True,
             alignment = alignment.top_center,

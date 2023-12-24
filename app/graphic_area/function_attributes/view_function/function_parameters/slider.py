@@ -46,9 +46,6 @@ class SliderEditor(ParamEditorInterface, Container):
         super().__init__()
         self._set_styles()
 
-        self.ref_textfield = Ref[TextField]()
-        self.ref_slider = Ref[Slider]()
-
         self.content = self._create_content()
     
     
@@ -65,6 +62,7 @@ class SliderEditor(ParamEditorInterface, Container):
 
     def _create_editor_part_textfield(self) -> Row:
         '''Создает часть модификатора параметра с текстовым полем'''
+        self.ref_textfield = Ref[TextField]()
         return Row([
             Text(f'{self.title if self.title else self._name}:'),
             TextField(
@@ -90,6 +88,7 @@ class SliderEditor(ParamEditorInterface, Container):
 
     def _create_editor_part_slider(self) -> Row:
         '''Создает часть модификатора параметра со слайдером'''
+        self.ref_slider = Ref[Slider]()
         slider_divisions = int((self.max - self.min) / self.step)
         return Row(
             controls=[

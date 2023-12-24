@@ -48,7 +48,6 @@ class FilePickerEditor(ParamEditorInterface, Container):
         self.settings = config.settings
         self.default_value = config.default_value
 
-        self.ref_files = Ref[Column]()
         self.list_picked_files: List[File] = []
         self.file_picker_dialog = self._create_file_picker_dialog()
 
@@ -69,6 +68,7 @@ class FilePickerEditor(ParamEditorInterface, Container):
 
     def _create_content(self) -> Column:
         '''Создает содержимое редактора'''
+        self.ref_files = Ref[Column]()
         return Column([
             Row(
                 alignment = MainAxisAlignment.SPACE_BETWEEN,

@@ -31,11 +31,10 @@ class FunctionResultView(Container):
         self.border_radius = 10
         self.bgcolor = colors.BLACK26
         self.padding = padding.only(left=10, top=10, right=20, bottom=10)
-        # self.on_click = self.function._on_click
+        self.on_click = self.function._on_click
 
         self.result_data: ResultData = self.function.get_result()
 
-        self.ref_title = Ref[Text]()
         self.view_title = self._create_view_title()
 
         self.content = self.create_content()
@@ -44,6 +43,20 @@ class FunctionResultView(Container):
     def change_selection(self):
         '''Изменяет выделение результата'''
         self.border = border.all(color=colors.BLUE) if self.function.selected else None
+
+
+    def _create_view_title(self) -> Row:
+        '''Создает заголовок результата'''
+        self.ref_title = Ref[Text]()
+        return Row(
+            alignment = MainAxisAlignment.CENTER,
+            controls = [Text(
+                ref = self.ref_title,
+                weight = FontWeight.BOLD,
+                size = 20,
+                text_align = TextAlign.CENTER
+            )]
+        )
 
 
     def create_content(self) -> Column | Row:
@@ -80,19 +93,6 @@ class FunctionResultView(Container):
 
         count = view_cnt + extra_cnt
         return count > 1
-
-
-    def _create_view_title(self) -> Row:
-        '''Создает заголовок результата'''
-        return Row(
-            alignment = MainAxisAlignment.CENTER,
-            controls = [Text(
-                ref = self.ref_title,
-                weight = FontWeight.BOLD,
-                size = 20,
-                text_align = TextAlign.CENTER
-            )]
-        )
 
 
     def _create_view_result(self, result_data: ResultData) -> Column:
@@ -169,8 +169,8 @@ class FunctionResultView(Container):
                 )
             case ViewType.AUDIO_PLAYER:
                 return ResultItem(
-                    control = ResultAudio(self.function.page, main_data),
-                    is_main = True, # main_view == ViewType.AUDIO_PLAYER,
+                    control = ResultAudioPlayer(self.function.page, main_data),
+                    is_main = main_view == ViewType.AUDIO_PLAYER,
                     button_name = f"Показать аудио: ***{function_type}***"
                 )
             case 'extra_data':

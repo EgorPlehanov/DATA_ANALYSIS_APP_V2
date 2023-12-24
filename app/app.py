@@ -21,13 +21,13 @@ class DataAnalysisApp(Container):
         
         self.appbar = ApplicationBar(self.tabs_modes, self.dialog_add_tab.open_dialog)
         self.page.appbar = self.appbar
-
-        self.ref_tabs_bar = Ref[Tab]()
+        
         self.content = self._create_content()
 
 
     def _create_content(self) -> Tabs:
         '''Создает содержимое приложения'''
+        self.ref_tabs_bar = Ref[Tab]()
         return Tabs(
             ref = self.ref_tabs_bar,
             animation_duration = 200,

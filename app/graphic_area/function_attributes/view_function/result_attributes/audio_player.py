@@ -2,6 +2,7 @@ from typing import List
 from enum import Enum
 from pandas import DataFrame
 import base64
+import time
 from flet import (
     Row, IconButton, icons, Text, TextButton, colors, Page,
     Slider, Icon, ControlEvent, Audio, ShadowBlurStyle, Column, 
@@ -10,7 +11,7 @@ from flet import (
 )
 
 
-class ResultAudio(Row):
+class ResultAudioPlayer(Row):
     '''Плеер для проигрывания сигнала'''
     class TimeDisplay(Enum):
         '''Определяет отображение времени'''
@@ -29,6 +30,7 @@ class ResultAudio(Row):
         self.data = data
 
         self.disabled = True
+        self.spacing = 0
 
         self.state = self.State.PLAYING
         self.time_display = self.TimeDisplay.REMAINING
@@ -37,13 +39,12 @@ class ResultAudio(Row):
         self.current_position = 0
         self.is_position_changing = False
         self.current_speed = 1.0
-
+        
         self.audio: Audio = self._create_audio_control()
         self.page.overlay.append(self.audio)
         self.page.update()
 
         self.controls = self.create_controls()
-        self.spacing = 0
 
 
     def _create_audio_control(self) -> Audio:
@@ -82,13 +83,9 @@ class ResultAudio(Row):
         progress_track: Slider = self.ref_progress_track.current
         progress_track.max = self.duration
         progress_track.divisions = self.duration
-        progress_track.update()
 
-        self._update_time()
-
-        self.disabled = False
+        self._update_time(is_update=False)
         self._loading_progress_bar_change_visible()
-        self.update()
 
 
     def _on_position_changed(self, e: ControlEvent) -> None:
@@ -127,7 +124,6 @@ class ResultAudio(Row):
                 self._create_loading_progress_bar()
             ])
         )]
-        
 
 
     def _create_progress_track(self) -> Slider:
@@ -476,10 +472,12 @@ class ResultAudio(Row):
         e.control.update()
 
 
-    def _update_time(self, time: int = None) -> None:
+    def _update_time(self, time: int = None, is_update: bool = True) -> None:
         '''Обновляет поля текущее время и оставшееся время до конца трека'''
         if time is None:
             time = self.current_position
+        if not self.time_with_ms:
+            time = int(time / 1000) * 1000
 
         current_time: Text = self.ref_current_time.current
         remaining_time: Text = self.ref_remaining_time.current
@@ -493,8 +491,9 @@ class ResultAudio(Row):
 
         remaining_time.value = remaining_value
 
-        current_time.update()
-        remaining_time.update()
+        if is_update:
+            current_time.update()
+            remaining_time.update()
         
 
     def _converter_time(self, time_ms: int) -> str:
@@ -524,5 +523,6 @@ class ResultAudio(Row):
 
     def _loading_progress_bar_change_visible(self) -> None:
         '''Изменяет видимость индикатора загрузки аудио файла'''
+        self.disabled = not self.disabled
         self.ref_loading_progress.current.visible = self.disabled
-        
+        self.update()

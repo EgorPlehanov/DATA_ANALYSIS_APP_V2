@@ -119,10 +119,6 @@ class DataLibraryEditor(ParamEditorInterface, Container):
 
         self.selected_file = self.default_value
 
-        self.ref_title = Ref[Text]()
-        self.ref_cancel = Ref[IconButton]()
-        self.ref_textfield = Ref[TextField]()
-        self.ref_files_options = Ref[Column]()
         self.ref_selected_file_option = Ref[Container]()
 
         super().__init__()
@@ -142,6 +138,8 @@ class DataLibraryEditor(ParamEditorInterface, Container):
 
     def _create_popup_menu_button(self) -> Row:
         '''Создание меню выбора'''
+        self.ref_title = Ref[Text]()
+        self.ref_cancel = Ref[IconButton]()
         menu_button = PopupMenuButton(
             expand = True,
             tooltip = None,
@@ -238,6 +236,8 @@ class DataLibraryEditor(ParamEditorInterface, Container):
 
     def _create_textfield_search(self) -> Column:
         '''Создание элемента поиска'''
+        self.ref_textfield = Ref[TextField]()
+        self.ref_files_options = Ref[Column]()
         return Column([
             TextField(
                 ref = self.ref_textfield,
