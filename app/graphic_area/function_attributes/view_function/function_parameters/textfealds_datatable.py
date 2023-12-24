@@ -22,12 +22,19 @@ class TFDTItem:
     row_index: int           = None
     value: str | int | float = ''
 
+
 @dataclass
 class TFDTColumn:
     name: str             = ''
     tooltip: str          = ''
     unit: str             = None
     value_type: ValueType = ValueType.FLOAT
+    round_digits: int     = 2
+
+    def __post_init__(self):
+        if self.value_type == ValueType.INT:
+            self.round_digits = 0
+
 
 @dataclass
 class TFDTConfig:
@@ -76,7 +83,7 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
     def _create_datatable(self) -> DataTable:
         '''Создает таблицу'''
         self.ref_data_table = Ref[DataTable]()
-        row_count = max([item.row_index for item in self.default_value]) + 1
+        row_count = max([item.row_index for item in self.default_value], default=0) + 1
         return DataTable(
             columns                    = self._create_datatable_columns(),
             rows                       = self._create_datatable_rows(row_count),
@@ -132,6 +139,7 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
             focused_color = colors.BLUE,
             data = {
                 'value_type': self.columns[cell_config.column_name].value_type,
+                'round_digits': self.columns[cell_config.column_name].round_digits,
                 'column_name': cell_config.column_name,
             },
             on_change = validate_textfield_value,
@@ -215,7 +223,11 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
         rows = self.ref_data_table.current.rows
         values = {
             idx: {
-                cell.content.data.get('column_name'): float(cell.content.value)
+                cell.content.data.get('column_name'): self._round_value(
+                    value = cell.content.value,
+                    value_type = cell.content.data.get('value_type'),
+                    round_digits = cell.content.data.get('round_digits'),
+                )
                 for cell in row.cells
             }
             for idx, row in enumerate(rows)
@@ -226,4 +238,13 @@ class TextFieldsDataTableEditor(ParamEditorInterface, Container):
         }
         self.function.calculate.set_parameter_value(self._name, values)
         self.update()
+
+
+    def _round_value(self, value: int | float, value_type: ValueType, round_digits: int) -> int | float:
+        '''Округляет значение параметра'''
+        return (
+            int(float(value) * 10**round_digits) / 10**round_digits
+            if round_digits > 0 and value_type != ValueType.INT
+            else int(float(value))
+        )
     

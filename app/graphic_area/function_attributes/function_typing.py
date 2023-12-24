@@ -19,6 +19,7 @@ class ParameterType(Enum):
     TEXTFIELDS_DATATABLE = 'textfields_datatable'
     TEXTFIELD = 'textfield'
     DATA_LIBRARY = 'data_library'
+    RANGE_SLIDER = 'range_slider'
 
     def __str__(self):
         return self.value
@@ -248,3 +249,17 @@ class File:
             return f"{size / (1024 * 1024):.2f}\u00A0МБ"
         else:
             return f"{size / (1024 * 1024 * 1024):.2f}\u00A0ГБ"
+
+
+
+@dataclass
+class Range:
+    start_value: int | float = 0
+    end_value: int | float   = 1
+
+    def __post_init__(self):
+        if self.start_value > self.end_value:
+            self.start_value, self.end_value = self.end_value, self.start_value
+
+    def __str__(self):
+        return f"(start_value: {self.start_value}, end_value: {self.end_value})"

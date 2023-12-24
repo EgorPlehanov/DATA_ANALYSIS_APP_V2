@@ -7,3 +7,4 @@ from .switch import SwitchEditor, SWConfig
 from .textfealds_datatable import TextFieldsDataTableEditor, TFDTConfig, TFDTColumn, TFDTItem
 from .textfield import TextFieldEditor, TFConfig
 from .data_library import DataLibraryEditor, DLConfig, DLFolder
+from .range_slider import RangeSliderEditor, RSLConfig, Range

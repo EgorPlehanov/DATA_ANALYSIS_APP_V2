@@ -59,9 +59,9 @@ class DLFolder:
 class DLConfig:
     name: str                   = 'library_data'
     title: str                  = 'Выбор набора данных'
-    valid_folders: List[str]    = field(default_factory=list)
-    # TODO: add valid_file_types
-    default_value: str | File = None
+    excluded_folders: List[str] = field(default_factory=list)
+    valid_file_types: List[str] = field(default_factory=list)
+    default_value: str | File   = None
 
     @property
     def type(self) -> ParameterType:
@@ -80,9 +80,14 @@ class DLConfig:
         for file in os.listdir(root):
             path = os.path.join(root, file)
             if os.path.isfile(path):
-                items.append(File(path))
+                data_file = File(path)
+                if (
+                    len(self.valid_file_types) == 0
+                    or data_file.extension in self.valid_file_types
+                ):
+                    items.append(File(path))
             elif os.path.isdir(path):
-                if os.path.basename(path) in self.valid_folders:
+                if os.path.basename(path) not in self.excluded_folders:
                     folder = self._create_folder(path)
                     if folder.file_count > 0 or folder.folder_count > 0:
                         items.append(folder)
@@ -100,7 +105,7 @@ class DLConfig:
         '''Поиск файла по имени'''
         return next((
             item for item in self.all_files
-            if (item.name == file_name and item.folder in self.valid_folders)
+            if (item.name == file_name and item.folder not in self.excluded_folders)
         ), None)
     
 
@@ -112,7 +117,7 @@ class DataLibraryEditor(ParamEditorInterface, Container):
         
         self._name = config.name
         self.title = config.title
-        self.valid_folders = config.valid_folders
+        self.excluded_folders = config.excluded_folders
         self.all_files = config.all_files
         self.folders_files = config.folders_files
         self.default_value = config.default_value

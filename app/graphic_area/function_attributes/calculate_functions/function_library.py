@@ -86,6 +86,14 @@ class FunctionLibrary:
             function = test,
             view_list = [ViewType.CHART, ViewType.AUDIO_PLAYER],
             parameters = [
+                RSLConfig(
+                    name='rsl',
+                    title='Cлайдер диапазона',
+                    min=0,
+                    max=100,
+                    round_digits=3,
+                    default_value=Range(0, 100)
+                ),
                 CBConfig(
                     name='cb',
                     title='Кнопка',
@@ -157,8 +165,11 @@ class FunctionLibrary:
                 ),
                 DLConfig(
                     name='dl',
-                    valid_folders=['User_Saved_Data', 'dat', 'wav', 'jpg', 'grace', 'rect'],
-                    default_value='birches_changed.jpg'#'pgp_2ms.dat'
+                    valid_file_types = [
+                        'csv', 'xls', 'xlsx', 'xlsm', 'xlsb', 'odf',
+                        'ods', 'odt', 'json', 'txt', 'dat', 'wav'
+                    ],
+                    default_value='pgp_2ms.dat'
                 )
             ],
         ),
@@ -388,8 +399,14 @@ class FunctionLibrary:
             name = 'Из библиотеки данных',
             type = FunctionType.DATA,
             function = data_library,
+            view_list = [ViewType.CHART, ViewType.AUDIO_PLAYER],
             parameters = [
-                DLConfig(valid_folders = ['User_Saved_Data', 'dat', 'wav', 'роза']),
+                DLConfig(
+                    valid_file_types = [
+                        'csv', 'xls', 'xlsx', 'xlsm', 'xlsb', 'odf',
+                        'ods', 'odt', 'json', 'txt', 'dat', 'wav'
+                    ]
+                ),
                 SWConfig(),
             ]
         ),
@@ -789,7 +806,32 @@ class FunctionLibrary:
             ]
         ),
 
-
+        'rw': FunctionConfig(
+            key = 'rw',
+            name = 'Ударный слог',
+            type = FunctionType.EDIT,
+            function = rw,
+            view_list = [ViewType.CHART, ViewType.AUDIO_PLAYER],
+            parameters = [
+                DDFDConfig(),
+                TFDTConfig(
+                    name='start_end_coef', title='Диапазоны и коэффициенты',
+                    columns=[
+                        TFDTColumn(
+                            name='start', tooltip='Начало диапазона',
+                            value_type=ValueType.INT
+                        ),
+                        TFDTColumn(
+                            name='end', tooltip='Конец диапазона',
+                            value_type=ValueType.INT
+                        ),
+                        TFDTColumn(
+                            name='coef', tooltip='Коэффициент',
+                        ),
+                    ],
+                ),
+            ]
+        ),
 
         # ================================================
         # FunctionType.ANALYTIC

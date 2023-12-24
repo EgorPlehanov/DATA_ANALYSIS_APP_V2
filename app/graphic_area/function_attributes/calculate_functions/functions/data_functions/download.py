@@ -4,7 +4,8 @@ from typing import List
 import numpy as np
 import pandas as pd
 import csv
-import wave
+import soundfile as sf
+
 
 
 def read_csv(path: str) -> pd.DataFrame:
@@ -26,30 +27,31 @@ def read_dat(path: str) -> pd.DataFrame:
 
 def read_wav(path: str) -> pd.DataFrame:
     '''Возвращает DataFrame из WAV-файла'''
-    with wave.open(path, 'rb') as wav_file:
-        sample_width = wav_file.getsampwidth()
-        n_channels = wav_file.getnchannels()
-        framerate = wav_file.getframerate()
-        n_frames = wav_file.getnframes()
-        frames = wav_file.readframes(n_frames)
-        audio_data = np.frombuffer(frames, dtype=np.int16)
+    audio_data, sample_rate = sf.read(path)
+    
+    if len(audio_data.shape) > 1:
+        audio_data = audio_data[:, 0]
 
-    time = np.arange(0, n_frames) / framerate
-    return pd.DataFrame({'Time': time, 'Amplitude': audio_data})
+    time_array = np.arange(len(audio_data)) / sample_rate
+    return pd.DataFrame({
+        'time': time_array,
+        'amp': audio_data
+    })
+
 
 
 def read_data(path: str) -> FunctionResult:
     '''Чтение данных из файлов'''
     read_data = {
         'csv': read_csv,
-        'xls': lambda path: pd.read_excel(path),
-        'xlsx': lambda path: pd.read_excel(path),
-        'xlsm': lambda path: pd.read_excel(path),
-        'xlsb': lambda path: pd.read_excel(path),
-        'odf': lambda path: pd.read_excel(path),
-        'ods': lambda path: pd.read_excel(path),
-        'odt': lambda path: pd.read_excel(path),
-        'json': lambda path: pd.read_json(path),
+        'xls': pd.read_excel,
+        'xlsx': pd.read_excel,
+        'xlsm': pd.read_excel,
+        'xlsb': pd.read_excel,
+        'odf': pd.read_excel,
+        'ods': pd.read_excel,
+        'odt': pd.read_excel,
+        'json': pd.read_json,
         'txt': lambda path: pd.read_table(path, sep=';'),
         'dat': read_dat,
         'wav': read_wav,
@@ -66,7 +68,7 @@ def read_data(path: str) -> FunctionResult:
     except Exception as e:
         raise ValueError(f"При чтении файла '{name}' произошла ошибка: {str(e)}")
     
-    if data.empty:
+    if data is None or data.empty:
         raise ValueError(f"Файл '{name}' пуст")
     if len(data.columns) != 2:
         raise ValueError(f"Файл '{name}' должен содержать 2 столбца, а не {len(data.columns)}")

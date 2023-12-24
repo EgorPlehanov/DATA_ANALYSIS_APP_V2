@@ -56,7 +56,8 @@ class FunctionParametersView(Container):
             ParameterType.SWITCH:                 SwitchEditor,
             ParameterType.TEXTFIELDS_DATATABLE:   TextFieldsDataTableEditor,
             ParameterType.TEXTFIELD:              TextFieldEditor,
-            ParameterType.DATA_LIBRARY:           DataLibraryEditor
+            ParameterType.DATA_LIBRARY:           DataLibraryEditor,
+            ParameterType.RANGE_SLIDER:           RangeSliderEditor
         }
 
         for config in self.parameters_config.values():

@@ -6,6 +6,7 @@ import pandas as pd
 
 
 def test(
+    rsl,
     cb,
     ddfd,
     dd,
@@ -17,6 +18,7 @@ def test(
     dl
 ) -> FunctionResult:
     error_message = f"Заданые значения:\n" \
+        + f"rsl = {rsl},\n" \
         + f"cb = {cb},\n" \
         + f"ddfd = {ddfd},\n" \
         + f"dd = {dd},\n" \

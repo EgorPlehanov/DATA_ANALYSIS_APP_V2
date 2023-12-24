@@ -1,8 +1,10 @@
 from typing import List
 from enum import Enum
 from pandas import DataFrame
+import io
 import base64
-import time
+import numpy as np
+from scipy.io import wavfile
 from flet import (
     Row, IconButton, icons, Text, TextButton, colors, Page,
     Slider, Icon, ControlEvent, Audio, ShadowBlurStyle, Column, 
@@ -52,8 +54,7 @@ class ResultAudioPlayer(Row):
         self.ref_audio = Ref[Audio]()
         return Audio(
             ref = self.ref_audio,
-            src = 'D:\POLITEH\DATA_ANALYSIS_APP_V2\DATA\wav\sample-12s.wav',
-            # src_base64 = self._dataframe_to_base64(self.data),
+            src_base64 = self._dataframe_to_base64_wav(self.data),
             autoplay = False,
             volume = 0.5,
             balance = 0,
@@ -63,12 +64,23 @@ class ResultAudioPlayer(Row):
             on_state_changed = self._on_state_changed,
         )
     
-
-    def _dataframe_to_base64(self, df: DataFrame) -> str:
+    
+    def _dataframe_to_base64_wav(self, df: DataFrame) -> str:
         '''Конвертирует DataFrame в строку base64'''
-        csv_string = df.to_csv(index=False)
-        base64_string = base64.b64encode(csv_string.encode()).decode()
-        return base64_string
+        time_array = df.iloc[:, 0].to_numpy()
+        amp_array = df.iloc[:, 1].to_numpy()
+        
+        time_diff = (time_array[-1] - time_array[0]) / (len(time_array) - 1)
+        sample_rate = int(1 / time_diff)
+        
+        normalized_amp = amp_array / np.max(np.abs(amp_array))
+        audio_data = (normalized_amp * np.iinfo(np.int16).max).astype(np.int16)
+        
+        wav_bytes = io.BytesIO()
+        wavfile.write(wav_bytes, sample_rate, audio_data)
+        wav_bytes.seek(0)
+        
+        return base64.b64encode(wav_bytes.getvalue()).decode('utf-8')
     
 
     def _on_loaded(self, e: ControlEvent) -> None:

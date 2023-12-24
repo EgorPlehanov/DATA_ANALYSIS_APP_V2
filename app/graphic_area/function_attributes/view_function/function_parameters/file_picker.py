@@ -20,7 +20,7 @@ class FPSettings:
     initial_directory: str          = None
     file_type: FilePickerFileType   = FilePickerFileType.CUSTOM
     allowed_extensions: List[str]   = field(default_factory=lambda: [
-        'csv', 'xls', 'xlsx', 'xlsm', 'xlsb', 'odf', 'ods', 'odt', 'json', 'txt', 'dat'
+        'csv', 'xls', 'xlsx', 'xlsm', 'xlsb', 'odf', 'ods', 'odt', 'json', 'txt', 'dat', 'wav'
     ])
     allow_multiple: bool            = False
 
