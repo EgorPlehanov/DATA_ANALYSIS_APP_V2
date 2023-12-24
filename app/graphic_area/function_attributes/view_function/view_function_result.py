@@ -22,6 +22,7 @@ class ResultItem:
 
 
 class FunctionResultView(Container):
+    '''Представление результата функции'''
     def __init__(self, function: "Function"):
         super().__init__()
         self.function = function
@@ -30,7 +31,7 @@ class FunctionResultView(Container):
         self.border_radius = 10
         self.bgcolor = colors.BLACK26
         self.padding = padding.only(left=10, top=10, right=20, bottom=10)
-        self.on_click = self.function._on_click
+        # self.on_click = self.function._on_click
 
         self.result_data: ResultData = self.function.get_result()
 
@@ -105,6 +106,9 @@ class FunctionResultView(Container):
             if result_data.view_chart:
                 result_items.append(self._create_result_item(ViewType.CHART, result_data))
 
+            if result_data.view_audio:
+                result_items.append(self._create_result_item(ViewType.AUDIO, result_data))
+
             if result_data.view_histogram:
                 result_items.append(self._create_result_item(ViewType.HISTOGRAM, result_data))
                     
@@ -162,6 +166,12 @@ class FunctionResultView(Container):
                     control = ResultTableVertical(main_data),
                     is_main = main_view == ViewType.TABLE_VERTICAL,
                     button_name = f"Показать таблицу статистических параметров: ***{function_type}***",
+                )
+            case ViewType.AUDIO:
+                return ResultItem(
+                    control = ResultAudio(self.function.page, main_data),
+                    is_main = True, # main_view == ViewType.AUDIO,
+                    button_name = f"Показать аудио: ***{function_type}***"
                 )
             case 'extra_data':
                 return ResultItem(

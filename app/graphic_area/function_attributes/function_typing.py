@@ -43,6 +43,7 @@ class ViewType(Enum):
     HISTOGRAM = 'histogram'
     TABLE_HORIZONTAL = 'table_horizontal'
     TABLE_VERTICAL = 'table_vertical'
+    AUDIO = 'audio'
 
     def __str__(self):
         return self.value
@@ -73,6 +74,7 @@ class ResultData:
     view_histogram: Optional[bool]              = None
     view_table_horizontal: Optional[bool]       = None
     view_table_vertical: Optional[bool]         = None
+    view_audio: Optional[bool]                  = None
     main_view: Optional[ViewType]               = ViewType.CHART
     color: Optional[str]                        = colors.BLACK
 

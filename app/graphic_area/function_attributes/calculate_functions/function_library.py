@@ -84,6 +84,7 @@ class FunctionLibrary:
             enabled = True,
             type = FunctionType.TEST,
             function = test,
+            view_list = [ViewType.CHART, ViewType.AUDIO],
             parameters = [
                 CBConfig(
                     name='cb',

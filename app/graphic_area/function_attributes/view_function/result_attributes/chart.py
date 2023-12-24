@@ -7,6 +7,7 @@ from flet import (
 
 
 class ResultChart(Row):
+    '''График'''
     def __init__(self,
         data: DataFrame,
         title: str,

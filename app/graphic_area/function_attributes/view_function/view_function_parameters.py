@@ -11,6 +11,7 @@ from flet import (
 
 
 class FunctionParametersView(Container):
+    '''Представление параметров функции'''
     def __init__(self, function: "Function"):
         super().__init__()
         self.function = function

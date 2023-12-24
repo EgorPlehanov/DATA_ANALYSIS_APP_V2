@@ -7,6 +7,7 @@ from flet import (
 
 
 class ResultTableVertical(Row):
+    '''Вертикальная таблица для отображения набора данных'''
     def __init__(self, data: DataFrame):
         super().__init__()
         self.data = data

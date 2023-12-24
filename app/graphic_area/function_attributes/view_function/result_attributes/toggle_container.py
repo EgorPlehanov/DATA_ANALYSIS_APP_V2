@@ -6,6 +6,7 @@ from flet import (
 
 
 class ResultToggleContainer(Container):
+    '''Раскрывающийся контейнер для виджета'''
     def __init__(self,
         control: Any = None,
         button_name: str = 'Показать',

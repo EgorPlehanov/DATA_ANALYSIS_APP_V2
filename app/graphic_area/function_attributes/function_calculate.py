@@ -123,6 +123,7 @@ class FunctionCalculate:
                 view_histogram          = ViewType.HISTOGRAM in view_list,
                 view_table_horizontal   = ViewType.TABLE_HORIZONTAL in view_list,
                 view_table_vertical     = ViewType.TABLE_VERTICAL in view_list,
+                view_audio              = ViewType.AUDIO in view_list,
                 main_view               = self.function.config.main_view,
                 color                   = self.function.color
             )

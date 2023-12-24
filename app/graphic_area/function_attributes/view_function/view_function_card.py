@@ -4,16 +4,17 @@ if TYPE_CHECKING:
 
 from .card_attributes import *
 
-import flet as ft
 from flet import (
     Page, Container, border, colors, Ref, Column, IconButton,
     Row, MainAxisAlignment, CrossAxisAlignment, Markdown, Text,
     MarkdownExtensionSet, icons, animation, AnimationCurve, Icon,
-    DragTarget, Draggable, DragTargetAcceptEvent, ControlEvent
+    DragTarget, Draggable, DragTargetAcceptEvent, ControlEvent,
+    BoxShadow, ShadowBlurStyle
 )
 
 
 class FunctionCardView(DragTarget):
+    '''Карточка функции'''
     def __init__(self, page: Page, function: "Function"):
         super().__init__()
         self.page = page
@@ -171,14 +172,15 @@ class FunctionCardView(DragTarget):
 
     def _on_hover_color_indicator(self, e: ControlEvent):
         '''Устанавливает тень вокруг индикатора'''
-        if e.data == "true":
-            e.control.shadow = ft.BoxShadow(
+        e.control.shadow = (
+            BoxShadow(
                 spread_radius = 15,
-                color = ft.colors.WHITE10,
-                blur_style = ft.ShadowBlurStyle.NORMAL,
+                color = colors.WHITE10,
+                blur_style = ShadowBlurStyle.NORMAL,
             )
-        else: 
-            e.control.shadow = None
+            if e.data == "true"
+            else None
+        )
         e.control.update()
 
 

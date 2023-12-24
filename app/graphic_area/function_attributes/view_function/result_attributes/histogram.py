@@ -7,6 +7,7 @@ from flet import (
 
 
 class ResultHistogram(Row):
+    '''Гистограмма'''
     def __init__(self,
         data: DataFrame,
         title: str,
