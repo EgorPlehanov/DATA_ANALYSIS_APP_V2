@@ -29,7 +29,7 @@ def lp_values(dt, Fc, m):
         lpw[i] = lpw[i] * sum
         sumg += 2 * lpw[i]
     for i in range(m + 1):
-        lpw[i] = lpw[i] / sumg
+        lpw[i] /= (sumg if sumg != 0 else 1)
     return lpw
 
 
@@ -109,8 +109,8 @@ def fourier_spectrum(data: DataFrame) -> DataFrame:
     x_values = data.iloc[:, 0].copy()
 
     spectrum = np.fft.fft(y_values)
-    frequency = np.fft.fftfreq(len(y_values), d=x_values.iloc[1] - x_values.iloc[0])
-    print(frequency)
+    # frequency = np.fft.fftfreq(len(y_values), d=x_values.iloc[1] - x_values.iloc[0])
+    # print(frequency)
     return DataFrame({
         'Amp': np.arange(0, len(spectrum) // 2),
         'f': np.abs(spectrum[: len(spectrum) // 2])
@@ -119,7 +119,7 @@ def fourier_spectrum(data: DataFrame) -> DataFrame:
 
 def convolution(x, h, N, M):
     '''Расчет свертки'''
-    return [sum(x[i - j] * h[j] for j in range(M) if i - j >= 0) for i in range(N)]
+    return np.array([sum(x[i - j] * h[j] for j in range(M) if i - j >= 0) for i in range(N)])
 
 
 
@@ -165,7 +165,7 @@ def get_filtered_data(
     if data is None:
         return FunctionResult(main_data=filter, extra_data=extra_data)
     
-    y_values = data.iloc[:, 1].copy()
+    y_values = data.iloc[:, 1].copy().to_list()
     
     extra_data.append(ResultData(
         main_data=fourier_spectrum(data),

@@ -848,6 +848,87 @@ class FunctionLibrary:
             ]
         ),
 
+        'speach_process': FunctionConfig(
+            key = 'speach_process',
+            name = 'Обработка аудео сигналов',
+            type = FunctionType.EDIT,
+            function = speach_process,
+            parameters = [
+                DLConfig(
+                    valid_file_types = [
+                        'csv', 'xls', 'xlsx', 'xlsm', 'xlsb', 'odf',
+                        'ods', 'odt', 'json', 'txt', 'dat', 'wav'
+                    ],
+                    default_value='RAMA_MAIN.wav'
+                ),
+                TFDTConfig(
+                    name='ranges', title='Диапазоны',
+                    columns=[
+                        TFDTColumn(
+                            name='start', tooltip='Начало диапазона',
+                            value_type=ValueType.INT
+                        ),
+                        TFDTColumn(
+                            name='end', tooltip='Конец диапазона',
+                            value_type=ValueType.INT
+                        ),
+                    ],
+                    default_value=[
+                        # Диапазон 1
+                        TFDTItem(column_name='start', row_index=0, value=4600),
+                        TFDTItem(column_name='end',   row_index=0, value=15000),
+                        # Диапазон 2
+                        TFDTItem(column_name='start', row_index=1, value=20500),
+                        TFDTItem(column_name='end',   row_index=1, value=29500),
+                    ],
+                ),
+                TFDTConfig(
+                    name='f_values', title='Частоты формант',
+                    columns=[
+                        TFDTColumn(
+                            name='f0', tooltip='Основной тон',
+                            value_type=ValueType.INT
+                        ),
+                        TFDTColumn(
+                            name='f1', tooltip='Первая форманта',
+                            value_type=ValueType.INT
+                        ),
+                        TFDTColumn(
+                            name='f2', tooltip='Вторая форманта',
+                            value_type=ValueType.INT
+                        ),
+                        TFDTColumn(
+                            name='f3', tooltip='Третья форманта',
+                            value_type=ValueType.INT
+                        ),
+                        TFDTColumn(
+                            name='f4', tooltip='Четвертая форманта',
+                            value_type=ValueType.INT
+                        )
+                    ],
+                    default_value=[
+                        # Диапазон 1
+                        TFDTItem(column_name='f0', row_index=0, value = 300),
+                        TFDTItem(column_name='f1', row_index=0, value = 506),
+                        TFDTItem(column_name='f2', row_index=0, value = 1262),
+                        TFDTItem(column_name='f3', row_index=0, value = 2354),
+                        TFDTItem(column_name='f4', row_index=0, value = 3700),
+                        # Диапазон 2
+                        TFDTItem(column_name='f0', row_index=1, value = 270),
+                        TFDTItem(column_name='f1', row_index=1, value = 564),
+                        TFDTItem(column_name='f2', row_index=1, value = 1224),
+                        TFDTItem(column_name='f3', row_index=1, value = 2450),
+                        TFDTItem(column_name='f4', row_index=1, value = 3700),
+                    ],
+                ),
+                SLConfig(
+                    name='m', title='Ширина окна (M)',
+                    min=1, max=1000, step=1, default_value=128,
+                    value_type=ValueType.INT, round_digits=0
+                ),
+            ]
+        ),
+
         # ================================================
         # FunctionType.ANALYTIC
         # ================================================

@@ -31,7 +31,6 @@ class FunctionResultView(Container):
         self.border_radius = 10
         self.bgcolor = colors.BLACK26
         self.padding = padding.only(left=10, top=10, right=20, bottom=10)
-        self.on_click = self.function._on_click
 
         self.result_data: ResultData = self.function.get_result()
 
@@ -48,15 +47,19 @@ class FunctionResultView(Container):
     def _create_view_title(self) -> Row:
         '''Создает заголовок результата'''
         self.ref_title = Ref[Text]()
-        return Row(
-            alignment = MainAxisAlignment.CENTER,
-            controls = [Text(
-                ref = self.ref_title,
-                weight = FontWeight.BOLD,
-                size = 20,
-                text_align = TextAlign.CENTER
-            )]
+        return Container(
+            content = Row(
+                alignment = MainAxisAlignment.CENTER,
+                controls = [Text(
+                    ref = self.ref_title,
+                    weight = FontWeight.BOLD,
+                    size = 20,
+                    text_align = TextAlign.CENTER
+                )]
+            ),
+            on_click = self.function._on_click
         )
+        
 
 
     def create_content(self) -> Column | Row:
