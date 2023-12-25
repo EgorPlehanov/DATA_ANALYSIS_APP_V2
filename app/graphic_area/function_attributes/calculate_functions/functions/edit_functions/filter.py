@@ -111,9 +111,12 @@ def fourier_spectrum(data: DataFrame) -> DataFrame:
     spectrum = np.fft.fft(y_values)
     # frequency = np.fft.fftfreq(len(y_values), d=x_values.iloc[1] - x_values.iloc[0])
     # print(frequency)
+
+    sample_rate = int(1 / np.mean(np.diff(x_values)))
+    df = 1 / sample_rate
     return DataFrame({
-        'Amp': np.arange(0, len(spectrum) // 2),
-        'f': np.abs(spectrum[: len(spectrum) // 2])
+        'f': np.arange(0, len(spectrum) // 2, df),
+        'Amp': np.abs(spectrum[: len(spectrum) // 2])
     })
 
 
@@ -158,8 +161,12 @@ def get_filtered_data(
     M = 2 * m + 1
     filter_freq = frequency_response(filter_values, M)
     data_len = len(filter_freq) // 2
+
+    f_gr = 1 / (2 * dt)
+    df = 2 * f_gr / len(filter_freq)
+
     extra_data = [ResultData(
-        main_data=DataFrame({'Amp': np.arange(0, data_len), 'f': filter_freq[: data_len]}),
+        main_data=DataFrame({'f': np.arange(0, f_gr, df)[:data_len], 'Amp': filter_freq[: data_len]}),
         type='Частотный спектр',
     )]
     if data is None:

@@ -77,7 +77,7 @@ def spectr_fourier(
     N = len(Xn_values) // 2
 
     f_border = 1 / (2 * delta_t)
-    delta_f = f_border / N
+    delta_f = 2 * f_border / N
     frequencies = np.arange(N) * delta_f
 
     spectr_fourier_df = pd.DataFrame({'f': frequencies, '|Xn|': Xn_values[:N]})

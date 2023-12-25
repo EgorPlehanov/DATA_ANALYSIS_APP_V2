@@ -75,8 +75,25 @@ class FunctionLibrary:
     function_by_key = {
 
         # ================================================
-        # FunctionType.DATA
+        # FunctionType.TEST
         # ================================================
+
+        'exam': FunctionConfig(
+            key = "exam",
+            name = "Экзамен",
+            type = FunctionType.TEST,
+            enabled = True,
+            function = exam,
+            view_list = [ViewType.CHART],
+            parameters = [
+                DLConfig(
+                    valid_file_types = [
+                        'csv', 'xls', 'xlsx', 'xlsm', 'xlsb', 'odf',
+                        'ods', 'odt', 'json', 'txt', 'dat', 'wav'
+                    ]
+                ),
+            ],
+        ),
 
         'test': FunctionConfig(
             key = "test",
@@ -173,6 +190,10 @@ class FunctionLibrary:
                 )
             ],
         ),
+
+        # ================================================
+        # FunctionType.DATA
+        # ================================================
 
         "trend": FunctionConfig(
             key = "trend",
