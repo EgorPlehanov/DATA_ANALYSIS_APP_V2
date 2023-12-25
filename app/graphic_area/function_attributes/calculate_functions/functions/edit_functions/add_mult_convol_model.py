@@ -1,4 +1,4 @@
-from ....function_typing import FunctionResult, ResultData
+from ....function_typing import FunctionResult, ResultData, Range
 
 import numpy as np
 from pandas import DataFrame
@@ -115,6 +115,32 @@ def extend_model(
 
     result_x = np.concatenate((first_x[:-1], second_x))
     result_y = np.concatenate((first_y[:-1], second_y))
+
+    result_df = DataFrame({'x': result_x, 'y': result_y})
+    return FunctionResult(main_data=result_df)
+
+
+def cut_model(
+    data: DataFrame, # Набор данных (из другой функции)
+    range: Range     # Диапазон
+) -> FunctionResult:
+    '''
+    Обрезать по краям набор данных
+    '''
+    if data is None:
+        return FunctionResult()
+    
+    x = data.iloc[:, 0].copy()
+    y = data.iloc[:, 1].copy()
+    N = len(x)
+
+    start = int(range.start_value / 100 * N) 
+    end = int(range.end_value / 100 * N)
+
+    result_x = x[start:end]
+    result_y = y[start:end]
+
+    result_x = result_x - np.min(result_x)
 
     result_df = DataFrame({'x': result_x, 'y': result_y})
     return FunctionResult(main_data=result_df)

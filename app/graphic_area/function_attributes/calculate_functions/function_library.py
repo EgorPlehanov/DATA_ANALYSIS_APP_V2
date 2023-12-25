@@ -833,6 +833,21 @@ class FunctionLibrary:
             ]
         ),
 
+        'cut_model': FunctionConfig(
+            key = 'cut_model',
+            name = 'Обрезать',
+            type = FunctionType.EDIT,
+            function = cut_model,
+            parameters = [
+                DDFDConfig(),
+                RSLConfig(
+                    name='range', title='Границы диапазона',
+                    value_type=ValueType.FLOAT, round_digits=3,
+                    min=0, max=100, step=0.01, default_value=Range(0, 100)
+                )
+            ]
+        ),
+
         # ================================================
         # FunctionType.ANALYTIC
         # ================================================

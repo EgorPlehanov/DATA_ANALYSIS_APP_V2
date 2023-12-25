@@ -3,7 +3,12 @@ if TYPE_CHECKING:
     from ....function import Function
 
 import os
-from flet import FilePicker, FilePickerResultEvent, FilePickerFileType, ControlEvent
+import numpy as np
+import soundfile as sf
+from scipy.io import wavfile
+from flet import (
+    FilePicker, FilePickerResultEvent, FilePickerFileType, ControlEvent
+)
 
 
 class DialogSaveResultData(FilePicker):
@@ -25,7 +30,7 @@ class DialogSaveResultData(FilePicker):
             dialog_title = f"Сохрание результата функции {self.function.formatted_name}",
             file_name = f"{self.function.name}({parameters_text}).csv",
             file_type = FilePickerFileType.CUSTOM,
-            allowed_extensions = ['csv', 'json'],
+            allowed_extensions = ['csv', 'json', 'wav'],
             initial_directory = self.initial_directory,
         )
 
@@ -47,20 +52,37 @@ class DialogSaveResultData(FilePicker):
             return
         file_format = os.path.splitext(path)[-1][1:].lower()
 
-        if file_format not in ['csv', 'json']:
+        if file_format not in ['csv', 'json', 'wav']:
             path = f'{path}.csv'
             file_format = 'csv'
 
         try:
+            data_to_save = self.function.get_result_main_data()
             with open(path, 'w') as file:
-                data_to_save = self.function.get_result_main_data()
                 match file_format:
                     case 'csv':
                         data_to_save.to_csv(file, index=False)
                     case 'json':
                         data_to_save.to_json(file, orient='records')
+                    case 'wav':
+                            self.save_dataframe_as_wav(data_to_save, path)
                     case _:
                         raise Exception(f'Неизвестный формат файла: {file_format}')
                         
         except Exception as ex:
             print(f'Ошибка при сохранении: {ex}')
+
+
+    def save_dataframe_as_wav(self, df, path):
+        '''Сохраняет DataFrame в WAV файл'''
+        time_column = df.iloc[:, 0].copy()
+        amp_column = df.iloc[:, 1].copy()
+        
+        amp_column_normalized = (
+            (amp_column - amp_column.min()) 
+            / (amp_column.max() - amp_column.min())
+        )
+
+        audio_data = amp_column_normalized.to_numpy(dtype=np.float32)
+        sample_rate = int(1 / np.mean(np.diff(time_column)))
+        wavfile.write(path, sample_rate, audio_data)
