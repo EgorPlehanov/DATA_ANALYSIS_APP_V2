@@ -83,7 +83,7 @@ class FunctionLibrary:
             name = "Экзамен",
             type = FunctionType.TEST,
             enabled = True,
-            function = exam,
+            function = exams,
             view_list = [ViewType.CHART],
             parameters = [
                 DLConfig(

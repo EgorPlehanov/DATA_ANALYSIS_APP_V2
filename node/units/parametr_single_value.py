@@ -1,0 +1,275 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .node import Node
+
+from flet import *
+from dataclasses import dataclass
+
+from .parametr_typing import *
+from .node_connect_point import ParameterConnectType
+
+
+
+@dataclass
+class SVParamConfig:
+    """
+    Конфигурация параметра с одним значением
+
+    name - название параметра
+    height - высота параметра
+    value - значение параметра
+    connect_point_color - цвет точки подключения
+    """
+    name: str   = 'Untitled'
+    height: int = 20
+    value: int | float = 0
+    velue_step: int | float = 1
+    has_connect_point: bool = True
+    connect_point_color: str = 'green'
+
+    @property
+    def type(self) -> ParameterType:
+        return ParameterType.SINGLE_VALUE
+    
+    @property
+    def connect_type(self) -> ParameterType:
+        return ParameterConnectType.IN
+
+
+
+class SingleValueParam(Container, ParamInterface):
+    '''
+    Параметр с одним значением
+    '''
+
+    MAIN_COLOR = colors.with_opacity(0.05, colors.WHITE)
+    HOVER_COLOR = colors.with_opacity(0.2, colors.WHITE)
+    ACCENT_COLOR = colors.DEEP_ORANGE_ACCENT_400
+
+    def __init__(self, node: 'Node', config: SVParamConfig = SVParamConfig()):
+        super().__init__()
+        self._type: ParameterType = ParameterType.SINGLE_VALUE
+        self._connect_type: ParameterConnectType = ParameterConnectType.IN
+        self._config: SVParamConfig = config
+        self.node = node
+
+        self.set_style()
+        
+        self.value = float(self._config.value)
+        self.is_connected = False
+
+        self.main_control = self._create_main_control()
+        self.enter_control = self._create_enter_control()
+        self.connected_control = self._create_connected_control()
+
+        self.content = self._create_content()
+
+        if self._config.has_connect_point:
+            self.connect_point = self._create_connect_point()
+
+
+
+    def set_style(self) -> None:
+        """
+        Устанавливает стиль параметра
+        """
+        self._name = self._config.name
+        self.height = self._config.height
+        self.control_height = self.height - self.PADDING_VERTICAL_SIZE * 2
+        
+        self.has_connect_point = self._config.has_connect_point
+        self.connect_point_color = self._config.connect_point_color
+
+        self.value_step = self._config.velue_step
+
+        self.margin = margin.only(left = 5)
+        self.padding = padding.only(top = self.PADDING_VERTICAL_SIZE, bottom = self.PADDING_VERTICAL_SIZE)
+        self.border_radius = 5
+
+
+    def _create_content(self) -> Column:
+        '''
+        Создает содержимое параметра
+        '''
+        return Column(
+            controls = [
+                self.main_control,
+                self.enter_control,
+                self.connected_control,
+            ],
+            spacing = 0
+        )
+        
+
+    def _create_main_control(self) -> Container:
+        '''
+        Создает основное содержимое параметра
+        '''
+        self.ref_main_control_value = Ref[Text]()
+        return Container(
+            on_click = self._ckick_to_enter,
+            on_hover = self._on_main_control_hover,
+            visible = not self.is_connected,
+            content = GestureDetector(
+                content = Row(
+                    controls = [
+                        Text(self._name + str(self.id)),
+                        Text(
+                            ref = self.ref_main_control_value,
+                            value = self.value,
+                        )
+                    ],
+                    alignment = MainAxisAlignment.SPACE_BETWEEN,
+                ),
+                on_horizontal_drag_start = self.drag_value_update_start,
+                on_horizontal_drag_end = self.drag_value_update_end,
+                on_horizontal_drag_update = self.drag_value_update,
+
+            ),
+            padding = padding.only(left = 5, right = 5),
+            bgcolor = self.MAIN_COLOR
+        )
+    
+    
+    def _create_enter_control(self) -> Row:
+        '''
+        Создает поле ввода значения
+        '''
+        self.ref_enter_textfield = Ref[TextField]()
+        return Row(
+            visible = False,
+            controls = [
+                TextField(
+                    ref = self.ref_enter_textfield,
+                    keyboard_type = KeyboardType.NUMBER,
+                    expand = True,
+                    height = self.control_height,
+                    value = str(self.value),
+                    on_blur = self._on_enter_blur,
+                    on_change = self._on_enter_change,
+                    on_submit = self._on_enter_submit,
+                    content_padding = padding.only(left = 5, right = 5),
+                    focused_border_color = self.ACCENT_COLOR,
+                ),
+            ]
+        )
+    
+    
+    def _create_connected_control(self) -> Container:
+        '''
+        Создает содержимое параметра когда он подключен
+        '''
+        return Container(
+            visible = self.is_connected,
+            content = Row(
+                controls = [
+                    Text(self._name)
+                ]
+            ),
+            padding = padding.only(left = 5, right = 5),
+        )
+    
+
+    def _ckick_to_enter(self, e: ControlEvent) -> None:
+        '''
+        При клике на параметр открывает поле ввода
+        '''
+        self.main_control.visible = False
+        self.enter_control.visible = True
+        self.ref_enter_textfield.current.value = self.value
+        self.ref_enter_textfield.current.focus()
+        self.update()
+
+
+    def _on_main_control_hover(self, e: ControlEvent) -> None:
+        '''
+        При наведении на основное содержимое
+        '''
+        e.control.bgcolor = self.HOVER_COLOR if e.data == "true" else self.MAIN_COLOR
+        e.control.update()
+
+    
+    def _on_enter_blur(self, e: ControlEvent) -> None:
+        """
+        При потери фокуса открывает основное содержимое
+        """
+        value = self.ref_enter_textfield.current.value
+        if self.is_valid_value(value):
+            self.value = float(self.ref_enter_textfield.current.value)
+            self.ref_main_control_value.current.value = self.value
+        else:
+            self.ref_enter_textfield.current.value = self.value
+
+        self.main_control.visible = True
+        self.enter_control.visible = False
+
+        self.main_control.bgcolor = self.MAIN_COLOR
+        self.update()
+
+    
+    def _on_enter_change(self, e: ControlEvent) -> None:
+        """
+        При изменении значения в поле ввода
+        """
+        pass
+
+    
+    def _on_enter_submit(self, e: ControlEvent) -> None:
+        """
+        При нажатии Enter в поле ввода
+        """
+        self._on_enter_blur(e)
+
+
+    def set_connect_state(self, is_connected: bool) -> None:
+        """
+        Переключает состояние подключения
+        """
+        self.is_connected = is_connected
+        self.main_control.visible = not self.is_connected
+        self.enter_control.visible = not self.is_connected
+        self.connected_control.visible = self.is_connected
+        self.update()
+
+
+    def is_valid_value(self, value: str) -> bool:
+        """
+        Проверяет значение на валидность
+        """
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
+        
+
+    def drag_value_update(self, e: DragUpdateEvent) -> None:
+        """
+        При изменении значения в поле ввода
+        """
+        self.value += round(e.delta_x) * self.value_step
+
+        velue_text: Text = self.ref_main_control_value.current
+        velue_text.value =  self.value
+        velue_text.update()
+
+    def drag_value_update_start(self, e: DragUpdateEvent) -> None:
+        """
+        При начале изменения значения в поле ввода
+        """
+        velue_text: Text = self.ref_main_control_value.current
+        velue_text.color = self.ACCENT_COLOR
+        velue_text.update()
+        
+
+    def drag_value_update_end(self, e: DragUpdateEvent) -> None:
+        """
+        При окончании изменения значения в поле ввода
+        """
+        velue_text: Text = self.ref_main_control_value.current
+        velue_text.color = None
+        velue_text.update()
+
+
+    def _on_change(self):
+        pass

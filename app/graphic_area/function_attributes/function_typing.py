@@ -125,11 +125,11 @@ class FunctionConfig:
     key - ключ функции
     name - название функции
     type - тип функции
+    enabled - активна ли функция
     function - функция
     parameters - параметры функции
     main_view - основное представление функции
     view_list - список представлений функции
-    enabled - активна ли функция
     '''
     key: str                  = 'Unknown'
     name: str                 = 'Неизвестная'

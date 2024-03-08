@@ -12,7 +12,7 @@ from functools import partial
 
 
 
-def speach_process(
+def exams(
     library_data: File, # Файл с данными
 ) -> FunctionResult:
     """
@@ -36,10 +36,10 @@ def speach_process(
 
 
     # Фильтрация
-    filter = get_filtered_data(
-        type = FilterType.lpf,
+    # filter = get_filtered_data(
+    #     type = FilterType.lpf,
 
-    )
+    # )
 
 
 
