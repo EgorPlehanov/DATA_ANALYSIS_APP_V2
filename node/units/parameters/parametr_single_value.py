@@ -24,8 +24,10 @@ class SVParamConfig:
     height: int = 20
     value: int | float = 0
     velue_step: int | float = 1
+    min_value: int | float = None
+    max_value: int | float = None
     has_connect_point: bool = True
-    connect_point_color: str = 'green'
+    connect_point_color: str = colors.GREY_500
 
     @property
     def type(self) -> ParameterType:
@@ -81,6 +83,8 @@ class SingleValueParam(Container, ParamInterface):
         self.connect_point_color = self._config.connect_point_color
 
         self.value_step = self._config.velue_step
+        self.min_value = self._config.min_value
+        self.max_value = self._config.max_value
 
         self.margin = margin.only(left = 3, right = 3)
         self.padding = padding.only(top = self.PADDING_VERTICAL_SIZE, bottom = self.PADDING_VERTICAL_SIZE)
@@ -113,7 +117,7 @@ class SingleValueParam(Container, ParamInterface):
             content = GestureDetector(
                 content = Row(
                     controls = [
-                        Text(self._name + str(self.id)),
+                        Text(self._name),
                         Text(
                             ref = self.ref_main_control_value,
                             value = self.value,
@@ -196,7 +200,7 @@ class SingleValueParam(Container, ParamInterface):
         """
         value = self.ref_enter_textfield.current.value
         if self.is_valid_value(value):
-            self.value = float(self.ref_enter_textfield.current.value)
+            self.value = self.min_max_check(float(self.ref_enter_textfield.current.value))
             self.ref_main_control_value.current.value = self.value
         else:
             self.ref_enter_textfield.current.value = self.value
@@ -204,6 +208,7 @@ class SingleValueParam(Container, ParamInterface):
         self.main_control.visible = True
         self.enter_control.visible = False
 
+        self.ref_main_control_value.current.color = None
         self.main_control.bgcolor = self.MAIN_COLOR
         self.update()
 
@@ -244,11 +249,23 @@ class SingleValueParam(Container, ParamInterface):
             return False
         
 
+    def min_max_check(self, value: float) -> float:
+        """
+        Проверяет значение на валидность
+        """
+        if self.min_value is not None and value < self.min_value:
+            value = self.min_value
+        if self.max_value is not None and value > self.max_value:
+            value = self.max_value
+        return float(value)
+        
+
     def drag_value_update(self, e: DragUpdateEvent) -> None:
         """
         При изменении значения в поле ввода
         """
-        self.value += round(e.delta_x) * self.value_step
+        value = self.value + round(e.delta_x) * self.value_step
+        self.value = self.min_max_check(value)
 
         velue_text: Text = self.ref_main_control_value.current
         velue_text.value =  self.value

@@ -3,8 +3,6 @@ from typing import List
 from flet import icons
 
 
-
-
 @dataclass
 class Folder:
     key: str = "unknown"

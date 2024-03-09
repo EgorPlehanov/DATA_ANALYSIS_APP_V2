@@ -21,7 +21,7 @@ class OutParamConfig:
     name: str   = 'Untitled'
     height: int = 20
     has_connect_point: bool = True
-    connect_point_color: str = 'green'
+    connect_point_color: str = colors.YELLOW_ACCENT_200
 
     @property
     def type(self) -> ParameterType:
@@ -55,7 +55,7 @@ class OutParam(Container, ParamInterface):
         return Container(
             content = Row(
                 controls = [
-                    Text(self._name + str(self.id)),
+                    Text(self._name),
                 ],
                 alignment = MainAxisAlignment.END
             ),

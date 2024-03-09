@@ -2,7 +2,7 @@ from flet import *
 from typing import List
 from .result_area import ResultArea
 from .node.node_area import NodeArea
-from .node.node_statistics_panel import NodeStatisticsPanel
+from .statistics_panel import NodeStatisticsPanel
 from .menubar import FunctionMenuBar
 
 

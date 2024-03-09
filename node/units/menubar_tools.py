@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Callable
 from flet import icons
 
-from .typing import Folder
+from .folder import Folder
 
 
 
