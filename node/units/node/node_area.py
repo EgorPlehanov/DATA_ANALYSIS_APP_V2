@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from .workplace import Workplace
+    from ..workplace import Workplace
 
 from flet import *
 import flet.canvas as cv

@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from .node import Node
+    from ..node.node import Node
 
 from flet import *
 from dataclasses import dataclass
 
 from .parametr_typing import *
-from .node_connect_point import ParameterConnectType
+from ..node.node_connect_point import ParameterConnectType
 
 
 
@@ -82,7 +82,7 @@ class SingleValueParam(Container, ParamInterface):
 
         self.value_step = self._config.velue_step
 
-        self.margin = margin.only(left = 5)
+        self.margin = margin.only(left = 3, right = 3)
         self.padding = padding.only(top = self.PADDING_VERTICAL_SIZE, bottom = self.PADDING_VERTICAL_SIZE)
         self.border_radius = 5
 
@@ -150,6 +150,7 @@ class SingleValueParam(Container, ParamInterface):
                     on_submit = self._on_enter_submit,
                     content_padding = padding.only(left = 5, right = 5),
                     focused_border_color = self.ACCENT_COLOR,
+                    focused_border_width = 1,
                 ),
             ]
         )

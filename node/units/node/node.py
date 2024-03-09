@@ -6,11 +6,12 @@ from flet import *
 from itertools import count
 from typing import Callable, List, Dict
 from dataclasses import dataclass, field
-from .node_typing import Color
 import math
+
+from .node_typing import Color
 from .node_connect_point import NodeConnectPoint
 from .node_typing import NodeConnect 
-from .parametrs_dict import *
+from ..parameters.parametrs_dict import *
 
 
 
@@ -32,6 +33,7 @@ class NodeConfig:
     """
     key: str                = "unknown"
     name: str               = "Untitled"
+    icon: str               = None
     group: str              = "Default"
     color: str              = Color.random()
     left: int               = 20
@@ -125,6 +127,8 @@ class Node(GestureDetector):
         self.width = self.config.width
 
         self.header_color = self.config.color
+
+        self.function = self.config.function
 
 
     def get_height(self):
