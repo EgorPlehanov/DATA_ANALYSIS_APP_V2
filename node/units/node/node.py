@@ -4,14 +4,15 @@ if TYPE_CHECKING:
 
 from flet import *
 from itertools import count
-from typing import Callable, List, Dict
+from typing import Callable, List, Dict, get_type_hints
+from inspect import signature
 from dataclasses import dataclass, field
 import math
 
 from .node_typing import Color
 from .node_connect_point import NodeConnectPoint
 from .node_typing import NodeConnect 
-from ..parameters.parametrs_dict import *
+from ..parameters.parameters_dict import *
 
 
 
@@ -40,7 +41,7 @@ class NodeConfig:
     top: int                = 20
     width: int              = 250
     enabled: bool           = True
-    function: Callable      = lambda: None
+    function: Callable      = lambda: {}
     parameters: Dict | List = field(default_factory=list)
     
     
@@ -95,8 +96,6 @@ class Node(GestureDetector):
 
         self.scale = scale
         
-        self.connects: List[NodeConnect] = []
-
         self.header = self.create_header()
         self.parameters = self.create_parameters()
         
@@ -104,6 +103,8 @@ class Node(GestureDetector):
 
         self.connect_points = self.create_contact_points_list()
         self.content = self.create_content()
+
+        self.calculate()
 
 
     def setup_values(self):
@@ -129,6 +130,16 @@ class Node(GestureDetector):
         self.header_color = self.config.color
 
         self.function = self.config.function
+        self.function_signature = self.get_signature_type_hints()
+
+        self.connects_from: Dict = {
+            param.key: None
+            for param in self.config.parameters
+        }
+        self.connects_to: Dict = {
+            param.key: []
+            for param in self.config.parameters
+        }
 
 
     def get_height(self):
@@ -152,7 +163,7 @@ class Node(GestureDetector):
         """
         Возвращает высоту параметров
         """
-        return sum(param.height for param in self.parameters_list)
+        return sum(param.height for param in self.parameters_dict.values())
     
 
     def get_width_content(self):
@@ -178,7 +189,6 @@ class Node(GestureDetector):
                         ],
                         spacing = 0,
                     ),
-                    # height = self.get_height_content(),
                     width = self.get_width_content(),
                     left = self.CONTENT_MARGIN,
                     top = self.CONTENT_MARGIN,
@@ -262,7 +272,6 @@ class Node(GestureDetector):
             else:
                 point.top, point.left = point.close_top, point.close_left
 
-        # self.height = self.get_height()
         self.node_area.paint_line()
         self.update()
     
@@ -278,27 +287,27 @@ class Node(GestureDetector):
         """
         Создает параметры узла
         """
-        self.parameters_list = self.create_parameters_list(self.config.parameters)
+        self.parameters_dict: Dict = self.create_parameters_dict(self.config.parameters)
         self.set_connect_points_coordinates()
 
         return Container(
             width = self.width,
             content = Column(
-                controls = self.parameters_list,
+                controls = self.parameters_dict.values(),
                 spacing = 0,
             ),
             padding = padding.all(self.PARAM_PADDING),
         )
     
 
-    def create_parameters_list(self, config_list: list) -> list:
+    def create_parameters_dict(self, config_list: list) -> Dict:
         '''
         Создает список параметров
         '''
-        return [
-            type_to_param[config.type](node=self, config=config)
+        return {
+            config.key: type_to_param[config.type](node=self, config=config)
             for config in config_list
-        ]
+        }
     
 
     def set_connect_points_coordinates(self):
@@ -339,7 +348,7 @@ class Node(GestureDetector):
         top = self.HEADER_HEIGHT + self.POINT_SIZE // 2 + self.PARAM_PADDING
         left_out = self.width - 12
 
-        for param in self.parameters_list:
+        for param in self.parameters_dict.values():
             if param.has_connect_point:
                 if param._connect_type == ParameterConnectType.OUT:
                     left = left_out
@@ -366,7 +375,7 @@ class Node(GestureDetector):
         Создает точки контакта
         """
         return [
-            param.connect_point for param in self.parameters_list
+            param.connect_point for param in self.parameters_dict.values()
             if param.has_connect_point or param.connect_point is not None
         ]
     
@@ -404,24 +413,25 @@ class Node(GestureDetector):
         return points if point_idx is None else points[point_idx]
     
 
-    def clear_contact_point(self, param_idx: int):
+    def clear_contact_point(self, connect_point: NodeConnectPoint):
         """
         Очищает точку контакта и удаляет соединение
         """
-        con_p: NodeConnectPoint = next(con_p for con_p in self.connect_points if con_p.id == param_idx)
-        if not isinstance(con_p.content, Draggable):
+        if not isinstance(connect_point.content, Draggable):
             return
-        con_p.content = con_p.content.content
+        connect_point.content = connect_point.content.content
 
-        con_p.drag_leave(None)
+        connect_point.drag_leave(None)
+        connect_point.remove_node_from_connects_to()
 
-        connect = next(con for con in self.connects if con.to_param_idx == param_idx)
-        self.connects.remove(connect)
+        # connect = next(con for con in self.connects if con.to_param_idx == param_idx)
+        # self.connects.remove(connect)
 
-        param = next(param for param in self.parameters_list if param.id == param_idx)
+        param = connect_point.parameter
         param.set_connect_state(False)
 
         self.node_area.paint_line()
+
 
 
     def on_drag(self, e: DragUpdateEvent):
@@ -481,3 +491,85 @@ class Node(GestureDetector):
             conteiner.bgcolor = self.NODE_BGCOLOR
             conteiner.border = border.all(self.BORDER_WIDTH, self.NODE_BORDER_COLOR)
             self.node_area.remove_selection_node(self)
+
+
+    def calculate(self):
+        '''
+        Вычисляет значение функции
+        '''
+        valid_parameters = self._get_valid_parameters()
+        self.result = self.function(**valid_parameters)
+        self.set_result_to_out_parameters()
+        print(self.name, self.result)
+        self.recalculate_connects_to_node()
+        
+
+
+    def set_result_to_out_parameters(self):
+        '''
+        Устанавливает значение выходного параметра
+        '''
+        for res_param in self.result.keys():
+            self.parameters_dict[res_param].value = self.result[res_param]
+
+
+    def recalculate_connects_to_node(self):
+        """
+        Запускает пересчет значений зависимых нод
+        """
+        for params_list in self.connects_to.values():
+            for param in params_list:
+                param.node.calculate()
+
+
+    def get_signature_type_hints(self):
+        '''
+        Возвращает типы параметров функции
+        '''
+        if self.function is None:
+            return {}
+        type_hints = get_type_hints(self.function)
+        type_hints.pop('return', None)
+        return {
+            name: type_hints.get(name)
+            for name in signature(self.function).parameters
+        }
+    
+
+    def _get_valid_parameters(self) -> dict:
+        '''Возвращает текущие значения параметров функции с учетом сигнатуры функции'''
+        valid_parameters = {
+            name:
+                self.parameters_dict[name].value
+                if not self.parameters_dict[name].is_connected
+                else self.connects_from[name].value
+            for name in self.function_signature
+            if self.is_valid_parameter(name, self.parameters_dict[name].value)
+        }
+
+        if len(valid_parameters) != len(self.function_signature):
+            raise ValueError(
+                "Количество параметров не совпадает, "
+                + f"ожидалось {len(self.function_signature)} и получено {len(valid_parameters)}\n"
+                + f"\nПараметры: {self.function_signature}"
+                + f"\nВалидные: {valid_parameters}"
+            )
+
+        return valid_parameters
+    
+
+    def is_valid_parameter(self, name: str, value) -> bool:
+        '''
+        Возвращает True, если параметр имеет допустимый тип
+        '''
+        if (
+            (
+                self.function_signature[name] in [bool, int, str]
+                and not type(value) == self.function_signature[name]
+            ) or (
+                self.function_signature[name] in [float]
+                and not isinstance(value, (float, int))
+            )
+        ):
+            raise TypeError(f"Тип параметра {name} должен быть типа {self.function_signature[name]}, а не {type(value)}")
+        return True

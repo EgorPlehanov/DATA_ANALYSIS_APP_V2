@@ -37,8 +37,6 @@ class NodeArea(cv.Canvas):
             # on_pan_update = self.drag_all
         )
 
-        self.node_connects: Dict[int, NodeConnect] = {}
-
     
     def create_background_grid(self):
         '''
@@ -74,7 +72,9 @@ class NodeArea(cv.Canvas):
         """
         Удалить узел
         """
+        self.delete_node_connect(node)
         self.nodes.remove(node)
+        
         if node in self.selected_nodes:
             self.selected_nodes.remove(node)
         
@@ -82,15 +82,23 @@ class NodeArea(cv.Canvas):
         self.paint_line()
 
 
-    def delete_node_connect(self, node_id, param_idx):
+    def delete_node_connect(self, cur_node: Node):
         '''
         Удаляет соединение между узлами
         '''
-        node: Node = next(node for node in self.nodes if node.id == node_id)
-        node.clear_contact_point(param_idx)
+        for to_param_key, from_param in cur_node.connects_from.items():
+            if from_param is not None:
+                print(to_param_key, from_param.name)
+                cur_node.parameters_dict[to_param_key].connect_point.remove_node_from_connects_to()
+
+        for to_param_list in cur_node.connects_to.values():
+            for to_param in to_param_list:
+                to_param.connect_point.remove_node_from_connects_to()
 
 
-    def calculate_coord(self, node: Node, point: NodeConnectPoint):
+    def calculate_coord(self, point: NodeConnectPoint):
+        node = point.node
+
         left_center = node.width // 2
         top_center = node.height // 2
 
@@ -130,40 +138,63 @@ class NodeArea(cv.Canvas):
         steepness *= self.current_scale
         shp = []
         for node in self.nodes:
-            for connect in node.connects:
-                try:
-                    from_left, from_top, to_left, to_top = self.get_coords(connect)
-                    if connect.ref_path.current is None:
-                        shp.append(cv.Path(
-                            ref = connect.ref_path,
-                            elements = [
-                                cv.Path.MoveTo(from_left, from_top),
-                                cv.Path.LineTo(from_left + line_len, from_top),
-                                cv.Path.CubicTo(
-                                    from_left + steepness, from_top,
-                                    to_left - steepness, to_top,
-                                    to_left - line_len, to_top,
-                                ),
-                                cv.Path.LineTo(to_left, to_top),
-                            ],
-                            paint = Paint(
-                                stroke_width = 2,
-                                style = PaintingStyle.STROKE,
-                                color = connect.color
+            for from_param_key, connects_to_params in node.connects_to.items():
+                for param in connects_to_params:
+                    from_point: NodeConnectPoint = node.parameters_dict[from_param_key].connect_point
+                    to_point: NodeConnectPoint = param.connect_point
+                    from_left, from_top = self.calculate_coord(from_point)
+                    to_left, to_top = self.calculate_coord(to_point)
+
+                    shp.append(cv.Path(
+                        elements = [
+                            cv.Path.MoveTo(from_left, from_top),
+                            cv.Path.LineTo(from_left + line_len, from_top),
+                            cv.Path.CubicTo(
+                                from_left + steepness, from_top,
+                                to_left - steepness, to_top,
+                                to_left - line_len, to_top,
                             ),
-                        ))
-                    else:
-                        shp.append(connect.ref_path.current)
-                        connect.ref_path.current.paint.color = connect.color
-                        move_to, line_from_to, cubic_to, line_to_to = connect.ref_path.current.elements[:4]
-                        move_to.x,      move_to.y      = from_left,             from_top
-                        line_from_to.x, line_from_to.y = from_left + line_len,  from_top
-                        cubic_to.cp1x,  cubic_to.cp1y  = from_left + steepness, from_top
-                        cubic_to.cp2x,  cubic_to.cp2y  = to_left - steepness,   to_top
-                        cubic_to.x,     cubic_to.y     = to_left - line_len,    to_top
-                        line_to_to.x,   line_to_to.y   = to_left,               to_top
-                except Exception as ex:
-                    self.delete_node_connect(connect.to_node_id, connect.to_param_idx)
+                            cv.Path.LineTo(to_left, to_top),
+                        ],
+                        paint = Paint(
+                            stroke_width = 2,
+                            style = PaintingStyle.STROKE,
+                            color = from_point.point_color
+                        ),
+                    ))
+                # try:
+                #     from_left, from_top, to_left, to_top = self.get_coords(connect)
+                #     if connect.ref_path.current is None:
+                #         shp.append(cv.Path(
+                #             ref = connect.ref_path,
+                #             elements = [
+                #                 cv.Path.MoveTo(from_left, from_top),
+                #                 cv.Path.LineTo(from_left + line_len, from_top),
+                #                 cv.Path.CubicTo(
+                #                     from_left + steepness, from_top,
+                #                     to_left - steepness, to_top,
+                #                     to_left - line_len, to_top,
+                #                 ),
+                #                 cv.Path.LineTo(to_left, to_top),
+                #             ],
+                #             paint = Paint(
+                #                 stroke_width = 2,
+                #                 style = PaintingStyle.STROKE,
+                #                 color = connect.color
+                #             ),
+                #         ))
+                #     else:
+                #         shp.append(connect.ref_path.current)
+                #         connect.ref_path.current.paint.color = connect.color
+                #         move_to, line_from_to, cubic_to, line_to_to = connect.ref_path.current.elements[:4]
+                #         move_to.x,      move_to.y      = from_left,             from_top
+                #         line_from_to.x, line_from_to.y = from_left + line_len,  from_top
+                #         cubic_to.cp1x,  cubic_to.cp1y  = from_left + steepness, from_top
+                #         cubic_to.cp2x,  cubic_to.cp2y  = to_left - steepness,   to_top
+                #         cubic_to.x,     cubic_to.y     = to_left - line_len,    to_top
+                #         line_to_to.x,   line_to_to.y   = to_left,               to_top
+                # except Exception as ex:
+                #     self.delete_node_connect(connect.to_node_id, connect.to_param_idx)
         
         self.workplace.node_stats.update_text("edges", len(shp))
         
@@ -287,3 +318,11 @@ class NodeArea(cv.Canvas):
                 l_y * scale_delta / self.current_scale
             )
             self.paint_line()
+
+
+    def get_node_parameter(self, node_id: int, param_id: int):
+        """
+        Возвращает параметр узла
+        """
+        node = next(node for node in self.nodes if node.id == node_id)
+        return next(param for param in node.parameters_dict.values() if param.id == param_id)

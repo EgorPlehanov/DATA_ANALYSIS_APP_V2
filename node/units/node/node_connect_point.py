@@ -50,6 +50,7 @@ class NodeConnectPoint(Container):
         
         self.connect_type = connect_type
         self.point_color = color
+        self.point_current_color = color
         self.point_size = size
 
         self.top = top
@@ -72,10 +73,11 @@ class NodeConnectPoint(Container):
         """
         return Container(
             on_long_press = (
-                lambda e: self.node.clear_contact_point(self.id)
+                # lambda e: self.node.clear_contact_point(self)
+                lambda e: self.remove_node_from_connects_to()
                 if self.connect_type == ParameterConnectType.IN else None
             ),
-            bgcolor = self.point_color,
+            bgcolor = self.point_current_color,
             width = self.point_size,
             height = self.point_size,
             shape = BoxShape.CIRCLE,
@@ -129,11 +131,12 @@ class NodeConnectPoint(Container):
         """
         Отменяент изменения drag_will_accept(), когда курсор убирают с цели
         """
+        point_color = self.point_color
         if isinstance(self.content, Draggable):
-            self.point.bgcolor = self.content.data.get('color')
-        else:
-            self.point.bgcolor = self.point_color
-        self.point.border = border.all(self.POINT_BORDER_WIDTH, colors.BLACK)
+            # self.point_current_color = self.content.data.get('color')
+            point_color = self.point_current_color
+        
+        self.set_point_color(point_color)
         self.update()
 
 
@@ -142,47 +145,44 @@ class NodeConnectPoint(Container):
         Принимает контакт
         """
         src = self.page.get_control(e.src_id)
+
+        src_type = src.data.get('type')
+        src_node_id = src.data.get('node_id')
+        src_value_idx = src.data.get('value_idx')
+        src_color = src.data.get('color')
+        src_cur_node_id = src.data.get('cur_node_id')
+        src_cur_param_idx = src.data.get('cur_param_idx')
+        if src_type == 'in':
+            src_cur_param = self.node.node_area.get_node_parameter(src_cur_node_id, src_cur_param_idx)
+
+        from_param = self.node.node_area.get_node_parameter(src_node_id, src_value_idx)
+
         # пропускаем связь с самим собой
-        if src.data.get('node_id') == self.node_id:
+        if src_node_id == self.node_id:
             self.drag_leave(e)
             return
         
         # удаляет связь при перетаскивании входного параметра из другого контакта
-        if src.data.get('type') == 'in':
-            self.node.node_area.delete_node_connect(src.data.get('cur_node_id'), src.data.get('cur_param_idx'))
+        if src_type == 'in':
+            self.remove_node_from_connects_to(src_cur_param)
 
-        connect = next((
-            con for con in self.node.connects
-            if con.to_param_idx == self.id
-        ), None)
-        if connect is None:
-            self.node.connects.append(
-                NodeConnect(
-                    from_node_id = src.data.get('node_id'),
-                    from_value_idx = src.data.get('value_idx'),
-                    to_node_id = self.node_id,
-                    to_param_idx = self.id,
-                    color = src.data.get('color')
-                )
-            )
-        elif (
-            connect.from_node_id == src.data.get('node_id') 
-            and connect.from_value_idx == src.data.get('value_idx')
-        ):
-            self.point.bgcolor = self.point.data.get('color')
-            self.point.border = border.all(self.POINT_BORDER_WIDTH, colors.BLACK)
+        if self.node.connects_from[self.parameter._key] is None:
+            self.add_connects(from_param)
+        elif from_param.id == self.node.connects_from[self.parameter._key].id:
+            self.set_point_color(self.point_current_color, None)
             self.update()
             return
         else:
-            connect.from_node_id = src.data.get('node_id')
-            connect.from_value_idx = src.data.get('value_idx')
-            connect.color = src.data.get('color')
+            self.remove_node_from_connects_to()
+            self.add_connects(from_param)
+
             
         # Обновление цвета и данных Точки контакта
         data = src.data.copy()
         data['type'] = 'in'
         data['cur_node_id'] = self.node_id
         data['cur_param_idx'] = self.id
+
         if not isinstance(self.content, Draggable):
             self.content = Draggable(
                 content = self.content,
@@ -190,9 +190,67 @@ class NodeConnectPoint(Container):
             )
         else:
             self.content.data = data
-        self.point.bgcolor = src.data.get('color')
-        self.point.border = border.all(self.POINT_BORDER_WIDTH, colors.BLACK)
+        self.set_point_color(src_color)
+        self.point_current_color = src_color
             
         self.node.node_area.paint_line()
-        # self.update()
         self.parameter.set_connect_state(True)
+
+
+    def set_point_color(self, point_color: str = None, border_color: str = colors.BLACK) -> None:
+        """
+        Устанавливает цвет Точки контакта
+        """
+        if point_color is None:
+            point_color = self.point_color
+        self.point.bgcolor = point_color
+        self.point.border = border.all(self.POINT_BORDER_WIDTH, border_color)
+
+
+    def add_connects(self, from_parameter):
+        """
+        Добавляет связь с текущим параметром
+        """
+        self.add_node_from_connects_to(from_parameter)
+        self.add_coonects_from(from_parameter)
+
+
+    def add_node_from_connects_to(self, from_parameter):
+        """
+        Добавляет ноде источника связь с текущем параметром
+        """
+        from_node: Node = from_parameter.node
+        from_node.connects_to[from_parameter._key].append(self.parameter)
+            
+
+    def add_coonects_from(self, from_parameter):
+        """
+        Добавляет текущему параметру связь с нодой источника
+        """
+        self.node.connects_from[self.parameter._key] = from_parameter
+
+
+    def remove_node_from_connects_to(self, to_parameter = None):
+        """
+        Удаляет ноде источника связь с текущем параметром
+        """
+        if to_parameter is None:
+            to_parameter = self.parameter
+
+        to_node = to_parameter.node
+
+        from_parameter = to_node.connects_from[to_parameter._key]
+        from_node: Node = from_parameter.node
+
+        to_node.connects_from[to_parameter._key] = None
+        to_parameter.set_connect_state(False)
+
+        to_point = to_parameter.connect_point
+        to_point.point_current_color = to_point.point_color
+        to_point.set_point_color()
+        if isinstance(to_point.content, Draggable):
+            to_point.content = to_point.content.content
+
+        from_node.connects_to[from_parameter._key].remove(to_parameter)
+
+        from_node.node_area.paint_line()

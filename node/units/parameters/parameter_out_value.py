@@ -5,23 +5,17 @@ if TYPE_CHECKING:
 from flet import *
 from dataclasses import dataclass
 
-from .parametr_typing import *
+from .parameter_typing import *
 
 
 
 @dataclass
-class OutParamConfig:
+class OutParamConfig(ParameterConfigInterface):
     """
-    Конфигурация параметра с одним значением
-    
-    name - название параметра
-    height - высота параметра
-    connect_point_color - цвет точки подключения
+    Конфигурация параметра выходного типа
     """
-    name: str   = 'Untitled'
-    height: int = 20
-    has_connect_point: bool = True
-    connect_point_color: str = colors.YELLOW_ACCENT_200
+    def __post_init__(self):
+        super().__post_init__()
 
     @property
     def type(self) -> ParameterType:
@@ -33,14 +27,18 @@ class OutParamConfig:
 
 
 class OutParam(Container, ParamInterface):
+    """
+    Параметр выходного типа
+    """
     def __init__(self, node: 'Node', config: OutParamConfig = OutParamConfig()):
-        super().__init__()
         self._type = ParameterType.OUT
         self._connect_type = ParameterConnectType.OUT
+
         self.node = node
         self._config: OutParamConfig = config
+        super().__init__()
 
-        self.set_style()
+        self.set_config_height()
 
         self.content = self._create_content()
 
@@ -55,28 +53,10 @@ class OutParam(Container, ParamInterface):
         return Container(
             content = Row(
                 controls = [
-                    Text(self._name),
+                    Text(self.name),
                 ],
                 alignment = MainAxisAlignment.END
             ),
             padding = padding.only(left = 5, right = 5),
         )
     
-
-    def set_style(self):
-        """
-        Устанавливает стиль параметра
-        """
-        self._name = self._config.name
-        self.height = self._config.height
-        
-        self.has_connect_point = self._config.has_connect_point
-        self.connect_point_color = self._config.connect_point_color
-
-
-    def _on_change(self) -> None:
-        return super()._on_change()
-    
-
-    def set_connect_state(self, is_connected: bool) -> None:
-        return super().set_connect_state(is_connected)

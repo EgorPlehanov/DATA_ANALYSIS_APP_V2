@@ -5,29 +5,29 @@ if TYPE_CHECKING:
 from flet import *
 from dataclasses import dataclass
 
-from .parametr_typing import *
+from .parameter_typing import *
 from ..node.node_connect_point import ParameterConnectType
 
 
 
 @dataclass
-class SVParamConfig:
+class SVParamConfig(ParameterConfigInterface):
     """
     Конфигурация параметра с одним значением
 
-    name - название параметра
-    height - высота параметра
-    value - значение параметра
-    connect_point_color - цвет точки подключения
+    default_value - значение параметра (по умолчанию)
+    velue_step - шаг изменения значения
+    min_value - минимальное значение
+    max_value - максимальное значение
     """
-    name: str   = 'Untitled'
-    height: int = 20
-    value: int | float = 0
+    default_value: int | float = 0
     velue_step: int | float = 1
     min_value: int | float = None
     max_value: int | float = None
-    has_connect_point: bool = True
-    connect_point_color: str = colors.GREY_500
+    decimal_accuracy: int = None
+
+    def __post_init__(self):
+        super().__post_init__()
 
     @property
     def type(self) -> ParameterType:
@@ -43,23 +43,16 @@ class SingleValueParam(Container, ParamInterface):
     '''
     Параметр с одним значением
     '''
-
-    MAIN_COLOR = colors.with_opacity(0.05, colors.WHITE)
-    HOVER_COLOR = colors.with_opacity(0.2, colors.WHITE)
-    ACCENT_COLOR = colors.DEEP_ORANGE_ACCENT_400
-
     def __init__(self, node: 'Node', config: SVParamConfig = SVParamConfig()):
-        super().__init__()
         self._type: ParameterType = ParameterType.SINGLE_VALUE
         self._connect_type: ParameterConnectType = ParameterConnectType.IN
-        self._config: SVParamConfig = config
+
         self.node = node
+        self._config: SVParamConfig = config
+        super().__init__()
 
         self.set_style()
         
-        self.value = float(self._config.value)
-        self.is_connected = False
-
         self.main_control = self._create_main_control()
         self.enter_control = self._create_enter_control()
         self.connected_control = self._create_connected_control()
@@ -75,16 +68,13 @@ class SingleValueParam(Container, ParamInterface):
         """
         Устанавливает стиль параметра
         """
-        self._name = self._config.name
-        self.height = self._config.height
-        self.control_height = self.height - self.PADDING_VERTICAL_SIZE * 2
+        self.set_config_height()
         
-        self.has_connect_point = self._config.has_connect_point
-        self.connect_point_color = self._config.connect_point_color
-
         self.value_step = self._config.velue_step
         self.min_value = self._config.min_value
         self.max_value = self._config.max_value
+        self.decimal_accuracy = self._config.decimal_accuracy
+        self.value = self.min_max_check(self._config.default_value)
 
         self.margin = margin.only(left = 3, right = 3)
         self.padding = padding.only(top = self.PADDING_VERTICAL_SIZE, bottom = self.PADDING_VERTICAL_SIZE)
@@ -117,7 +107,7 @@ class SingleValueParam(Container, ParamInterface):
             content = GestureDetector(
                 content = Row(
                     controls = [
-                        Text(self._name),
+                        Text(self.name),
                         Text(
                             ref = self.ref_main_control_value,
                             value = self.value,
@@ -140,6 +130,7 @@ class SingleValueParam(Container, ParamInterface):
         Создает поле ввода значения
         '''
         self.ref_enter_textfield = Ref[TextField]()
+        self.ref_focus = Ref[IconButton]()  
         return Row(
             visible = False,
             controls = [
@@ -151,11 +142,10 @@ class SingleValueParam(Container, ParamInterface):
                     value = str(self.value),
                     on_blur = self._on_enter_blur,
                     on_change = self._on_enter_change,
-                    on_submit = self._on_enter_submit,
                     content_padding = padding.only(left = 5, right = 5),
                     focused_border_color = self.ACCENT_COLOR,
                     focused_border_width = 1,
-                ),
+                )
             ]
         )
     
@@ -168,7 +158,7 @@ class SingleValueParam(Container, ParamInterface):
             visible = self.is_connected,
             content = Row(
                 controls = [
-                    Text(self._name)
+                    Text(self.name)
                 ]
             ),
             padding = padding.only(left = 5, right = 5),
@@ -198,9 +188,10 @@ class SingleValueParam(Container, ParamInterface):
         """
         При потери фокуса открывает основное содержимое
         """
+        old_value = self.value
         value = self.ref_enter_textfield.current.value
         if self.is_valid_value(value):
-            self.value = self.min_max_check(float(self.ref_enter_textfield.current.value))
+            self.value = self.min_max_check(float(value))
             self.ref_main_control_value.current.value = self.value
         else:
             self.ref_enter_textfield.current.value = self.value
@@ -211,22 +202,18 @@ class SingleValueParam(Container, ParamInterface):
         self.ref_main_control_value.current.color = None
         self.main_control.bgcolor = self.MAIN_COLOR
         self.update()
+        if old_value != self.value:
+            self._on_change()
 
     
     def _on_enter_change(self, e: ControlEvent) -> None:
         """
         При изменении значения в поле ввода
         """
+        # TODO: можно добавить проверку на валидность
         pass
 
     
-    def _on_enter_submit(self, e: ControlEvent) -> None:
-        """
-        При нажатии Enter в поле ввода
-        """
-        self._on_enter_blur(e)
-
-
     def set_connect_state(self, is_connected: bool) -> None:
         """
         Переключает состояние подключения
@@ -236,6 +223,7 @@ class SingleValueParam(Container, ParamInterface):
         self.enter_control.visible = not self.is_connected
         self.connected_control.visible = self.is_connected
         self.update()
+        self._on_change()
 
 
     def is_valid_value(self, value: str) -> bool:
@@ -257,37 +245,39 @@ class SingleValueParam(Container, ParamInterface):
             value = self.min_value
         if self.max_value is not None and value > self.max_value:
             value = self.max_value
-        return float(value)
+        if self.decimal_accuracy is None:
+            return float(value)
+        elif self.decimal_accuracy == 0:
+            return int(value)
+        return round(float(value), self.decimal_accuracy)
         
 
     def drag_value_update(self, e: DragUpdateEvent) -> None:
         """
         При изменении значения в поле ввода
         """
-        value = self.value + round(e.delta_x) * self.value_step
-        self.value = self.min_max_check(value)
-
-        velue_text: Text = self.ref_main_control_value.current
-        velue_text.value =  self.value
-        velue_text.update()
+        value_text: Text = self.ref_main_control_value.current
+        value = float(value_text.value) + round(e.delta_x) * self.value_step
+        value_text.value =  self.min_max_check(value)
+        value_text.update()
 
     def drag_value_update_start(self, e: DragUpdateEvent) -> None:
         """
         При начале изменения значения в поле ввода
         """
-        velue_text: Text = self.ref_main_control_value.current
-        velue_text.color = self.ACCENT_COLOR
-        velue_text.update()
+        value_text: Text = self.ref_main_control_value.current
+        value_text.color = self.ACCENT_COLOR
+        value_text.update()
         
 
     def drag_value_update_end(self, e: DragUpdateEvent) -> None:
         """
         При окончании изменения значения в поле ввода
         """
-        velue_text: Text = self.ref_main_control_value.current
-        velue_text.color = None
-        velue_text.update()
+        value_text: Text = self.ref_main_control_value.current
+        value_text.color = None
+        value_text.update()
 
-
-    def _on_change(self):
-        pass
+        if self.value != float(value_text.value):
+            self.value = self.min_max_check(value_text.value)
+            self._on_change()
