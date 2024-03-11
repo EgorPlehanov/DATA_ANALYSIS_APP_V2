@@ -11,7 +11,7 @@ from ..node.node_connect_point import ParameterConnectType
 
 
 @dataclass
-class SVParamConfig(ParameterConfigInterface):
+class SingleValueParamConfig(ParameterConfigInterface):
     """
     Конфигурация параметра с одним значением
 
@@ -43,12 +43,12 @@ class SingleValueParam(Container, ParamInterface):
     '''
     Параметр с одним значением
     '''
-    def __init__(self, node: 'Node', config: SVParamConfig = SVParamConfig()):
+    def __init__(self, node: 'Node', config: SingleValueParamConfig = SingleValueParamConfig()):
         self._type: ParameterType = ParameterType.SINGLE_VALUE
         self._connect_type: ParameterConnectType = ParameterConnectType.IN
 
         self.node = node
-        self._config: SVParamConfig = config
+        self._config: SingleValueParamConfig = config
         super().__init__()
 
         self.set_style()
@@ -68,7 +68,7 @@ class SingleValueParam(Container, ParamInterface):
         """
         Устанавливает стиль параметра
         """
-        self.set_config_height()
+        self.__post_init__()
         
         self.value_step = self._config.velue_step
         self.min_value = self._config.min_value
@@ -130,7 +130,6 @@ class SingleValueParam(Container, ParamInterface):
         Создает поле ввода значения
         '''
         self.ref_enter_textfield = Ref[TextField]()
-        self.ref_focus = Ref[IconButton]()  
         return Row(
             visible = False,
             controls = [

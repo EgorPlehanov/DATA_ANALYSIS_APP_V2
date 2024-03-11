@@ -34,7 +34,7 @@ class TakeValueParam(Container, ParamInterface):
         self.node = node
         self._config: TakeValueParamConfig = config
         super().__init__()
-        self.set_config_height()
+        self.__post_init__()
         
         self.content = self._create_content()
 

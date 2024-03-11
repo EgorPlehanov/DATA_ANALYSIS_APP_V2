@@ -44,6 +44,7 @@ class ParameterConfigInterface:
     default_value: Any = None
     has_connect_point: bool = True
     connect_point_color: str = colors.GREY_500
+    tooltip: str = None
 
     def __post_init__(self):
         if self.key == 'unknown':
@@ -86,6 +87,10 @@ class ParamInterface(ABC):
         self.is_connected = False
         self.value = self._config.default_value
 
+    def __post_init__(self):
+        self.height = self._config.height
+        self.control_height = self.height - self.PADDING_VERTICAL_SIZE * 2
+        self.tooltip = self._config.tooltip
 
     @property
     def type(self) -> str:
@@ -95,7 +100,6 @@ class ParamInterface(ABC):
     def _create_content(self) -> Any:
         pass
 
-    # @abstractmethod
     def set_connect_state(self, is_connected: bool) -> None:
         self.is_connected = is_connected
         self._on_change()
@@ -103,10 +107,6 @@ class ParamInterface(ABC):
     def _on_change(self) -> None:
         self.node.calculate()
 
-    def set_config_height(self) -> None:
-        self.height = self._config.height
-        self.control_height = self.height - self.PADDING_VERTICAL_SIZE * 2
-    
     def _create_connect_point(self) -> NodeConnectPoint:
         return NodeConnectPoint(
             node = self.node,

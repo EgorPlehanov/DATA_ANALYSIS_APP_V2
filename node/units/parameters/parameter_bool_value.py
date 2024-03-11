@@ -11,7 +11,7 @@ from ..node.node_connect_point import ParameterConnectType
 
 
 @dataclass
-class BVParamConfig(ParameterConfigInterface):
+class BoolValueParamConfig(ParameterConfigInterface):
     """
     Конфигурация параметра с одним булевым значением
 
@@ -38,12 +38,12 @@ class BoolValueParam(Container, ParamInterface):
     '''
     Параметр с одним булевым значением
     '''
-    def __init__(self, node: 'Node', config: BVParamConfig = BVParamConfig()):
+    def __init__(self, node: 'Node', config: BoolValueParamConfig = BoolValueParamConfig()):
         self._type: ParameterType = ParameterType.BOOL_VALUE
         self._connect_type: ParameterConnectType = ParameterConnectType.IN
 
         self.node = node
-        self._config: BVParamConfig = config
+        self._config: BoolValueParamConfig = config
         super().__init__()
 
         self.set_style()
@@ -62,7 +62,7 @@ class BoolValueParam(Container, ParamInterface):
         """
         Устанавливает стиль параметра
         """
-        self.set_config_height()
+        self.__post_init__()
 
         self.is_tristate = self._config.is_tristate
         
@@ -108,7 +108,7 @@ class BoolValueParam(Container, ParamInterface):
                 ],
                 alignment = MainAxisAlignment.SPACE_BETWEEN,
             ),
-            padding = padding.only(left = 5, right = 5),
+            padding = padding.only(left = 5),
             bgcolor = self.MAIN_COLOR
         )
     
@@ -163,4 +163,5 @@ class BoolValueParam(Container, ParamInterface):
         )
         self.ref_main_control_value.current.value = self.value
         self.update()
+        self._on_change()
 

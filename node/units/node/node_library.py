@@ -22,8 +22,8 @@ class NodeLibrary:
                     parameters = [
                         OutParamConfig(name = "Param 1", connect_point_color = "green"),
 
-                        SVParamConfig(name = "Param 2", connect_point_color = "red"),
-                        SVParamConfig(name = "Param 3", connect_point_color = "orange", has_connect_point = False),
+                        SingleValueParamConfig(name = "Param 2", connect_point_color = "red"),
+                        SingleValueParamConfig(name = "Param 3", connect_point_color = "orange", has_connect_point = False),
                     ]
                 ),
 
@@ -34,10 +34,16 @@ class NodeLibrary:
                         OutParamConfig(name = "Param 1", connect_point_color = "green"),
                         OutParamConfig(name = "Param 2", connect_point_color = "blue"),
 
-                        SVParamConfig(name = "Param 3", connect_point_color = "red"),
-                        SVParamConfig(name = "Param 4", connect_point_color = "orange"),
-                        BVParamConfig(key="bool_val3", name="Bool tristate", default_value = True, is_tristate = True),
-                        BVParamConfig(key="bool_val4", name="Bool", default_value = True),
+                        SingleValueParamConfig(name = "Param 3", connect_point_color = "red"),
+                        SingleValueParamConfig(name = "Param 4", connect_point_color = "orange"),
+
+                        BoolValueParamConfig(
+                            key="bool_val_1", name="Bool tristate",
+                            default_value = True, is_tristate = True
+                        ),
+                        BoolValueParamConfig(key="bool_val_2", name="Bool", default_value = True),
+
+                        TextValueParamConfig(key="text", name="Text", default_value = "Test"),
                     ]
                 ),
 
@@ -91,9 +97,9 @@ class NodeLibrary:
                     parameters = [
                         OutParamConfig(key = "value", name = "Value", connect_point_color = colors.BLUE_ACCENT_200),
 
-                        SVParamConfig(key = "min_value", name = "Min"),
-                        SVParamConfig(key = "max_value", name = "Max"),
-                        SVParamConfig(
+                        SingleValueParamConfig(key = "min_value", name = "Min"),
+                        SingleValueParamConfig(key = "max_value", name = "Max"),
+                        SingleValueParamConfig(
                             key = "decimal_accuracy", name = "Десятичная точность",
                             decimal_accuracy = 0, default_value = 3,
                             min_value = -1, max_value = 10
@@ -109,8 +115,8 @@ class NodeLibrary:
                     parameters = [
                         OutParamConfig(key = "sum", name = "Sum", connect_point_color = "green"),
 
-                        SVParamConfig(key = "a", name = "A"),
-                        SVParamConfig(key = "b", name = "B"),
+                        SingleValueParamConfig(key = "a", name = "A"),
+                        SingleValueParamConfig(key = "b", name = "B"),
                     ]
                 ),
             ]
@@ -124,6 +130,7 @@ class NodeLibrary:
             function = display_result,
             parameters = [
                 TakeValueParamConfig(key = "result", name = "Result"),
+                TextValueParamConfig(key="label", name="Label", hint_text = "Название результата..."),
             ]
         )
     ]

@@ -11,13 +11,19 @@ from ..node.node_connect_point import ParameterConnectType
 
 
 @dataclass
-class TVParamConfig(ParameterConfigInterface):
+class TextValueParamConfig(ParameterConfigInterface):
     """
-    Конфигурация параметра с одним булевым значением
+    Конфигурация параметра с одним текстовым значением
 
     default_value - значение параметра (по умолчанию)
+    text_align - выравнивание текста
+    capitalization - капитализация текста
+    hint_text - подсказка
     """
-    default_value: bool = False
+    default_value: str = ''
+    text_align: TextAlign = TextAlign.RIGHT
+    capitalization: TextCapitalization = TextCapitalization.NONE
+    hint_text: str = ''
 
     def __post_init__(self):
         super().__post_init__()
@@ -36,12 +42,12 @@ class TextValueParam(Container, ParamInterface):
     '''
     Параметр с одним булевым значением
     '''
-    def __init__(self, node: 'Node', config: TVParamConfig = TVParamConfig()):
+    def __init__(self, node: 'Node', config: TextValueParamConfig = TextValueParamConfig()):
         self._type: ParameterType = ParameterType.TEXT_VALUE
         self._connect_type: ParameterConnectType = ParameterConnectType.IN
 
         self.node = node
-        self._config: TVParamConfig = config
+        self._config: TextValueParamConfig = config
         super().__init__()
 
         self.set_style()
@@ -60,10 +66,13 @@ class TextValueParam(Container, ParamInterface):
         """
         Устанавливает стиль параметра
         """
-        self.set_config_height()
+        self.__post_init__()
 
-        self.is_tristate = self._config.is_tristate
-        
+        self.text_align = self._config.text_align
+        self.tooltip = self._config.tooltip
+        self.capitalization = self._config.capitalization
+        self.hint_text = self._config.hint_text
+
         self.margin = margin.only(left = 3, right = 3)
         self.padding = padding.only(top = self.PADDING_VERTICAL_SIZE, bottom = self.PADDING_VERTICAL_SIZE)
         self.border_radius = 5
@@ -86,29 +95,37 @@ class TextValueParam(Container, ParamInterface):
         '''
         Создает основное содержимое параметра
         '''
-        self.ref_main_control_value = Ref[Checkbox]()
+        self.ref_main_control_value = Ref[TextField]()
         return Container(
-            on_click = self._change_checkbox_value,
             on_hover = self._on_main_control_hover,
             visible = not self.is_connected,
             content = Row(
                 controls = [
                     Text(self.name),
-                    Checkbox(
+                    TextField(
                         ref = self.ref_main_control_value,
-                        value = self.value,
-                        on_change = self.on_checkbox_change,
                         height = self.control_height,
-                        tristate = self.is_tristate,
-                        check_color = colors.WHITE,
-                        active_color = colors.with_opacity(0, colors.WHITE),
+                        expand = True,
+                        value = str(self.value),
+                        border = InputBorder.NONE,
+                        focused_border_color = self.ACCENT_COLOR,
+                        text_size = self.control_height * 0.75,
+                        text_align = self.text_align,
+                        capitalization = self.capitalization,
+                        hint_text = self.hint_text,
+                        on_blur = self._on_enter_blur,
+                        on_focus = self._on_focus,
                     )
-                ],
-                alignment = MainAxisAlignment.SPACE_BETWEEN,
+                ]
             ),
             padding = padding.only(left = 5, right = 5),
             bgcolor = self.MAIN_COLOR
         )
+    
+
+    def _on_focus(self, e: ControlEvent) -> None:
+        e.control.border = InputBorder.UNDERLINE
+        self.update()
     
     
     def _create_connected_control(self) -> Container:
@@ -143,22 +160,15 @@ class TextValueParam(Container, ParamInterface):
         self._on_change()
 
 
-    def on_checkbox_change(self, e: ControlEvent) -> None:
+    def _on_enter_blur(self, e: ControlEvent) -> None:
         """
-        Обработчик изменения состояния
+        При потери фокуса открывает основное содержимое
         """
-        self.value = e.control.value
-        self._on_change()
+        value = self.ref_main_control_value.current.value
+        if value != self.value:
+            self.value = value
+            self._on_change()
 
-    
-    def _change_checkbox_value(self, e: ControlEvent) -> None:
-        '''
-        Изменяет состояние параметра при клике на поле параметра
-        '''
-        self.value = (
-            not self.value if not self.is_tristate
-            else {False: True, True: None, None: False}[self.value]
-        )
-        self.ref_main_control_value.current.value = self.value
+        e.control.border = InputBorder.NONE
         self.update()
 
