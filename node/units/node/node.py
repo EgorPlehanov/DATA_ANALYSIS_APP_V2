@@ -500,7 +500,7 @@ class Node(GestureDetector):
         valid_parameters = self._get_valid_parameters()
         self.result = self.function(**valid_parameters)
         self.set_result_to_out_parameters()
-        print(self.name, self.result)
+        print(self.id, self.name, self.result)
         self.recalculate_connects_to_node()
         
 

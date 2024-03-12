@@ -134,7 +134,7 @@ class BoolValueParam(Container, ParamInterface):
         e.control.update()
 
     
-    def set_connect_state(self, is_connected: bool) -> None:
+    def set_connect_state(self, is_connected: bool, recalculate: bool = True) -> None:
         """
         Переключает состояние подключения
         """
@@ -142,7 +142,8 @@ class BoolValueParam(Container, ParamInterface):
         self.main_control.visible = not self.is_connected
         self.connected_control.visible = self.is_connected
         self.update()
-        self._on_change()
+        if recalculate:
+            self._on_change()
 
 
     def on_checkbox_change(self, e: ControlEvent) -> None:

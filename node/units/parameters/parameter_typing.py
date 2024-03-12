@@ -100,9 +100,10 @@ class ParamInterface(ABC):
     def _create_content(self) -> Any:
         pass
 
-    def set_connect_state(self, is_connected: bool) -> None:
+    def set_connect_state(self, is_connected: bool, recalculate: bool = True) -> None:
         self.is_connected = is_connected
-        self._on_change()
+        if recalculate:
+            self._on_change()
     
     def _on_change(self) -> None:
         self.node.calculate()

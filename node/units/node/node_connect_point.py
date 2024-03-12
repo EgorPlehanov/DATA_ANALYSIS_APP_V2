@@ -230,7 +230,7 @@ class NodeConnectPoint(Container):
         self.node.connects_from[self.parameter._key] = from_parameter
 
 
-    def remove_node_from_connects_to(self, to_parameter = None):
+    def remove_node_from_connects_to(self, to_parameter = None, recalculate_and_paint = True):
         """
         Удаляет ноде источника связь с текущем параметром
         """
@@ -243,7 +243,7 @@ class NodeConnectPoint(Container):
         from_node: Node = from_parameter.node
 
         to_node.connects_from[to_parameter._key] = None
-        to_parameter.set_connect_state(False)
+        to_parameter.set_connect_state(False, recalculate = recalculate_and_paint)
 
         to_point = to_parameter.connect_point
         to_point.point_current_color = to_point.point_color
@@ -252,5 +252,6 @@ class NodeConnectPoint(Container):
             to_point.content = to_point.content.content
 
         from_node.connects_to[from_parameter._key].remove(to_parameter)
-
-        from_node.node_area.paint_line()
+        
+        if recalculate_and_paint:
+            from_node.node_area.paint_line()
