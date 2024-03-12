@@ -6,8 +6,6 @@ from flet import *
 from enum import Enum
 from typing import Any
 
-from .node_typing import NodeConnect
-
     
 
 class ParameterConnectType(Enum):

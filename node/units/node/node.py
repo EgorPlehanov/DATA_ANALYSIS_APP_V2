@@ -10,8 +10,6 @@ from dataclasses import dataclass, field
 import math
 
 from .node_typing import Color
-from .node_connect_point import NodeConnectPoint
-from .node_typing import NodeConnect 
 from ..parameters.parameters_dict import *
 
 
@@ -466,10 +464,9 @@ class Node(GestureDetector):
         valid_parameters = self._get_valid_parameters()
         self.result = self.function(**valid_parameters)
         self.set_result_to_out_parameters()
-        print(self.id, self.name, self.result)
+        print(self.id, self.name, self.result) # ОТЛАДКА TEST
         self.recalculate_connects_to_node()
         
-
 
     def set_result_to_out_parameters(self):
         '''

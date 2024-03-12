@@ -11,3 +11,11 @@ class ResultArea(Column):
 
         self.page = page
         self.workplace = workplace
+
+        self.controls = self.create_controls()
+
+
+    def create_controls(self):
+        return [
+            Text("Результаты")
+        ]

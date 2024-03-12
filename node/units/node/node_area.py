@@ -7,7 +7,6 @@ import flet.canvas as cv
 from typing import Dict
 
 from .node import Node, NodeConfig
-from .node_typing import NodeConnect
 from .node_connect_point import NodeConnectPoint
 
 
@@ -118,25 +117,6 @@ class NodeArea(cv.Canvas):
         point_top_scl = point_top * self.current_scale + top_center
 
         return node.left + point_left_scl, node.top + point_top_scl
-    
-
-    def get_coords(self, connect: NodeConnect):
-        '''
-        Возвращает координаты начала и конца линии соединения
-        '''
-        from_node: Node = next((node for node in self.nodes if node.id == connect.from_node_id), None)
-        if from_node is None:
-            raise Exception('From Node not found')
-        from_point: NodeConnectPoint = next((point for point in from_node.connect_points if point.id == connect.from_value_idx), None)
-        from_left, from_top = self.calculate_coord(from_node, from_point)
-        
-        to_node: Node = next((node for node in self.nodes if node.id == connect.to_node_id), None)
-        if to_node is None:
-            raise Exception('To Node not found')
-        to_point: NodeConnectPoint = next((point for point in to_node.connect_points if point.id == connect.to_param_idx), None)
-        to_left, to_top = self.calculate_coord(to_node, to_point)
-
-        return from_left, from_top, to_left, to_top
     
 
     def paint_line(self, line_len = 10, steepness = 70):
