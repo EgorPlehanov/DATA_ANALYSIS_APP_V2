@@ -41,6 +41,7 @@ class NodeConfig:
     enabled: bool           = True
     function: Callable      = lambda: {}
     parameters: Dict | List = field(default_factory=list)
+    is_display_result: bool = False
     
     
     def __post_init__(self):
@@ -51,11 +52,6 @@ class NodeConfig:
                     setattr(self, attr, str(value))
                 except ValueError:
                     raise ValueError(f"Недопустимый тип {attr}: {type(value)}")
-        # if not isinstance(self.parameters, dict):
-        #     if isinstance(self.parameters, list):
-        #         self.parameters = {param.name: param for param in self.parameters}
-        #     else:
-        #         raise ValueError(f'Недопустимый тип parameters функции: {type(self.parameters)}')
 
 
 
@@ -117,6 +113,7 @@ class Node(GestureDetector):
 
         self.is_open = True
         self.is_selected = False
+        self.is_display_result = self.config.is_display_result
 
         self.name = self.config.name
 
@@ -462,10 +459,12 @@ class Node(GestureDetector):
         Вычисляет значение функции
         '''
         valid_parameters = self._get_valid_parameters()
-        self.result = self.function(**valid_parameters)
+        self.result: Dict = self.function(**valid_parameters)
         self.set_result_to_out_parameters()
         print(self.id, self.name, self.result) # ОТЛАДКА TEST
         self.recalculate_connects_to_node()
+        if self.is_display_result:
+            self.display_result()
         
 
     def set_result_to_out_parameters(self):
@@ -480,9 +479,13 @@ class Node(GestureDetector):
         """
         Запускает пересчет значений зависимых нод
         """
-        for params_list in self.connects_to.values():
-            for param in params_list:
-                param.node.calculate()
+        node_to_recalculate = set(
+            to_param.node
+            for to_param_list in self.connects_to.values() 
+            for to_param in to_param_list
+        )
+        for node in node_to_recalculate:
+            node.calculate()
 
 
     def get_signature_type_hints(self):
@@ -536,3 +539,17 @@ class Node(GestureDetector):
         ):
             raise TypeError(f"Тип параметра {name} должен быть типа {self.function_signature[name]}, а не {type(value)}")
         return True
+    
+
+    def display_result(self):
+        '''
+        Отображает значение выходного параметра
+        '''
+        result_area = self.node_area.workplace.result_area
+        for param_key, result in self.result.items():
+            result_control = result
+            if not isinstance(result, Control):
+                result_control = Text(f"{param_key}: {result}")
+            result_area.result_controls.insert(1, result_control)
+
+        result_area.update()

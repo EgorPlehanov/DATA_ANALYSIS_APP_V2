@@ -5,17 +5,35 @@ if TYPE_CHECKING:
 from flet import *
 
 
-class ResultArea(Column):
+class ResultArea(Container):
     def __init__(self, page: Page, workplace: "Workplace"):
         super().__init__()
 
         self.page = page
         self.workplace = workplace
+        
+        self.expand = True
+        self.alignment = alignment.top_center
+        self.bgcolor = colors.PURPLE_900
 
-        self.controls = self.create_controls()
+        self.result_controls = [Text("Результаты")]
+        self.content = self.create_controls()
 
 
     def create_controls(self):
-        return [
-            Text("Результаты")
-        ]
+        return Column(
+            tight = True,
+            expand = True,
+            scroll = ScrollMode.AUTO,
+            controls = [Container(
+                padding = 10,
+                content = Column(
+                    spacing = 10,
+                    controls = self.result_controls
+                ) 
+            )]
+        )
+    
+    
+    
+    

@@ -128,6 +128,7 @@ class NodeLibrary:
             icon = icons.SEND,
             color = colors.BLACK,
             function = display_result,
+            is_display_result = True,
             parameters = [
                 TakeValueParamConfig(key = "result", name = "Result"),
                 TextValueParamConfig(key="label", name="Label", hint_text = "Название результата..."),
