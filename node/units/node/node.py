@@ -413,27 +413,6 @@ class Node(GestureDetector):
         return points if point_idx is None else points[point_idx]
     
 
-    def clear_contact_point(self, connect_point: NodeConnectPoint):
-        """
-        Очищает точку контакта и удаляет соединение
-        """
-        if not isinstance(connect_point.content, Draggable):
-            return
-        connect_point.content = connect_point.content.content
-
-        connect_point.drag_leave(None)
-        connect_point.remove_node_from_connects_to()
-
-        # connect = next(con for con in self.connects if con.to_param_idx == param_idx)
-        # self.connects.remove(connect)
-
-        param = connect_point.parameter
-        param.set_connect_state(False)
-
-        self.node_area.paint_line()
-
-
-
     def on_drag(self, e: DragUpdateEvent):
         """
         Обработка перемещения узла
@@ -444,19 +423,6 @@ class Node(GestureDetector):
             self.set_selection()
 
         self.node_area.drag_selection(top_delta = e.delta_y, left_delta = e.delta_x)
-
-        # for con in self.connects:
-        #     path: cv.Path = con.ref_path.current
-        #     for el in path.elements:
-        #         if isinstance(el, (cv.Path.MoveTo, cv.Path.LineTo, cv.Path.CubicTo)):
-        #             el.x += e.delta_x
-        #             el.y += e.delta_y
-        #         if isinstance(el, cv.Path.CubicTo):
-        #             el.cp1x += e.delta_x
-        #             el.cp1y += e.delta_y
-        #             el.cp2x += e.delta_x
-        #             el.cp2y += e.delta_y
-
         self.node_area.paint_line()
         self.node_area.update()
 
