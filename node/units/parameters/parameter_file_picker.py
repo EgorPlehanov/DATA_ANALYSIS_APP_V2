@@ -143,6 +143,7 @@ class FilePickerParam(Container, ParamInterface):
             content = hover_history_button,
             items = self.get_history_popup_menu_items(),
             tooltip = 'История выбора файла',
+            on_cancelled = self.update_history
         )
     
 
@@ -151,45 +152,60 @@ class FilePickerParam(Container, ParamInterface):
         Возвращает список пунктов меню истории
         '''
         return [
-            PopupMenuItem(
-                data = idx,
-                content = Row([
-                    Image(
-                        src = file.path,
-                        height = 100,
-                        width = 100,
-                        border_radius = 3
-                    ),
+            self.create_history_popup_menu_item(file, idx)
+            for idx, file in enumerate(self.list_picked_files)
+        ]
+    
+
+    def create_history_popup_menu_item(self, file: File, idx: int) -> PopupMenuItem:
+        '''
+        Создает пункт меню истории
+        '''
+        delete_message = Row(
+            visible = False,
+            controls = [Text(value="Удалено", expand=True, text_align=TextAlign.CENTER)],
+        )
+        file_image = Image(src=file.path, height=100, width=100, border_radius=3)
+        file_name = Text(value=file, expand=True, size=14)
+        file_path = Text(value=file.path, size=10)
+        ref_close_button = Ref[IconButton]()
+        close_button = IconButton(
+            ref = ref_close_button,
+            icon = icons.CLOSE,
+            icon_color = colors.WHITE,
+            icon_size = 20,
+            width = 20,
+            height = 20,
+            style = ButtonStyle(padding = 0),
+            on_click = (
+                lambda file, idx: lambda _: self.remove_file_from_history(file, idx)
+            )(file, idx),
+        )
+        hover_close_button = self.create_hover_conteiner(
+            control = close_button,
+            ref_control = ref_close_button,
+        )
+        return PopupMenuItem(
+            data = idx,
+            content = Column([
+                delete_message,
+                Row([
+                    file_image,
                     Column(
+                        expand = True,
+                        alignment = MainAxisAlignment.CENTER,
                         controls = [
                             Row(
                                 vertical_alignment = CrossAxisAlignment.START,
-                                controls = [
-                                    Text(file, expand = True, size = 14),
-                                    IconButton(
-                                        visible = idx > 0,
-                                        icon = icons.CLOSE,
-                                        icon_color = colors.RED,
-                                        icon_size = 20,
-                                        width = 20,
-                                        height = 20,
-                                        style = ButtonStyle(padding = 0),
-                                        on_click = (
-                                            lambda file, idx: lambda _: self.remove_file_from_history(file, idx)
-                                        )(file, idx),
-                                    ),
-                                ]
+                                controls = [file_name, hover_close_button]
                             ),
-                            Text(file.path, size = 10),
+                            file_path
                         ],
-                        expand = True,
-                        alignment = MainAxisAlignment.CENTER,
                     ),
                 ]),
-                on_click = (lambda file: lambda _: self.file_update(file))(file),
-            )
-            for idx, file in enumerate(self.list_picked_files)
-        ]
+            ]),
+            on_click = (lambda file: lambda _: self.file_update(file))(file),
+        )
 
 
     def create_main_control_open_button(self) -> Container:
@@ -456,10 +472,18 @@ class FilePickerParam(Container, ParamInterface):
         '''
         Удаляет файл из истории
         '''
-        popup_items = self.ref_main_control_history_popup.current.items
-        self.ref_main_control_history_popup.current.items = [item for item in popup_items if item.data != idx]
-        item = next((item for i, item in enumerate(popup_items) if item.data == idx), None)
-        item.content.visible = False
-        item.content.update()
         self.list_picked_files.remove(file)
-        self.ref_main_control_history_popup.current.update()
+
+        popup_items = self.ref_main_control_history_popup.current.items
+        removed_item = popup_items[idx]
+        removed_item.content.controls[0].visible = True
+        removed_item.content.controls[1].visible = False
+        removed_item.update()
+
+
+    def update_history(self, e: ControlEvent) -> None:
+        '''
+        Обновляет историю выбора
+        '''
+        self.ref_main_control_history_popup.current.items = self.get_history_popup_menu_items()
+        self.update()
