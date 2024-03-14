@@ -41,9 +41,11 @@ class NodeLibrary:
                             key="bool_val_1", name="Bool tristate",
                             default_value = True, is_tristate = True
                         ),
-                        BoolValueParamConfig(key="bool_val_2", name="Bool", default_value = True),
+                        BoolValueParamConfig(key="bool_val_2", name="Bool"),
 
                         TextValueParamConfig(key="text", name="Text", default_value = "Test"),
+
+                        FilePickerParamConfig(key="file", name="File", default_value = None),
                     ]
                 ),
 
@@ -64,7 +66,7 @@ class NodeLibrary:
                     parameters = [
                         OutParamConfig(key = "image", name = "Image", connect_point_color = colors.BLUE_ACCENT),
 
-                        # TODO: добавить параметр выбора файла
+                        FilePickerParamConfig(key="file", name="File", default_value = None),
                     ]
                 ),
 

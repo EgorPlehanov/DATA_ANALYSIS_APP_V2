@@ -45,7 +45,7 @@ class BoolValueParam(Container, ParamInterface):
         self.node = node
         self._config: BoolValueParamConfig = config
         super().__init__()
-
+        
         self.set_style()
         
         self.main_control = self._create_main_control()
@@ -94,6 +94,7 @@ class BoolValueParam(Container, ParamInterface):
             on_hover = self._on_main_control_hover,
             visible = not self.is_connected,
             content = Row(
+                vertical_alignment = CrossAxisAlignment.CENTER,
                 controls = [
                     Text(self.name),
                     Checkbox(
@@ -104,6 +105,7 @@ class BoolValueParam(Container, ParamInterface):
                         tristate = self.is_tristate,
                         check_color = colors.WHITE,
                         active_color = colors.with_opacity(0, colors.WHITE),
+                        overlay_color = colors.WHITE10,
                     )
                 ],
                 alignment = MainAxisAlignment.SPACE_BETWEEN,
@@ -130,6 +132,7 @@ class BoolValueParam(Container, ParamInterface):
         '''
         При наведении на основное содержимое
         '''
+        self.ref_main_control_value.current.check_color = self.ACCENT_COLOR if e.data == "true" else colors.WHITE
         e.control.bgcolor = self.HOVER_COLOR if e.data == "true" else self.MAIN_COLOR
         e.control.update()
 

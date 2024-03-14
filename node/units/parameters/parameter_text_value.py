@@ -21,7 +21,6 @@ class TextValueParamConfig(ParameterConfigInterface):
     hint_text - подсказка
     """
     default_value: str = ''
-    text_align: TextAlign = TextAlign.RIGHT
     capitalization: TextCapitalization = TextCapitalization.NONE
     hint_text: str = ''
 
@@ -68,10 +67,10 @@ class TextValueParam(Container, ParamInterface):
         """
         self.__post_init__()
 
-        self.text_align = self._config.text_align
-        self.tooltip = self._config.tooltip
         self.capitalization = self._config.capitalization
         self.hint_text = self._config.hint_text
+
+        self.is_enter_focused = False
 
         self.margin = margin.only(left = 3, right = 3)
         self.padding = padding.only(top = self.PADDING_VERTICAL_SIZE, bottom = self.PADDING_VERTICAL_SIZE)
@@ -104,28 +103,25 @@ class TextValueParam(Container, ParamInterface):
                     Text(self.name),
                     TextField(
                         ref = self.ref_main_control_value,
-                        height = self.control_height,
                         expand = True,
                         value = str(self.value),
-                        border = InputBorder.NONE,
+                        focused_border_width = 1,
                         focused_border_color = self.ACCENT_COLOR,
+                        content_padding = padding.only(left = 5, right = 5),
+                        border_color = colors.with_opacity(0, colors.BLACK),
+                        height = self.control_height,
                         text_size = self.control_height * 0.75,
-                        text_align = self.text_align,
+                        text_align = TextAlign.RIGHT,
                         capitalization = self.capitalization,
                         hint_text = self.hint_text,
                         on_blur = self._on_enter_blur,
-                        on_focus = self._on_focus,
+                        on_focus = self._on_enter_focus,
                     )
                 ]
             ),
-            padding = padding.only(left = 5, right = 5),
+            padding = padding.only(left = 5),
             bgcolor = self.MAIN_COLOR
         )
-    
-
-    def _on_focus(self, e: ControlEvent) -> None:
-        e.control.border = InputBorder.UNDERLINE
-        self.update()
     
     
     def _create_connected_control(self) -> Container:
@@ -141,12 +137,34 @@ class TextValueParam(Container, ParamInterface):
         )
     
 
+    def _on_enter_focus(self, e: ControlEvent):
+        '''
+        При фокусе изменяет цвет
+        '''
+        self.is_enter_focused = True
+        self.set_main_control_bgcolor()
+
+    
+    def set_main_control_bgcolor(self, is_hover: bool = False) -> None:
+        '''
+        Устанавливает цвет основного контрола
+        '''
+        self.main_control.bgcolor = (
+            None if self.is_enter_focused
+            else (self.HOVER_COLOR if is_hover else self.MAIN_COLOR)
+        )
+        self.ref_main_control_value.current.text_align = (
+            TextAlign.LEFT if self.is_enter_focused else TextAlign.RIGHT
+        )
+        self.ref_main_control_value.current.color = self.ACCENT_COLOR if is_hover and not self.is_enter_focused else None
+        self.main_control.update()
+
+
     def _on_main_control_hover(self, e: ControlEvent) -> None:
         '''
         При наведении на основное содержимое
         '''
-        e.control.bgcolor = self.HOVER_COLOR if e.data == "true" else self.MAIN_COLOR
-        e.control.update()
+        self.set_main_control_bgcolor(is_hover = e.data == "true")
 
     
     def set_connect_state(self, is_connected: bool, recalculate: bool = True) -> None:
@@ -170,6 +188,5 @@ class TextValueParam(Container, ParamInterface):
             self.value = value
             self._on_change()
 
-        e.control.border = InputBorder.NONE
-        self.update()
-
+        self.is_enter_focused = False
+        self.set_main_control_bgcolor()

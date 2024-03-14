@@ -76,6 +76,8 @@ class SingleValueParam(Container, ParamInterface):
         self.decimal_accuracy = self._config.decimal_accuracy
         self.value = self.min_max_check(self._config.default_value)
 
+        self.is_drag_changed = False
+
         self.margin = margin.only(left = 3, right = 3)
         self.padding = padding.only(top = self.PADDING_VERTICAL_SIZE, bottom = self.PADDING_VERTICAL_SIZE)
         self.border_radius = 5
@@ -179,6 +181,7 @@ class SingleValueParam(Container, ParamInterface):
         '''
         При наведении на основное содержимое
         '''
+        self.ref_main_control_value.current.color = self.ACCENT_COLOR if e.data == "true" or self.is_drag_changed else None
         e.control.bgcolor = self.HOVER_COLOR if e.data == "true" else self.MAIN_COLOR
         e.control.update()
 
@@ -265,6 +268,7 @@ class SingleValueParam(Container, ParamInterface):
         """
         При начале изменения значения в поле ввода
         """
+        self.is_drag_changed = True
         value_text: Text = self.ref_main_control_value.current
         value_text.color = self.ACCENT_COLOR
         value_text.update()
@@ -274,6 +278,7 @@ class SingleValueParam(Container, ParamInterface):
         """
         При окончании изменения значения в поле ввода
         """
+        self.is_drag_changed = False
         value_text: Text = self.ref_main_control_value.current
         value_text.color = None
         value_text.update()
