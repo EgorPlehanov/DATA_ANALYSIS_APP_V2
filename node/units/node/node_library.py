@@ -39,13 +39,17 @@ class NodeLibrary:
 
                         BoolValueParamConfig(
                             key="bool_val_1", name="Bool tristate",
-                            default_value = True, is_tristate = True
+                            default_value = None, is_tristate = True
                         ),
-                        BoolValueParamConfig(key="bool_val_2", name="Bool"),
+                        BoolValueParamConfig(key="bool_val_2", name="Bool", default_value = True),
 
                         TextValueParamConfig(key="text", name="Text", default_value = "Test"),
 
-                        FilePickerParamConfig(key="file", name="File", default_value = None),
+                        FilePickerParamConfig(key="file_1", name="File 1"),
+                        FilePickerParamConfig(
+                            key="file_2", name="File 2",
+                            default_value = File('D:\\POLITEH\\DATA_ANALYSIS_APP_V2\\DATA\\jpg\\grace.jpg')
+                        ),
                     ]
                 ),
 

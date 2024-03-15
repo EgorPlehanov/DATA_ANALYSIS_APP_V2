@@ -66,6 +66,9 @@ class FilePickerParam(Container, ParamInterface):
         if self._config.has_connect_point:
             self.connect_point = self._create_connect_point()
 
+        if self._config.default_value is not None:
+            self.list_picked_files
+
 
 
     def set_style(self) -> None:
@@ -79,7 +82,7 @@ class FilePickerParam(Container, ParamInterface):
         self.file_type = self._config.file_type
         self.allowed_extensions = self._config.allowed_extensions
 
-        self.list_picked_files: List[File] = []
+        self.list_picked_files: List[File] = [] if self.value is None else [self.value]
 
         self.margin = margin.only(left = 3, right = 3)
         self.padding = padding.only(top = self.PADDING_VERTICAL_SIZE, bottom = self.PADDING_VERTICAL_SIZE)
@@ -132,11 +135,14 @@ class FilePickerParam(Container, ParamInterface):
             ref = self.ref_main_control_history_button,
             name = icons.HISTORY,
             size = 20,
-            color = colors.WHITE
+            color = colors.GREY_700 if len(self.list_picked_files) == 0 else colors.WHITE
         )
-        hover_history_button = self.create_hover_conteiner(
-            control = history_button,
-            ref_control = self.ref_main_control_history_button,
+        hover_history_button = Container(
+            on_hover = lambda e: self.on_history_button_hover(
+                ref_history_button = self.ref_main_control_history_button,
+                is_hover = e.data == "true"
+            ),
+            content = history_button,
         )
         return PopupMenuButton(
             ref = self.ref_main_control_history_popup,
@@ -145,6 +151,17 @@ class FilePickerParam(Container, ParamInterface):
             tooltip = 'История выбора файла',
             on_cancelled = self.update_history
         )
+    
+
+    def on_history_button_hover(self, ref_history_button: Ref[IconButton], is_hover: bool):
+        '''
+        Обработчик наведения на кнопку истории
+        '''
+        ref_history_button.current.color = (
+            colors.GREY_700 if len(self.list_picked_files) == 0
+            else (self.ACCENT_COLOR if is_hover else colors.WHITE)
+        )
+        ref_history_button.current.update()
     
 
     def get_history_popup_menu_items(self) -> List[PopupMenuItem]:
@@ -165,9 +182,9 @@ class FilePickerParam(Container, ParamInterface):
             visible = False,
             controls = [Text(value="Удалено", expand=True, text_align=TextAlign.CENTER)],
         )
-        file_image = Image(src=file.path, height=100, width=100, border_radius=3)
-        file_name = Text(value=file, expand=True, size=14)
-        file_path = Text(value=file.path, size=10)
+        file_image = Image(src=file.path, height=100, width=100, border_radius=3, fit=ImageFit.CONTAIN)
+        file_name = Text(value=file, expand=True, size=14, selectable=True)
+        file_path = Text(value=file.path, size=10, selectable=True)
         ref_close_button = Ref[IconButton]()
         close_button = IconButton(
             ref = ref_close_button,
@@ -193,7 +210,6 @@ class FilePickerParam(Container, ParamInterface):
                     file_image,
                     Column(
                         expand = True,
-                        alignment = MainAxisAlignment.CENTER,
                         controls = [
                             Row(
                                 vertical_alignment = CrossAxisAlignment.START,
@@ -233,6 +249,7 @@ class FilePickerParam(Container, ParamInterface):
             value = "Открыть файл",
             expand = True,
             text_align = TextAlign.CENTER,
+            visible = self.value is None
         )
         hover_open_button = self.create_hover_conteiner(
             control = Row([open_button, open_button_text]),
@@ -242,9 +259,9 @@ class FilePickerParam(Container, ParamInterface):
             is_hover_conteiner = True
         )
         hover_open_button.on_click = self.open_file_picker
-        hover_open_button.expand = True
+        hover_open_button.expand = self.value is None
         hover_open_button.border_radius = 5
-        hover_open_button.margin = margin.only(right = 5)
+        hover_open_button.margin = margin.only(right = 5) if self.value is None else None
         return hover_open_button
     
 
@@ -256,6 +273,8 @@ class FilePickerParam(Container, ParamInterface):
         self.ref_main_control_close_button = Ref[IconButton]()
         self.ref_main_control_file_name = Ref[Text]()
         self.ref_main_control_file_preview = Ref[Image]()
+        self.ref_main_control_file_image = Ref[Image]()
+        self.ref_main_control_file_popup_button = Ref[PopupMenuButton]()
         close_button = IconButton(
             ref = self.ref_main_control_close_button,
             icon = icons.CLOSE,
@@ -278,21 +297,38 @@ class FilePickerParam(Container, ParamInterface):
             scroll = ScrollMode.HIDDEN,
             controls = [Text(
                 ref = self.ref_main_control_file_name,
+                value = self.value.formatted_name if self.value is not None else "",
                 selectable = True,
                 text_align = TextAlign.RIGHT
             )]
         )
         file_preview = Container(
             padding = padding.only(top=3, bottom=3),
-            content = Image(
-                ref = self.ref_main_control_file_preview,
-                fit = ImageFit.FIT_HEIGHT,
-                border_radius = 3
-            ),
+            content = PopupMenuButton(
+                ref = self.ref_main_control_file_popup_button,
+                tooltip = self.value.formatted_name if self.value is not None else None,
+                content = Image(
+                    ref = self.ref_main_control_file_preview,
+                    src = self.value.path if self.value is not None else None,
+                    fit = ImageFit.FIT_HEIGHT,
+                    border_radius = 3,
+                ),
+                items = [
+                    PopupMenuItem(
+                        content = Image(
+                            ref = self.ref_main_control_file_image,
+                            src = self.value.path if self.value is not None else None,
+                            fit = ImageFit.CONTAIN,
+                            width = 260,
+                            border_radius = 5,
+                        )
+                    )
+                ],
+            )
         )
         return Container(
             ref = self.ref_main_control_file_container,
-            visible = False,
+            visible = self.value is not None,
             expand = True,
             padding = padding.only(right = 5),
             border_radius = border_radius.all(5),
@@ -422,6 +458,7 @@ class FilePickerParam(Container, ParamInterface):
         self.move_file_to_top(file)
         self.update_file_view()
         self.toggle_file_view(is_file_opened = True)
+        self.on_history_button_hover(self.ref_main_control_history_button, False)
         self._on_change()
 
 
@@ -454,6 +491,8 @@ class FilePickerParam(Container, ParamInterface):
         '''
         self.ref_main_control_file_name.current.value = self.value
         self.ref_main_control_file_preview.current.src = self.value.path
+        self.ref_main_control_file_image.current.src = self.value.path
+        self.ref_main_control_file_popup_button.current.tooltip = self.value.formatted_name
 
         self.ref_main_control_history_popup.current.items = self.get_history_popup_menu_items()
         self.update()
@@ -476,6 +515,7 @@ class FilePickerParam(Container, ParamInterface):
 
         popup_items = self.ref_main_control_history_popup.current.items
         removed_item = popup_items[idx]
+        removed_item.on_click = self.update_history
         removed_item.content.controls[0].visible = True
         removed_item.content.controls[1].visible = False
         removed_item.update()
@@ -486,4 +526,5 @@ class FilePickerParam(Container, ParamInterface):
         Обновляет историю выбора
         '''
         self.ref_main_control_history_popup.current.items = self.get_history_popup_menu_items()
+        self.on_history_button_hover(self.ref_main_control_history_button, False)
         self.update()
