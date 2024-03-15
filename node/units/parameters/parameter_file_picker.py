@@ -393,7 +393,10 @@ class FilePickerParam(Container, ParamInterface):
         if text:
             text.color = self.ACCENT_COLOR if is_hover else colors.WHITE
         if container:
-            container.border = border.all(1, self.ACCENT_COLOR) if is_hover and not self.value else None
+            container.border = (
+                border.all(1, self.ACCENT_COLOR) if is_hover and not self.value
+                else border.all(1, colors.with_opacity(0, colors.BLACK))
+            )
         self.update()
     
 

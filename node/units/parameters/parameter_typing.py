@@ -24,6 +24,7 @@ class ParameterType(Enum):
     BOOL_VALUE = 'bool_value'
     TEXT_VALUE = 'text_value'
     FILE_PICKER_VALUE = 'file_picker_value'
+    DROPDOWN_VALUE = 'dropdown_value'
 
     def __str__(self):
         return self.value

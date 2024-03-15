@@ -17,17 +17,6 @@ class NodeLibrary:
             obj_list = [
 
                 NodeConfig(
-                    key = "test2",
-                    name = "Тестовая 2->1",
-                    parameters = [
-                        OutParamConfig(name = "Param 1", connect_point_color = "green"),
-
-                        SingleValueParamConfig(name = "Param 2", connect_point_color = "red"),
-                        SingleValueParamConfig(name = "Param 3", connect_point_color = "orange", has_connect_point = False),
-                    ]
-                ),
-
-                NodeConfig(
                     key = "test3",
                     name = "Тестовая 3->2",
                     parameters = [
@@ -50,6 +39,34 @@ class NodeLibrary:
                             key="file_2", name="File 2",
                             default_value = File('D:\\POLITEH\\DATA_ANALYSIS_APP_V2\\DATA\\jpg\\grace.jpg')
                         ),
+
+                        DropdownValueParamConfig(
+                            key="dropdown_1", name="Dropdown 1",
+                            default_value = "A",
+                            options = [
+                                DropdownOptionItem(key="A", text="Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+                                DropdownOptionItem(key="B", text="B"),
+                                DropdownOptionItem(key="C", text="C"),
+                            ]
+                        ),
+                        DropdownValueParamConfig(
+                            key="dropdown_2", name="Dropdown 2",
+                            options = [
+                                DropdownOptionItem(key="B", text="B"),
+                                DropdownOptionItem(key="C", text="C"),
+                            ]
+                        )
+                    ]
+                ),
+
+                NodeConfig(
+                    key = "test2",
+                    name = "Тестовая 2->1",
+                    parameters = [
+                        OutParamConfig(name = "Param 1", connect_point_color = "green"),
+
+                        SingleValueParamConfig(name = "Param 2", connect_point_color = "red"),
+                        SingleValueParamConfig(name = "Param 3", connect_point_color = "orange", has_connect_point = False),
                     ]
                 ),
 

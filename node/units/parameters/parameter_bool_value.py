@@ -95,12 +95,12 @@ class BoolValueParam(Container, ParamInterface):
             visible = not self.is_connected,
             content = Row(
                 vertical_alignment = CrossAxisAlignment.CENTER,
+                alignment = MainAxisAlignment.SPACE_BETWEEN,
                 controls = [
                     Text(self.name),
                     Checkbox(
                         ref = self.ref_main_control_value,
                         value = self.value,
-                        on_change = self.on_checkbox_change,
                         height = self.control_height,
                         tristate = self.is_tristate,
                         check_color = colors.WHITE,
@@ -108,7 +108,6 @@ class BoolValueParam(Container, ParamInterface):
                         overlay_color = colors.WHITE10,
                     )
                 ],
-                alignment = MainAxisAlignment.SPACE_BETWEEN,
             ),
             padding = padding.only(left = 5),
             bgcolor = self.MAIN_COLOR
