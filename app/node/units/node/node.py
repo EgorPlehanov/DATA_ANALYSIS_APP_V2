@@ -279,6 +279,7 @@ class Node(GestureDetector):
                 point.top, point.left = point.open_top, point.open_left
             else:
                 point.top, point.left = point.close_top, point.close_left
+        self.height = self.get_height()
 
         self.node_area.paint_line()
         self.update()
