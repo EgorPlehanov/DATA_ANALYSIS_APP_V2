@@ -14,7 +14,7 @@ class NodeResultView(Container):
     '''
     Виджет для отображения результата вычисления узла
     '''
-    def __init__(self, node: "Node", result_dict: dict = {}):
+    def __init__(self, node: "Node", result_area: "ResultArea", result_dict: dict = {}):
         super().__init__()
         self.node = node
         self.result_dict = result_dict

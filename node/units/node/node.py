@@ -575,7 +575,7 @@ class Node(GestureDetector):
         for param_key, result in self.result.items():
             result_control: NodeResultView = self.parameters_results_view_dict[param_key]
             if result_control is None:
-                result_control = NodeResultView(self, result)
+                result_control = NodeResultView(self, result_area,result)
                 result_area.result_controls.insert(1, result_control)
                 self.parameters_results_view_dict[param_key] = result_control
             else:
