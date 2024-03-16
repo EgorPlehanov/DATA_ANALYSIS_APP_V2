@@ -228,7 +228,13 @@ class Node(GestureDetector):
                         on_click = self.toggle_parameters,
                         icon_size = 15,
                     ),
-                    Text(f'{self.id}: {self.name}'),
+                    Text(
+                        value = f'{self.id}: {self.name}',
+                        expand = True,
+                        tooltip = self.name,
+                        max_lines = 1,
+                        text_align = TextAlign.CENTER,
+                    ),
                     IconButton(
                         icon = icons.CLOSE,
                         icon_color = self.HEADER_ICON_COLOR,
@@ -573,10 +579,15 @@ class Node(GestureDetector):
         '''
         result_area = self.node_area.workplace.result_area
         for param_key, result in self.result.items():
+            if param_key not in self.parameters_results_view_dict:
+                continue
             result_control: NodeResultView = self.parameters_results_view_dict[param_key]
+            if result["label"] == "" and self.connects_from[param_key] is not None:
+                print(self.connects_from[param_key].node.name)
+                result["label"] = self.connects_from[param_key].node.name
             if result_control is None:
-                result_control = NodeResultView(self, result_area,result)
-                result_area.result_controls.insert(1, result_control)
+                result_control = NodeResultView(self, result_area, result)
+                result_area.result_controls.insert(0, result_control)
                 self.parameters_results_view_dict[param_key] = result_control
             else:
                 result_control.update_result(result)

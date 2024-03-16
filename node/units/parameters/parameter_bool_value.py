@@ -106,6 +106,7 @@ class BoolValueParam(Container, ParamInterface):
                         check_color = colors.WHITE,
                         active_color = colors.with_opacity(0, colors.WHITE),
                         overlay_color = colors.WHITE10,
+                        disabled=True
                     )
                 ],
             ),

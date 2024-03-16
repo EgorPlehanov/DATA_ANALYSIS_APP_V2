@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .node import Node
+    from ..result_area import ResultArea
 
 from flet import *
 import cv2
@@ -10,18 +11,23 @@ from .calculate_function.calculate_function_typing import *
 
 
 
-class NodeResultView(Container):
+class NodeResultView(DragTarget):
     '''
     Виджет для отображения результата вычисления узла
     '''
     def __init__(self, node: "Node", result_area: "ResultArea", result_dict: dict = {}):
         super().__init__()
         self.node = node
+        self.result_area = result_area
         self.result_dict = result_dict
 
         self.set_style()
 
         self.content = self._create_content()
+
+        self.on_will_accept = self.will_drag_accept
+        self.on_accept = self.drag_accept
+        self.on_leave = self.drag_leave
 
 
     def set_style(self):
@@ -29,11 +35,10 @@ class NodeResultView(Container):
         Устанавливает стиль
         '''
         self.set_result_value()
-        
 
-        self.border_radius = 10
-        self.bgcolor = colors.BLACK26
-        self.padding = padding.only(left=10, top=10, right=10, bottom=10)
+        self.id = self.node.id
+        self.key = self.id
+        self.group = "result"
 
 
     def set_result_value(self):
@@ -61,10 +66,35 @@ class NodeResultView(Container):
         }
         result_title = self.create_result_title()
         result_body = value_type_to_view[self.result_type]()
-        return Column([
-            result_title,
-            result_body
-        ])
+
+        self.ref_card_conteiner = Ref[Container]()
+        draggable_content = Container(
+            ref = self.ref_card_conteiner,
+            content = Column([
+                result_title,
+                result_body
+            ]),
+            # key = self.node.id,
+            data = self,
+            border_radius = 10,
+            bgcolor = colors.BLACK26,
+            padding = padding.only(left=10, top=10, right=10, bottom=10),
+        )
+        draggable_content_feedback = Container(
+            border_radius = 10,
+            bgcolor = colors.BLACK26,
+            padding = padding.only(left=10, top=10, right=10, bottom=10),
+            content = Text(
+                (self.current_time if self.current_time else "") + (": " + self.label if self.label else ""),
+                color = colors.WHITE54,
+                size = 20,
+            ),
+        )
+        return Draggable(
+            group = self.group,
+            content = draggable_content,
+            content_feedback = draggable_content_feedback,
+        )
     
 
     def create_result_title(self):
@@ -89,22 +119,14 @@ class NodeResultView(Container):
         """
         Создает элемент для отображения None
         """
-        return Container(
-            content = Text(
-                value = "Нет данных",
-            )
-        )
+        return Container(Text(value="Нет данных"))
     
 
     def create_str_view_element(self):
         """
         Создает элемент для отображения строки
         """
-        return Container(
-            content = Text(
-                value = self.result_value,
-            )
-        )
+        return Container(Text(value=self.result_value))
 
 
     def crate_num_view_element(self):
@@ -118,11 +140,10 @@ class NodeResultView(Container):
         """
         Создает элемент для отображения изображения
         """
-        print("crate_image_cv2_view_element", self.result_value)
         return Image(
             src_base64 = self.image_to_base64(self.result_value),
             border_radius = border_radius.all(10),
-            fit = ImageFit.FIT_WIDTH
+            fit = ImageFit.FIT_WIDTH,
         )
     
     def crate_image_base64_view_element(self):
@@ -164,3 +185,31 @@ class NodeResultView(Container):
         self.result_dict = result_dict
         self.set_result_value()
         self.content = self._create_content()
+
+
+    def drag_accept(self, e: DragTargetAcceptEvent):
+        '''Перемещает карточку (срабатывает при подтверждении перетаскивания)'''
+        src: Container = self.page.get_control(e.src_id)
+        from_result = src.content.data
+        to_result = self
+        if from_result == to_result:
+            self.set_default_color()
+            return
+        
+        self.result_area.change_results_positions(from_result, to_result)
+
+
+    def will_drag_accept(self, e: ControlEvent):
+        '''Срабатывает при наведении курсора с перетаскиваемой карточкой на эту карточку'''
+        self.ref_card_conteiner.current.bgcolor = colors.GREEN_500 if e.data == "true" else colors.RED_500
+        self.update()
+
+
+    def drag_leave(self, e: ControlEvent):
+        '''Срабатывает при отмене перетаскивания карточки'''
+        self.set_default_color()
+
+
+    def set_default_color(self):
+        self.ref_card_conteiner.current.bgcolor = colors.BLACK26
+        self.update()

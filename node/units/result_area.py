@@ -4,6 +4,8 @@ if TYPE_CHECKING:
     from .node.node_result_view import NodeResultView
 
 from flet import *
+from flet_core.scrollable_control import ScrollableControl
+
 
 
 class ResultArea(Container):
@@ -15,9 +17,9 @@ class ResultArea(Container):
         
         self.expand = True
         self.alignment = alignment.top_center
-        self.bgcolor = colors.PURPLE_900
+        self.bgcolor = colors.GREY_900
 
-        self.result_controls = [Text("Результаты")]
+        self.result_controls = []
         self.content = self.create_controls()
 
 
@@ -51,13 +53,20 @@ class ResultArea(Container):
         # Меняет местами 2 элемента в списке
         # self.result_controls[to_index], self.result_controls[from_index] = self.result_controls[from_index], self.result_controls[to_index]
         
-        self.ref_result_view.current.scroll_to(
-            key = str(from_result.id),
+        self._scroll_view_to(from_result.key)
+        self.update()
+
+
+    def _scroll_view_to(self, key: str | int, view: ScrollableControl = None) -> None:
+        '''
+        Прокручивает вью до элемента с заданным ключом
+        '''
+        if view is None:
+            view = self.ref_result_view.current
+        view.scroll_to(
+            key = str(key),
             duration = 500,
             curve = animation.AnimationCurve.FAST_OUT_SLOWIN
         )
-        self.update()
-    
-    
     
     

@@ -19,6 +19,7 @@ class NodeLibrary:
                 NodeConfig(
                     key = "test3",
                     name = "Тестовая 3->2",
+                    function = lambda bool_val_2: {"param_1": bool_val_2},
                     parameters = [
                         OutParamConfig(name = "Param 1", connect_point_color = "green"),
                         OutParamConfig(name = "Param 2", connect_point_color = "blue"),
@@ -177,10 +178,35 @@ class NodeLibrary:
                                     connect_point_color=colors.DEEP_PURPLE_ACCENT_700
                                 ),
 
-                                FilePickerParamConfig(key="image", name="Фото", default_value = None),
+                                FilePickerParamConfig(key="image", name="Фото"),
                                 SingleValueParamConfig(key="multiply_constant", name="Умножить на", default_value=2),
                             ]
                         ),
+
+                        NodeConfig(
+                            key = "shift_image",
+                            name = "Сдвиг изображения по осям",
+                            icon = icons.IMAGE,
+                            color = colors.GREEN_700,
+                            function = shift_image,
+                            parameters = [
+                                OutParamConfig(
+                                    key="shifted_image", name="Shifted image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                SingleValueParamConfig(
+                                    key="dx", name="Горизонтальный сдвиг",
+                                    default_value=30, min_value=0, decimal_accuracy=0
+                                ),
+                                SingleValueParamConfig(
+                                    key="dy", name="Вертикальный сдвиг",
+                                    default_value=30, min_value=0, decimal_accuracy=0
+                                ),
+                            ]
+
+                        )
                     ]
                 ),
 
@@ -188,7 +214,25 @@ class NodeLibrary:
                     name = "Лабораторная 2",
                     icon = icons.LABEL,
                     obj_list = [
-                        
+                        NodeConfig(
+                            key = "apply_grayscale_scaling",
+                            name = "Шкалирование серого цвета",
+                            icon = icons.IMAGE,
+                            color = colors.LIME,
+                            function = apply_grayscale_scaling,
+                            parameters = [
+                                OutParamConfig(
+                                    key="grayscale_image", name="Grayscale image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                SingleValueParamConfig(
+                                    key="scale_size", name="Масштаб",
+                                    min_value=0, decimal_accuracy=0, default_value=255, 
+                                ),
+                            ]
+                        )
                     ]
                 ),
 
@@ -196,6 +240,157 @@ class NodeLibrary:
                     name = "Лабораторная 3",
                     icon = icons.LABEL,
                     obj_list = [
+                        NodeConfig(
+                            key = "resize_nearest_neighbor",
+                            name = "Масштабирование методом ближайшего соседа (ПАКЕТНАЯ)",
+                            icon = icons.IMAGE,
+                            color = colors.TEAL,
+                            function = resize_nearest_neighbor,
+                            parameters = [
+                                OutParamConfig(
+                                    key="resized_image", name="Resized image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                SingleValueParamConfig(
+                                    key="scale_factor", name="Масштаб",
+                                    min_value=0.00001, default_value=2
+                                ),
+                            ]
+                        ),
+
+                        
+                        NodeConfig(
+                            key = "resize_nearest_neighbor_manual",
+                            name = "Масштабирование методом ближайшего соседа (АЛГОРИТМ)",
+                            icon = icons.IMAGE,
+                            color = colors.TEAL,
+                            function = resize_nearest_neighbor_manual,
+                            parameters = [
+                                OutParamConfig(
+                                    key="resized_image", name="Resized image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                SingleValueParamConfig(
+                                    key="scale_factor", name="Масштаб",
+                                    min_value=0.00001, default_value=2
+                                ),
+                            ]
+                        ),
+                        
+                        NodeConfig(
+                            key = "resize_bilinear_interpolation",
+                            name = "Масштабирование методом билинейной интерполяции (ПАКЕТНАЯ)",
+                            icon = icons.IMAGE,
+                            color = colors.TEAL,
+                            function = resize_bilinear_interpolation,
+                            parameters = [
+                                OutParamConfig(
+                                    key="resized_image", name="Resized image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                SingleValueParamConfig(
+                                    key="scale_factor", name="Масштаб",
+                                    min_value=0.00001, default_value=2
+                                ),
+                            ]
+                        ),
+
+                        NodeConfig(
+                            key = "resize_bilinear_interpolation_manual",
+                            name = "Масштабирование методом билинейной интерполяции (АЛГОРИТМ)",
+                            icon = icons.IMAGE,
+                            color = colors.TEAL,
+                            function = resize_bilinear_interpolation_manual,
+                            parameters = [
+                                OutParamConfig(
+                                    key="resized_image", name="Resized image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                SingleValueParamConfig(
+                                    key="scale_factor", name="Масштаб",
+                                    min_value=0.00001, default_value=2
+                                ),
+                            ]
+                        ),
+
+                        NodeConfig(
+                            key = "rotate_image_90_degrees",
+                            name = "Повернуть изображение кратно 90°",
+                            icon = icons.IMAGE,
+                            color = colors.TEAL,
+                            function = rotate_image_90_degrees,
+                            parameters = [
+                                OutParamConfig(
+                                    key="rotate_image", name="Rotated image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                # SingleValueParamConfig(
+                                #     key="angle", name="Угол (°)",
+                                #     decimal_accuracy=0, default_value = 90
+                                # ),
+                                DropdownValueParamConfig(
+                                    key="angle", name="Угол",
+                                    default_value = 90,
+                                    options = [
+                                        DropdownOptionItem(key=90, text="90°"),
+                                        DropdownOptionItem(key=180, text="180°"),
+                                        DropdownOptionItem(key=270, text="270°"),
+                                        DropdownOptionItem(key=360, text="360°"),
+                                    ]
+                                ),
+                            ]
+                        ),
+
+                        NodeConfig(
+                            key = "rotate_image",
+                            name = "Повернуть изображение (ПАКЕТНАЯ)",
+                            icon = icons.IMAGE,
+                            color = colors.TEAL,
+                            function = rotate_image,
+                            parameters = [
+                                OutParamConfig(
+                                    key="rotate_image", name="Rotated image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                SingleValueParamConfig(
+                                    key="angle", name="Угол (°)",
+                                    default_value = 90
+                                ),
+                            ]
+                        ),
+
+                        NodeConfig(
+                            key = "rotate_image_manual",
+                            name = "Повернуть изображение (АЛГОРИТМ)",
+                            icon = icons.IMAGE,
+                            color = colors.TEAL,
+                            function = rotate_image_manual,
+                            parameters = [
+                                OutParamConfig(
+                                    key="rotate_image", name="Rotated image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                SingleValueParamConfig(
+                                    key="angle", name="Угол (°)",
+                                    default_value = 90
+                                ),
+                                BoolValueParamConfig(key="resize", name="Изменять размер", default_value = False),
+                            ]
+                        ),
                         
                     ]
                 ),
@@ -204,6 +399,62 @@ class NodeLibrary:
                     name = "Лабораторная 4",
                     icon = icons.LABEL,
                     obj_list = [
+                        NodeConfig(
+                            key = "negative_transformation",
+                            name = "Негативное градационное преобразование",
+                            icon = icons.IMAGE,
+                            color = colors.PINK,
+                            function = negative_transformation,
+                            parameters = [
+                                OutParamConfig(
+                                    key="negative_image", name="Negative image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                            ]
+                        ),
+                        
+                        NodeConfig(
+                            key = "gamma_correction",
+                            name = "Гамма-преобразование",
+                            icon = icons.IMAGE,
+                            color = colors.PINK,
+                            function = gamma_correction,
+                            parameters = [
+                                OutParamConfig(
+                                    key="gamma_image", name="Gamma image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                SingleValueParamConfig(
+                                    key="gamma", name="Гамма", default_value = 1.0
+                                ),
+                                SingleValueParamConfig(
+                                    key="constant", name="Константа", default_value = 1
+                                )
+                            ]
+                        ),
+                        
+                        NodeConfig(
+                            key = "logarithmic_transformation",
+                            name = "Логарифмическое градационное преобразование",
+                            icon = icons.IMAGE,
+                            color = colors.PINK,
+                            function = logarithmic_transformation,
+                            parameters = [
+                                OutParamConfig(
+                                    key="logarithmic_image", name="Logarithmic image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                                SingleValueParamConfig(
+                                    key="constant", name="Константа", default_value = 1
+                                )
+                            ]
+                        ),
                         
                     ]
                 ),
