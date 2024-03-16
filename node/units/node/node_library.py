@@ -42,7 +42,7 @@ class NodeLibrary:
 
                         DropdownValueParamConfig(
                             key="dropdown_1", name="Dropdown 1",
-                            default_value = "A",
+                            # default_value = "A",
                             options = [
                                 DropdownOptionItem(key="A", text="Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
                                 DropdownOptionItem(key="B", text="B"),
@@ -51,6 +51,7 @@ class NodeLibrary:
                         ),
                         DropdownValueParamConfig(
                             key="dropdown_2", name="Dropdown 2",
+                            include_none = True,
                             options = [
                                 DropdownOptionItem(key="B", text="B"),
                                 DropdownOptionItem(key="C", text="C"),
@@ -58,18 +59,6 @@ class NodeLibrary:
                         )
                     ]
                 ),
-
-                NodeConfig(
-                    key = "test2",
-                    name = "Тестовая 2->1",
-                    parameters = [
-                        OutParamConfig(name = "Param 1", connect_point_color = "green"),
-
-                        SingleValueParamConfig(name = "Param 2", connect_point_color = "red"),
-                        SingleValueParamConfig(name = "Param 3", connect_point_color = "orange", has_connect_point = False),
-                    ]
-                ),
-
             ]
         ),
 
@@ -83,11 +72,14 @@ class NodeLibrary:
                     icon = icons.IMAGE,
                     color = colors.BLACK,
                     width = 300,
-                    # function = None,
+                    function = open_image_file,
                     parameters = [
-                        OutParamConfig(key = "image", name = "Image", connect_point_color = colors.BLUE_ACCENT),
+                        OutParamConfig(
+                            key = "image", name = "Изображение",
+                            connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                        ),
 
-                        FilePickerParamConfig(key="file", name="File", default_value = None),
+                        FilePickerParamConfig(key="image_file", name="Файл", default_value = None),
                     ]
                 ),
 
@@ -99,7 +91,10 @@ class NodeLibrary:
                     width = 300,
                     # function = None,
                     parameters = [
-                        OutParamConfig(key = "image", name = "Image", connect_point_color = colors.BLUE_ACCENT),
+                        OutParamConfig(
+                            key = "image", name = "Image",
+                            connect_point_color = colors.DEEP_PURPLE_ACCENT_700
+                        ),
 
                         # TODO: добавить параметр выбора файла из библиотеки (сохраненной в проекте)
                     ]
@@ -136,12 +131,90 @@ class NodeLibrary:
                     icon = icons.ADD,
                     function = add_two_numbers,
                     parameters = [
-                        OutParamConfig(key = "sum", name = "Sum", connect_point_color = "green"),
+                        OutParamConfig(key = "sum", name = "Sum", connect_point_color = colors.BLUE_ACCENT_200),
 
                         SingleValueParamConfig(key = "a", name = "A"),
                         SingleValueParamConfig(key = "b", name = "B"),
                     ]
                 ),
+            ]
+        ),
+
+        Folder(
+            name = "Лабораторные",
+            icon = icons.ASSIGNMENT_OUTLINED,
+            obj_list = [
+                Folder(
+                    name = "Лабораторная 1",
+                    icon = icons.LABEL,
+                    obj_list = [
+                        NodeConfig(
+                            key = "shift_image_by_constant",
+                            name = "Сдвиг изображения",
+                            icon = icons.IMAGE,
+                            color = colors.GREEN_700,
+                            function = shift_image_by_constant,
+                            parameters = [
+                                OutParamConfig(
+                                    key="shifted_image", name="Shifted image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+                                
+                                FilePickerParamConfig(key="image", name="Фото", default_value = None),
+                                SingleValueParamConfig(key="shift_constant", name="Сдвиг", default_value=30),
+                            ]
+                        ),
+
+                        NodeConfig(
+                            key = "multiply_image_by_constant",
+                            name = "Умножение изображения",
+                            icon = icons.IMAGE,
+                            color = colors.GREEN_700,
+                            function = multiply_image_by_constant,
+                            parameters = [
+                                OutParamConfig(
+                                    key="multiply_image", name="Multiply_image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото", default_value = None),
+                                SingleValueParamConfig(key="multiply_constant", name="Умножить на", default_value=2),
+                            ]
+                        ),
+                    ]
+                ),
+
+                Folder(
+                    name = "Лабораторная 2",
+                    icon = icons.LABEL,
+                    obj_list = [
+                        
+                    ]
+                ),
+
+                Folder(
+                    name = "Лабораторная 3",
+                    icon = icons.LABEL,
+                    obj_list = [
+                        
+                    ]
+                ),
+
+                Folder(
+                    name = "Лабораторная 4",
+                    icon = icons.LABEL,
+                    obj_list = [
+                        
+                    ]
+                ),
+
+                Folder(
+                    name = "Лабораторная 5",
+                    icon = icons.LABEL,
+                    obj_list = [
+                        
+                    ]
+                )
             ]
         ),
 

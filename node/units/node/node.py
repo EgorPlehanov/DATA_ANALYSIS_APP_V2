@@ -11,6 +11,8 @@ import math
 
 from .node_typing import Color
 from ..parameters.parameters_dict import *
+from .calculate_function.calculate_function_typing import *
+from .node_result_view import *
 
 
 
@@ -133,6 +135,11 @@ class Node(GestureDetector):
         }
         self.connects_to: Dict = {
             param.key: []
+            for param in self.config.parameters
+        }
+
+        self.parameters_results_view_dict: Dict = {
+            param.key: None
             for param in self.config.parameters
         }
 
@@ -458,8 +465,11 @@ class Node(GestureDetector):
         '''
         Вычисляет значение функции
         '''
-        valid_parameters = self._get_valid_parameters()
-        self.result: Dict = self.function(**valid_parameters)
+        try:
+            valid_parameters = self._get_valid_parameters()
+            self.result: Dict = self.function(**valid_parameters)
+        except Exception as e:
+            self.result = {"error": str(e)}
         self.set_result_to_out_parameters()
         print(self.id, self.name, self.result) # ОТЛАДКА TEST
         self.recalculate_connects_to_node()
@@ -471,7 +481,8 @@ class Node(GestureDetector):
         '''
         Устанавливает значение выходного параметра
         '''
-        for res_param in self.result.keys():
+        common_keys = [key for key in self.result.keys() if key in self.parameters_dict.keys()]
+        for res_param in common_keys:
             self.parameters_dict[res_param].value = self.result[res_param]
 
 
@@ -505,14 +516,21 @@ class Node(GestureDetector):
     def _get_valid_parameters(self) -> dict:
         '''Возвращает текущие значения параметров функции с учетом сигнатуры функции'''
         valid_parameters = {
-            name:
+            name: self.get_parameter_value(
                 self.parameters_dict[name].value
                 if not self.parameters_dict[name].is_connected
                 else self.connects_from[name].value
+            )
             for name in self.function_signature
-            if self.is_valid_parameter(name, self.parameters_dict[name].value)
+            if self.is_valid_parameter(
+                name,
+                self.get_parameter_value(
+                    self.parameters_dict[name].value
+                    if not self.parameters_dict[name].is_connected
+                    else self.connects_from[name].value
+                )
+            )
         }
-
         if len(valid_parameters) != len(self.function_signature):
             raise ValueError(
                 "Количество параметров не совпадает, "
@@ -520,8 +538,16 @@ class Node(GestureDetector):
                 + f"\nПараметры: {self.function_signature}"
                 + f"\nВалидные: {valid_parameters}"
             )
-
         return valid_parameters
+    
+
+    def get_parameter_value(self, value: Any) -> Any:
+        '''
+        Возвращает значение параметра
+        '''
+        if isinstance(value, NodeResult) and not self.is_display_result:
+            return value.value
+        return value
     
 
     def is_valid_parameter(self, name: str, value) -> bool:
@@ -547,9 +573,11 @@ class Node(GestureDetector):
         '''
         result_area = self.node_area.workplace.result_area
         for param_key, result in self.result.items():
-            result_control = result
-            if not isinstance(result, Control):
-                result_control = Text(f"{param_key}: {result}")
-            result_area.result_controls.insert(1, result_control)
-
+            result_control: NodeResultView = self.parameters_results_view_dict[param_key]
+            if result_control is None:
+                result_control = NodeResultView(self, result)
+                result_area.result_controls.insert(1, result_control)
+                self.parameters_results_view_dict[param_key] = result_control
+            else:
+                result_control.update_result(result)
         result_area.update()

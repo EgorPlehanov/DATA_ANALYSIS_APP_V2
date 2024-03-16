@@ -27,7 +27,7 @@ class FilePickerParamConfig(ParameterConfigInterface):
     initial_directory: str          = None
     file_type: FilePickerFileType   = FilePickerFileType.CUSTOM
     allowed_extensions: List[str]   = field(default_factory=lambda: [
-        'png', 'jpg', 
+        'png', 'jpg', "jpeg", "png", "bmp", "gif"
     ])
 
     def __post_init__(self):

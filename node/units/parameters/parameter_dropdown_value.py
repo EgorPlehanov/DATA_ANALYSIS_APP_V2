@@ -23,6 +23,7 @@ class DropdownValueParamConfig(ParameterConfigInterface):
     """
     height: int = 30
     default_value: str = None
+    include_none: bool = False
     options: List[DropdownOptionItem] = field(default_factory=list)
 
     def __post_init__(self):
@@ -69,6 +70,12 @@ class DropdownValueParam(Container, ParamInterface):
         self.__post_init__()
 
         self.options = self._config.options
+        self.include_none = self._config.include_none
+        if self.include_none:
+            self.options.insert(0, DropdownOptionItem(key = None, text = 'Не задано'))
+        elif self.value is None:
+            self.value = self.options[0].key
+
         self.key_to_text = {option.key: option.text for option in self.options}
 
         self.margin = margin.only(left = 3, right = 3)
@@ -107,10 +114,11 @@ class DropdownValueParam(Container, ParamInterface):
                     Text(self.name),
                     PopupMenuButton(
                         ref = self.ref_main_control_value_popup,
-                        tooltip = self.key_to_text[self.value] if self.value else 'Не задано',
+                        tooltip = self.key_to_text[self.value],
                         expand = True,
                         content = Container(
                             ref = self.ref_main_control_value_container,
+                            on_hover = self._on_main_control_dropdown_hover,
                             height = self.control_height,
                             border_radius = 5,
                             padding = padding.only(right = 5),
@@ -127,7 +135,7 @@ class DropdownValueParam(Container, ParamInterface):
                                     Text(
                                         expand = True,
                                         ref = self.ref_main_control_value,
-                                        value = self.key_to_text[self.value] if self.value else 'Не задано',
+                                        value = self.key_to_text[self.value],
                                         text_align = TextAlign.RIGHT,
                                         no_wrap = True,
                                         max_lines = 1,
@@ -168,12 +176,20 @@ class DropdownValueParam(Container, ParamInterface):
         '''
         is_hover = e.data == "true"
         self.ref_main_control_value.current.color = self.ACCENT_COLOR if is_hover else None
+        e.control.bgcolor = self.HOVER_COLOR if is_hover else self.MAIN_COLOR
+        self.update()
+
+
+    def _on_main_control_dropdown_hover(self, e: ControlEvent) -> None:
+        '''
+        При наведении на кнопку выбора основное содержимое
+        '''
+        is_hover = e.data == "true"
         self.ref_main_control_value_icon.current.color = self.ACCENT_COLOR if is_hover else colors.WHITE
         self.ref_main_control_value_container.current.border = (
             border.all(1, self.ACCENT_COLOR) if is_hover
             else border.all(1, colors.with_opacity(0, colors.BLACK))
         )
-        e.control.bgcolor = self.HOVER_COLOR if is_hover else self.MAIN_COLOR
         self.update()
 
     

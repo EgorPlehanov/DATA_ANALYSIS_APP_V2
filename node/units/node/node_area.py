@@ -71,6 +71,7 @@ class NodeArea(cv.Canvas):
         """
         Удалить узел
         """
+        self.delete_node_results(node)
         self.delete_node_connect(node)
         self.nodes.remove(node)
         
@@ -102,6 +103,16 @@ class NodeArea(cv.Canvas):
 
         for node in node_to_recalculate:
             node.calculate()
+
+
+    def delete_node_results(self, cur_node: Node):
+        '''
+        Удаляет результаты вычислений узла
+        '''
+        for view in cur_node.parameters_results_view_dict.values():
+            if view is not None:
+                self.workplace.result_area.result_controls.remove(view)
+        self.workplace.update()
 
 
     def calculate_coord(self, point: NodeConnectPoint):
