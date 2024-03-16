@@ -8,9 +8,13 @@ from .menubar import FunctionMenuBar
 
 
 class Workplace(Column):
-    def __init__(self, page: Page):
+    def __init__(self, app, page: Page):
         super().__init__()
+        self.app = app
         self.page = page
+    # def __init__(self, page: Page):
+    #     super().__init__()
+    #     self.page = page
 
         self.spacing = 0
         self.expand = True

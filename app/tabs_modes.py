@@ -1,4 +1,5 @@
 from .graphic_area import GraphicArea
+from .node.units.workplace import Workplace
 
 from dataclasses import dataclass
 from typing import Any
@@ -40,6 +41,6 @@ class TabsModes:
             dialog_title = "Добавить вкладку\nдля работы с изображениями",
             tab_icon = "image",
             default_tab_title = 'Изображения',
-            tab_content = lambda app, page: None
+            tab_content = Workplace
         )
     ]
