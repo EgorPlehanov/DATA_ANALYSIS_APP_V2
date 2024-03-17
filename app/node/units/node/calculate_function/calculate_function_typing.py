@@ -12,6 +12,8 @@ class ResultType(Enum):
     IMAGE_CV2 = "img_cv2"
     IMAGE_BASE64 = "img_base64"
     HISTOGRAM = "hist"
+    MATPLOTLIB_FIG = "matplotlib_fig"
+    PLOTLY_FIG = "plotly_fig"
 
     def __str__(self):
         return self.value

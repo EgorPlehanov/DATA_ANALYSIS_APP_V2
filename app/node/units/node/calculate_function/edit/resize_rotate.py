@@ -131,7 +131,6 @@ def rotate_image_manual(image, angle: float, resize: bool = False):
     """
     (АЛГОРИТМ) Поворачивает изображение на заданный угол
     """
-    print(resize)
     if image is None:
         return {"rotate_image": None}
     if isinstance(image, File):

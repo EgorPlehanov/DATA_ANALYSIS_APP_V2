@@ -232,6 +232,22 @@ class NodeLibrary:
                                     min_value=0, decimal_accuracy=0, default_value=255, 
                                 ),
                             ]
+                        ),
+
+                        NodeConfig(
+                            key = "create_single_image_histogram_plot",
+                            name = "Создание гистограммы изображения",
+                            icon = icons.IMAGE,
+                            color = colors.LIME,
+                            function = create_single_image_histogram_plot,
+                            parameters = [
+                                OutParamConfig(
+                                    key="histogram_fig", name="Histogram",
+                                    connect_point_color = colors.PINK_ACCENT_400
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                            ]
                         )
                     ]
                 ),
@@ -334,10 +350,6 @@ class NodeLibrary:
                                 ),
 
                                 FilePickerParamConfig(key="image", name="Фото"),
-                                # SingleValueParamConfig(
-                                #     key="angle", name="Угол (°)",
-                                #     decimal_accuracy=0, default_value = 90
-                                # ),
                                 DropdownValueParamConfig(
                                     key="angle", name="Угол",
                                     default_value = 90,
@@ -461,6 +473,14 @@ class NodeLibrary:
 
                 Folder(
                     name = "Лабораторная 5",
+                    icon = icons.LABEL,
+                    obj_list = [
+                        
+                    ]
+                ),
+
+                Folder(
+                    name = "Лабораторная 6",
                     icon = icons.LABEL,
                     obj_list = [
                         

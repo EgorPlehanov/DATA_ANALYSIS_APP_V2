@@ -4,8 +4,14 @@ if TYPE_CHECKING:
     from ..result_area import ResultArea
 
 from flet import *
+from flet.matplotlib_chart import MatplotlibChart
+from flet.plotly_chart import PlotlyChart
 import cv2
 import base64
+import io
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 from .calculate_function.calculate_function_typing import *
 
@@ -52,17 +58,56 @@ class NodeResultView(DragTarget):
         self.result_value = self.result.value if isinstance(self.result, NodeResult) else None
 
 
+    def drag_accept(self, e: DragTargetAcceptEvent):
+        '''Перемещает карточку (срабатывает при подтверждении перетаскивания)'''
+        src: Container = self.page.get_control(e.src_id)
+        from_result = src.content.data
+        to_result = self
+        if from_result == to_result:
+            self.set_default_color()
+            return
+        
+        self.result_area.change_results_positions(from_result, to_result)
+
+
+    def will_drag_accept(self, e: ControlEvent):
+        '''Срабатывает при наведении курсора с перетаскиваемой карточкой на эту карточку'''
+        self.ref_card_conteiner.current.bgcolor = colors.GREEN_500 if e.data == "true" else colors.RED_500
+        self.update()
+
+
+    def drag_leave(self, e: ControlEvent):
+        '''Срабатывает при отмене перетаскивания карточки'''
+        self.set_default_color()
+
+
+    def set_default_color(self):
+        self.ref_card_conteiner.current.bgcolor = colors.BLACK26
+        self.update()
+    
+
+    def update_result(self, result_dict: dict):
+        """
+        Обновляет содержимое
+        """
+        self.result_dict = result_dict
+        self.set_result_value()
+        self.content = self._create_content()
+
+
     def _create_content(self):
         '''
         Создает содержимое
         '''
         value_type_to_view = {
-            ResultType.NONE:         self.create_none_view_element,
-            ResultType.STR_VALUE:    self.create_str_view_element,
-            ResultType.NUMBER_VALUE: self.crate_num_view_element,
-            ResultType.IMAGE_CV2:    self.crate_image_cv2_view_element,
-            ResultType.IMAGE_BASE64: self.crate_image_base64_view_element,
-            ResultType.HISTOGRAM:    self.crate_histogram_view_element,
+            ResultType.NONE:            self.create_none_view_element,
+            ResultType.STR_VALUE:       self.create_str_view_element,
+            ResultType.NUMBER_VALUE:    self.crate_num_view_element,
+            ResultType.IMAGE_CV2:       self.crate_image_cv2_view_element,
+            ResultType.IMAGE_BASE64:    self.crate_image_base64_view_element,
+            ResultType.HISTOGRAM:       self.crate_histogram_view_element,
+            ResultType.MATPLOTLIB_FIG:  self.crate_matplotlib_view_element,
+            ResultType.PLOTLY_FIG:      self.crate_plotly_view_element,
         }
         result_title = self.create_result_title()
         result_body = value_type_to_view[self.result_type]()
@@ -104,6 +149,7 @@ class NodeResultView(DragTarget):
         title = (self.current_time if self.current_time else "") + (": " + self.label if self.label else "")
         return Container(
             content = Row(
+                expand = True,
                 alignment = MainAxisAlignment.CENTER,
                 controls = [Text(
                     value = title,
@@ -119,14 +165,20 @@ class NodeResultView(DragTarget):
         """
         Создает элемент для отображения None
         """
-        return Container(Text(value="Нет данных"))
+        return Row(
+            alignment = MainAxisAlignment.CENTER,
+            controls = [Text(value="Нет данных")],
+        )
     
 
     def create_str_view_element(self):
         """
         Создает элемент для отображения строки
         """
-        return Container(Text(value=self.result_value))
+        return Row(
+            alignment = MainAxisAlignment.CENTER,
+            controls = [Text(value=self.result_value)],
+        )
 
 
     def crate_num_view_element(self):
@@ -140,20 +192,29 @@ class NodeResultView(DragTarget):
         """
         Создает элемент для отображения изображения
         """
-        return Image(
-            src_base64 = self.image_to_base64(self.result_value),
-            border_radius = border_radius.all(10),
-            fit = ImageFit.FIT_WIDTH,
+        return Row(
+            alignment = MainAxisAlignment.CENTER,
+            controls = [Image(
+                src_base64 = self.image_to_base64(self.result_value),
+                border_radius = border_radius.all(10),
+                fit = ImageFit.FIT_WIDTH,
+                expand=True
+            )],
         )
+    
     
     def crate_image_base64_view_element(self):
         """
         Создает элемент для отображения изображения
         """
-        return Image(
-            src_base64 = self.result_value,
-            border_radius = border_radius.all(10),
-            fit = ImageFit.FIT_WIDTH,
+        return Row(
+            alignment = MainAxisAlignment.CENTER,
+            controls = [Image(
+                src_base64 = self.result_value,
+                border_radius = border_radius.all(10),
+                fit = ImageFit.FIT_WIDTH,
+                expand=True
+            )],
         )
     
 
@@ -161,7 +222,39 @@ class NodeResultView(DragTarget):
         """
         Создает элемент для отображения гистограммы
         """
-        return Row([])
+        return Row(
+            alignment = MainAxisAlignment.CENTER,
+            controls = [Text(value=self.result_value)],
+        )
+    
+
+    def crate_matplotlib_view_element(self):
+        """
+        Создает элемент для отображения графика
+        """
+        self.result_value = self.fig_to_base64(self.result_value)
+        return self.crate_image_base64_view_element()
+        # return Row(
+        #     alignment = MainAxisAlignment.CENTER,
+        #     controls = [MatplotlibChart(
+        #         figure = self.result_value,
+        #         expand = True,
+        #         isolated = True,
+        #     )],
+        # )
+    
+
+    def crate_plotly_view_element(self):
+        """
+        Создает элемент для отображения графика
+        """
+        return Row(
+            alignment = MainAxisAlignment.CENTER,
+            controls = [PlotlyChart(
+                figure = self.result_value,
+                expand = True,
+            )],
+        )
 
 
     def image_to_base64(self, image):
@@ -178,38 +271,14 @@ class NodeResultView(DragTarget):
         return base64_image
     
 
-    def update_result(self, result_dict: dict):
+    def fig_to_base64(self, fig):
         """
-        Обновляет содержимое
+        Преобразует объект fig из matplotlib в изображение в формате base64
         """
-        self.result_dict = result_dict
-        self.set_result_value()
-        self.content = self._create_content()
-
-
-    def drag_accept(self, e: DragTargetAcceptEvent):
-        '''Перемещает карточку (срабатывает при подтверждении перетаскивания)'''
-        src: Container = self.page.get_control(e.src_id)
-        from_result = src.content.data
-        to_result = self
-        if from_result == to_result:
-            self.set_default_color()
-            return
-        
-        self.result_area.change_results_positions(from_result, to_result)
-
-
-    def will_drag_accept(self, e: ControlEvent):
-        '''Срабатывает при наведении курсора с перетаскиваемой карточкой на эту карточку'''
-        self.ref_card_conteiner.current.bgcolor = colors.GREEN_500 if e.data == "true" else colors.RED_500
-        self.update()
-
-
-    def drag_leave(self, e: ControlEvent):
-        '''Срабатывает при отмене перетаскивания карточки'''
-        self.set_default_color()
-
-
-    def set_default_color(self):
-        self.ref_card_conteiner.current.bgcolor = colors.BLACK26
-        self.update()
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png')
+        buf.seek(0)
+        # return base64.b64encode(buf.read()).decode('utf-8')
+        plt.close(fig)
+        return base64.b64encode(buf.getvalue()).decode('utf-8')
+    
