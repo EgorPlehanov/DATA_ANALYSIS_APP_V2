@@ -584,7 +584,6 @@ class Node(GestureDetector):
                 continue
             result_control: NodeResultView = self.parameters_results_view_dict[param_key]
             if result["label"] == "" and self.connects_from[param_key] is not None:
-                print(self.connects_from[param_key].node.name)
                 result["label"] = self.connects_from[param_key].node.name
             if result_control is None:
                 result_control = NodeResultView(self, result_area, result)

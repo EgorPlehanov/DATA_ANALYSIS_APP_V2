@@ -19,6 +19,7 @@ class NodeLibrary:
                 NodeConfig(
                     key = "test3",
                     name = "Тестовая 3->2",
+                    icon = icons.QUESTION_MARK,
                     function = lambda bool_val_2: {"param_1": bool_val_2},
                     parameters = [
                         OutParamConfig(name = "Param 1", connect_point_color = "green"),
@@ -66,6 +67,7 @@ class NodeLibrary:
         Folder(
             name = "Данные",
             icon = icons.DATA_ARRAY,
+            color = colors.BLACK,
             obj_list = [
                 NodeConfig(
                     key = "open_image",
@@ -106,6 +108,7 @@ class NodeLibrary:
         Folder(
             name = "Математические",
             icon = icons.FUNCTIONS,
+            color = colors.BLUE_700,
             obj_list = [
                 NodeConfig(
                     key = "random_value",
@@ -130,6 +133,7 @@ class NodeLibrary:
                     key = "add",
                     name = "Cумма двух чисел",
                     icon = icons.ADD,
+                    color = colors.BLUE_700,
                     function = add_two_numbers,
                     parameters = [
                         OutParamConfig(key = "sum", name = "Sum", connect_point_color = colors.BLUE_ACCENT_200),
@@ -148,12 +152,13 @@ class NodeLibrary:
                 Folder(
                     name = "Лабораторная 1",
                     icon = icons.LABEL,
+                    color = colors.RED,
                     obj_list = [
                         NodeConfig(
                             key = "shift_image_by_constant",
                             name = "Сдвиг изображения",
                             icon = icons.IMAGE,
-                            color = colors.GREEN_700,
+                            color = colors.RED,
                             function = shift_image_by_constant,
                             parameters = [
                                 OutParamConfig(
@@ -170,7 +175,7 @@ class NodeLibrary:
                             key = "multiply_image_by_constant",
                             name = "Умножение изображения",
                             icon = icons.IMAGE,
-                            color = colors.GREEN_700,
+                            color = colors.RED,
                             function = multiply_image_by_constant,
                             parameters = [
                                 OutParamConfig(
@@ -187,7 +192,7 @@ class NodeLibrary:
                             key = "shift_image",
                             name = "Сдвиг изображения по осям",
                             icon = icons.IMAGE,
-                            color = colors.GREEN_700,
+                            color = colors.RED,
                             function = shift_image,
                             parameters = [
                                 OutParamConfig(
@@ -213,12 +218,13 @@ class NodeLibrary:
                 Folder(
                     name = "Лабораторная 2",
                     icon = icons.LABEL,
+                    color = colors.ORANGE,
                     obj_list = [
                         NodeConfig(
                             key = "apply_grayscale_scaling",
                             name = "Шкалирование серого цвета",
                             icon = icons.IMAGE,
-                            color = colors.LIME,
+                            color = colors.ORANGE,
                             function = apply_grayscale_scaling,
                             parameters = [
                                 OutParamConfig(
@@ -235,11 +241,11 @@ class NodeLibrary:
                         ),
 
                         NodeConfig(
-                            key = "create_single_image_histogram_plot",
+                            key = "plot_image_histogram",
                             name = "Создание гистограммы изображения",
                             icon = icons.IMAGE,
-                            color = colors.LIME,
-                            function = create_single_image_histogram_plot,
+                            color = colors.ORANGE,
+                            function = plot_image_histogram,
                             parameters = [
                                 OutParamConfig(
                                     key="histogram_fig", name="Histogram",
@@ -255,12 +261,13 @@ class NodeLibrary:
                 Folder(
                     name = "Лабораторная 3",
                     icon = icons.LABEL,
+                    color = colors.YELLOW,
                     obj_list = [
                         NodeConfig(
                             key = "resize_nearest_neighbor",
                             name = "Масштабирование методом ближайшего соседа (ПАКЕТНАЯ)",
                             icon = icons.IMAGE,
-                            color = colors.TEAL,
+                            color = colors.YELLOW,
                             function = resize_nearest_neighbor,
                             parameters = [
                                 OutParamConfig(
@@ -281,7 +288,7 @@ class NodeLibrary:
                             key = "resize_nearest_neighbor_manual",
                             name = "Масштабирование методом ближайшего соседа (АЛГОРИТМ)",
                             icon = icons.IMAGE,
-                            color = colors.TEAL,
+                            color = colors.YELLOW,
                             function = resize_nearest_neighbor_manual,
                             parameters = [
                                 OutParamConfig(
@@ -301,7 +308,7 @@ class NodeLibrary:
                             key = "resize_bilinear_interpolation",
                             name = "Масштабирование методом билинейной интерполяции (ПАКЕТНАЯ)",
                             icon = icons.IMAGE,
-                            color = colors.TEAL,
+                            color = colors.YELLOW,
                             function = resize_bilinear_interpolation,
                             parameters = [
                                 OutParamConfig(
@@ -321,7 +328,7 @@ class NodeLibrary:
                             key = "resize_bilinear_interpolation_manual",
                             name = "Масштабирование методом билинейной интерполяции (АЛГОРИТМ)",
                             icon = icons.IMAGE,
-                            color = colors.TEAL,
+                            color = colors.YELLOW,
                             function = resize_bilinear_interpolation_manual,
                             parameters = [
                                 OutParamConfig(
@@ -341,7 +348,7 @@ class NodeLibrary:
                             key = "rotate_image_90_degrees",
                             name = "Повернуть изображение кратно 90°",
                             icon = icons.IMAGE,
-                            color = colors.TEAL,
+                            color = colors.YELLOW,
                             function = rotate_image_90_degrees,
                             parameters = [
                                 OutParamConfig(
@@ -367,7 +374,7 @@ class NodeLibrary:
                             key = "rotate_image",
                             name = "Повернуть изображение (ПАКЕТНАЯ)",
                             icon = icons.IMAGE,
-                            color = colors.TEAL,
+                            color = colors.YELLOW,
                             function = rotate_image,
                             parameters = [
                                 OutParamConfig(
@@ -387,7 +394,7 @@ class NodeLibrary:
                             key = "rotate_image_manual",
                             name = "Повернуть изображение (АЛГОРИТМ)",
                             icon = icons.IMAGE,
-                            color = colors.TEAL,
+                            color = colors.YELLOW,
                             function = rotate_image_manual,
                             parameters = [
                                 OutParamConfig(
@@ -410,12 +417,13 @@ class NodeLibrary:
                 Folder(
                     name = "Лабораторная 4",
                     icon = icons.LABEL,
+                    color = colors.GREEN,
                     obj_list = [
                         NodeConfig(
                             key = "negative_transformation",
                             name = "Негативное градационное преобразование",
                             icon = icons.IMAGE,
-                            color = colors.PINK,
+                            color = colors.GREEN,
                             function = negative_transformation,
                             parameters = [
                                 OutParamConfig(
@@ -431,7 +439,7 @@ class NodeLibrary:
                             key = "gamma_correction",
                             name = "Гамма-преобразование",
                             icon = icons.IMAGE,
-                            color = colors.PINK,
+                            color = colors.GREEN,
                             function = gamma_correction,
                             parameters = [
                                 OutParamConfig(
@@ -453,7 +461,7 @@ class NodeLibrary:
                             key = "logarithmic_transformation",
                             name = "Логарифмическое градационное преобразование",
                             icon = icons.IMAGE,
-                            color = colors.PINK,
+                            color = colors.GREEN,
                             function = logarithmic_transformation,
                             parameters = [
                                 OutParamConfig(
@@ -474,18 +482,112 @@ class NodeLibrary:
                 Folder(
                     name = "Лабораторная 5",
                     icon = icons.LABEL,
+                    color = colors.INDIGO,
                     obj_list = [
-                        
+                        NodeConfig(
+                            key = "image_histogram_equalization",
+                            name = "Эквализация изображения",
+                            icon = icons.IMAGE,
+                            color = colors.INDIGO,
+                            function = image_histogram_equalization,
+                            parameters = [
+                                OutParamConfig(
+                                    key="equalization_image", name="Equalization image",
+                                    connect_point_color=colors.DEEP_PURPLE_ACCENT_700
+                                ),
+                                OutParamConfig(
+                                    key="original_hist", name="Original histogram",
+                                    connect_point_color=colors.PINK_ACCENT_400,
+                                ),
+                                OutParamConfig(
+                                    key="equalized_hist", name="Equalized histogram",
+                                    connect_point_color=colors.PINK_ACCENT_400,
+                                ),
+                                
+                                FilePickerParamConfig(key="image", name="Фото"),
+                            ]
+                        ),
+
+                        NodeConfig(
+                            key = "plot_brightness_histogram",
+                            name = "Построить гистограмму яркости",
+                            icon = icons.IMAGE,
+                            color = colors.INDIGO,
+                            function = plot_brightness_histogram,
+                            parameters = [
+                                OutParamConfig(
+                                    key="histogram_fig", name="Гистограмма",
+                                    connect_point_color=colors.PINK_ACCENT_400
+                                ),
+
+                                FilePickerParamConfig(key="image", name="Фото"),
+                            ]
+                        )
                     ]
                 ),
 
                 Folder(
                     name = "Лабораторная 6",
                     icon = icons.LABEL,
+                    color = colors.PURPLE,
                     obj_list = [
                         
                     ]
-                )
+                ),
+
+                Folder(
+                    name = "Лабораторная 7",
+                    icon = icons.LABEL,
+                    color = colors.PINK,
+                    obj_list = [
+                        
+                    ]
+                ),
+
+                Folder(
+                    name = "Лабораторная 8",
+                    icon = icons.LABEL,
+                    color = colors.BROWN,
+                    obj_list = [
+                        
+                    ]
+                ),
+
+                Folder(
+                    name = "Лабораторная 9",
+                    icon = icons.LABEL,
+                    color = colors.TEAL,
+                    obj_list = [
+                        
+                    ]
+                ),
+
+                Folder(
+                    name = "Лабораторная 10",
+                    icon = icons.LABEL,
+                    color = colors.AMBER,
+                    obj_list = [
+                        
+                    ]
+                ),
+
+                Folder(
+                    name = "Лабораторная 11",
+                    icon = icons.LABEL,
+                    color = colors.LIME,
+                    obj_list = [
+                        
+                    ]
+                ),
+
+                Folder(
+                    name = "Лабораторная 12",
+                    icon = icons.LABEL,
+                    color = colors.CYAN,
+                    obj_list = [
+                        
+                    ]
+                ),
             ]
         ),
 

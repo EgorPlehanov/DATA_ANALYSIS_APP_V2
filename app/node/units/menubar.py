@@ -53,7 +53,7 @@ class FunctionMenuBar(MenuBar):
             if isinstance(obj, Folder):
                 items.append(
                     SubmenuButton(
-                        content = Row([Icon(obj.icon), Text(obj.name)]),
+                        content = Row([Icon(obj.icon, color=obj.color), Text(obj.name)]),
                         controls = self.create_submenu(obj.obj_list)
                     )
                 )
@@ -61,7 +61,7 @@ class FunctionMenuBar(MenuBar):
                 items.append(
                     MenuItemButton(
                         content = Row(
-                            [Icon(obj.icon), Text(obj.name)] if obj.icon else [Text(obj.name)]
+                            [Icon(obj.icon, color=obj.color), Text(obj.name)] if obj.icon else [Text(obj.name)]
                         ),
                         style = ButtonStyle(bgcolor={MaterialState.HOVERED: colors.BLUE}),
                         on_click = (lambda obj: lambda e: (

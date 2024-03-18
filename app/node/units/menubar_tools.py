@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Callable
-from flet import icons
+from flet import icons, colors
 
 from .folder import Folder
 
@@ -10,6 +10,7 @@ from .folder import Folder
 class Tool:
     name: str = "Untitled"
     icon: str = icons.QUESTION_MARK
+    color: str = colors.WHITE
     function: Callable = lambda: None
 
 
