@@ -111,7 +111,8 @@ class Node(GestureDetector):
         self.mouse_cursor = MouseCursor.CLICK
         self.drag_interval = 20
         self.on_pan_update = self.on_drag
-        self.on_tap = self.toggle_selection
+        self.on_tap = lambda e: self.set_node_selection(True)
+        # self.on_tap = self.toggle_selection
 
         self.is_open = True
         self.is_selected = False
@@ -442,6 +443,15 @@ class Node(GestureDetector):
         """
         self.top = max(0, self.top + top_delta * self.scale)
         self.left = max(0, self.left + left_delta * self.scale)
+
+
+    def set_node_selection(self, is_selected: bool):
+        """
+        Выделить узел
+        """
+        self.is_selected = is_selected
+        self.set_selection()
+        self.update()
 
 
     def toggle_selection(self, e):

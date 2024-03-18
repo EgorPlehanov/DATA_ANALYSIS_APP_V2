@@ -31,10 +31,16 @@ class NodeArea(cv.Canvas):
                 height = self.height,
                 controls = self.nodes,                
             ),
+            drag_interval = 10,
             on_tap = self.clear_selection,
             on_scroll = self.scroll_scale_node_area,
             # on_pan_update = self.drag_all
+            on_pan_start = self.start_selection_box,
+            on_pan_update = self.drag_selection_box,
+            on_pan_end = self.end_selection_box,
         )
+
+        self.selection_box = self.create_selection_box()
 
     
     def create_background_grid(self):
@@ -168,6 +174,7 @@ class NodeArea(cv.Canvas):
         self.workplace.node_stats.update_text("edges", len(shp))
         
         shp.extend(self.background_grid)
+        
         self.shapes = shp
         self.update()
 
@@ -295,3 +302,69 @@ class NodeArea(cv.Canvas):
         """
         node = next(node for node in self.nodes if node.id == node_id)
         return next(param for param in node.parameters_dict.values() if param.id == param_id)
+    
+
+    def create_selection_box(self):
+        """
+        Создает объект области выделения
+        """
+        return cv.Rect(
+            paint = Paint(
+                color = colors.with_opacity(0.05, colors.WHITE),
+                # stroke_width = 10,
+            )
+        )
+    
+
+    def start_selection_box(self, e):
+        '''
+        Начать выделение
+        '''
+        self.selection_box.x = e.local_x
+        self.selection_box.y = e.local_y
+        self.selection_box.width = 0
+        self.selection_box.height = 0
+        self.shapes.insert(0, self.selection_box)
+        self.update()
+
+    
+    def drag_selection_box(self, e):
+        '''
+        Переместить выделение
+        '''
+        self.clear_selection(None)
+        self.selection_box.width = e.local_x - self.selection_box.x
+        self.selection_box.height = e.local_y - self.selection_box.y
+        self.update()
+
+
+    def end_selection_box(self, e):
+        '''
+        Завершить выделение
+        '''
+        self.shapes.remove(self.selection_box)
+        self.select_all_in_selection_box()
+        self.update()
+
+
+    def select_all_in_selection_box(self):
+        '''
+        Выделить все узлы в выделенном прямоугольнике
+        '''
+        x_start = self.selection_box.x
+        y_start = self.selection_box.y
+        x_end = x_start + self.selection_box.width
+        y_end = y_start + self.selection_box.height
+
+        x_start, x_end = min(x_start, x_end), max(x_start, x_end)
+        y_start, y_end = min(y_start, y_end), max(y_start, y_end)
+
+        for node in self.nodes:
+            if (
+                node.left < x_end
+                and node.top < y_end
+                and node.left + node.width > x_start
+                and node.top + node.height > y_start
+            ):
+                if not node.is_selected:
+                    node.toggle_selection(None)
