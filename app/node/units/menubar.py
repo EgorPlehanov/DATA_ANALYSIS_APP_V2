@@ -70,7 +70,9 @@ class FunctionMenuBar(MenuBar):
         row_controls = []
         if obj.icon:
             row_controls.append(Icon(obj.icon, color=obj.color))
+
         row_controls.append(Text(obj.name))
+
         is_has_counter = not isinstance(obj, Tool)
         ref_text_counter = Ref[Text]()
         if is_has_counter:
@@ -87,9 +89,7 @@ class FunctionMenuBar(MenuBar):
         return MenuItemButton(
             content = button_content,
             style = ButtonStyle(bgcolor={MaterialState.HOVERED: colors.BLUE}),
-            on_click = (lambda obj: lambda e: (
-                self.on_item_button_click(obj, ref_text_counter)
-            ))(obj),
+            on_click = (lambda obj: lambda e: self.on_item_button_click(obj, ref_text_counter))(obj),
         )
     
 
