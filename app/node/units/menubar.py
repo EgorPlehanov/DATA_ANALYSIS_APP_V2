@@ -89,7 +89,8 @@ class FunctionMenuBar(MenuBar):
         return MenuItemButton(
             content = button_content,
             style = ButtonStyle(bgcolor={MaterialState.HOVERED: colors.BLUE}),
-            on_click = (lambda obj: lambda e: self.on_item_button_click(obj, ref_text_counter))(obj),
+            on_click = lambda e: self.on_item_button_click(obj, ref_text_counter)
+            # (lambda obj: lambda e: self.on_item_button_click(obj, ref_text_counter))(obj),
         )
     
 
@@ -123,5 +124,4 @@ class FunctionMenuBar(MenuBar):
             obj.function(self)
         else:
             self.workplace.node_area.add_node(config=obj, ref_text_counter=ref_text_counter)
-
-        self.on_item_button_exit(None, ref_text_counter)
+            self.on_item_button_exit(None, ref_text_counter)
