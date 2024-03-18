@@ -55,14 +55,16 @@ class NodeArea(cv.Canvas):
         ]
 
 
-    def add_node(self, config: NodeConfig):
+    def add_node(self, config: NodeConfig, ref_text_counter: Ref[Text] = None):
         """
         Добавить узел
         """
-        self.nodes.append(Node(
-            page=self.page, node_area=self,
-            scale=self.current_scale, config=config
-        ))
+        node_count = ref_text_counter.current.data
+        for _ in range(node_count):
+            self.nodes.append(Node(
+                page=self.page, node_area=self,
+                scale=self.current_scale, config=config
+            ))
         self.workplace.node_stats.update_text("nodes", len(self.nodes))
         self.update()
 

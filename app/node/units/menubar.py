@@ -58,17 +58,70 @@ class FunctionMenuBar(MenuBar):
                     )
                 )
             else:
-                items.append(
-                    MenuItemButton(
-                        content = Row(
-                            [Icon(obj.icon, color=obj.color), Text(obj.name)] if obj.icon else [Text(obj.name)]
-                        ),
-                        style = ButtonStyle(bgcolor={MaterialState.HOVERED: colors.BLUE}),
-                        on_click = (lambda obj: lambda e: (
-                            obj.function(self) if isinstance(obj, Tool)
-                            else self.workplace.node_area.add_node(config=obj)
-                        ))(obj),
-                    )
-                )
+                items.append(self.create_menu_item_button(obj))
         return items
     
+
+
+    def create_menu_item_button(self, obj):
+        """
+        Cоздания пункта меню
+        """
+        row_controls = []
+        if obj.icon:
+            row_controls.append(Icon(obj.icon, color=obj.color))
+        row_controls.append(Text(obj.name))
+        is_has_counter = not isinstance(obj, Tool)
+        ref_text_counter = Ref[Text]()
+        if is_has_counter:
+            row_controls.append(
+                    Text(ref=ref_text_counter, data=1, visible=False, color=colors.BLACK)
+            )
+
+        button_content = GestureDetector(
+            content = Row(row_controls),
+            on_scroll = lambda e: self.on_item_button_scroll(e, ref_text_counter) if is_has_counter else None,
+            on_exit = lambda e: self.on_item_button_exit(e, ref_text_counter) if is_has_counter else None
+        )
+    
+        return MenuItemButton(
+            content = button_content,
+            style = ButtonStyle(bgcolor={MaterialState.HOVERED: colors.BLUE}),
+            on_click = (lambda obj: lambda e: (
+                self.on_item_button_click(obj, ref_text_counter)
+            ))(obj),
+        )
+    
+
+    def on_item_button_scroll(self, e: ScrollEvent, ref_text_counter: Ref[Text]):
+        """
+        При скролле пункта меню
+        """
+        counter_text = ref_text_counter.current
+        counter_text.data += -1 if e.scroll_delta_y > 0 else 1
+        counter_text.data = max(1, counter_text.data)
+        counter_text.data = min(10, counter_text.data)
+        counter_text.value = f"x{counter_text.data}"
+        counter_text.visible = counter_text.data != 1
+        counter_text.update()
+
+
+    def on_item_button_exit(self, e: ControlEvent, ref_text_counter: Ref[Text]):
+        """
+        При выходе пункта меню
+        """
+        ref_text_counter.current.data = 1
+        ref_text_counter.current.visible = False
+        ref_text_counter.current.update()
+
+
+    def on_item_button_click(self, obj, ref_text_counter: Ref[Text]):
+        """
+        При нажатии на пункт меню
+        """
+        if isinstance(obj, Tool):
+            obj.function(self)
+        else:
+            self.workplace.node_area.add_node(config=obj, ref_text_counter=ref_text_counter)
+
+        self.on_item_button_exit(None, ref_text_counter)

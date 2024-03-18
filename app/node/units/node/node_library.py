@@ -191,7 +191,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "shift_image",
                             name = "Сдвиг изображения по осям",
-                            icon = icons.IMAGE,
+                            icon = icons.PHOTO_SIZE_SELECT_SMALL,
                             color = colors.RED,
                             function = shift_image,
                             parameters = [
@@ -223,7 +223,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "apply_grayscale_scaling",
                             name = "Шкалирование серого цвета",
-                            icon = icons.IMAGE,
+                            icon = icons.SETTINGS_BRIGHTNESS,
                             color = colors.ORANGE,
                             function = apply_grayscale_scaling,
                             parameters = [
@@ -243,7 +243,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "plot_image_histogram",
                             name = "Создание гистограммы изображения",
-                            icon = icons.IMAGE,
+                            icon = icons.INSERT_CHART_OUTLINED_OUTLINED,
                             color = colors.ORANGE,
                             function = plot_image_histogram,
                             parameters = [
@@ -266,7 +266,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "resize_nearest_neighbor",
                             name = "Масштабирование методом ближайшего соседа (ПАКЕТНАЯ)",
-                            icon = icons.IMAGE,
+                            icon = icons.IMAGE_ASPECT_RATIO,
                             color = colors.YELLOW,
                             function = resize_nearest_neighbor,
                             parameters = [
@@ -287,7 +287,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "resize_nearest_neighbor_manual",
                             name = "Масштабирование методом ближайшего соседа (АЛГОРИТМ)",
-                            icon = icons.IMAGE,
+                            icon = icons.IMAGE_ASPECT_RATIO,
                             color = colors.YELLOW,
                             function = resize_nearest_neighbor_manual,
                             parameters = [
@@ -307,7 +307,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "resize_bilinear_interpolation",
                             name = "Масштабирование методом билинейной интерполяции (ПАКЕТНАЯ)",
-                            icon = icons.IMAGE,
+                            icon = icons.PHOTO_SIZE_SELECT_LARGE,
                             color = colors.YELLOW,
                             function = resize_bilinear_interpolation,
                             parameters = [
@@ -327,7 +327,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "resize_bilinear_interpolation_manual",
                             name = "Масштабирование методом билинейной интерполяции (АЛГОРИТМ)",
-                            icon = icons.IMAGE,
+                            icon = icons.PHOTO_SIZE_SELECT_LARGE,
                             color = colors.YELLOW,
                             function = resize_bilinear_interpolation_manual,
                             parameters = [
@@ -347,7 +347,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "rotate_image_90_degrees",
                             name = "Повернуть изображение кратно 90°",
-                            icon = icons.IMAGE,
+                            icon = icons.ROTATE_RIGHT,
                             color = colors.YELLOW,
                             function = rotate_image_90_degrees,
                             parameters = [
@@ -373,7 +373,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "rotate_image",
                             name = "Повернуть изображение (ПАКЕТНАЯ)",
-                            icon = icons.IMAGE,
+                            icon = icons.AUTORENEW,
                             color = colors.YELLOW,
                             function = rotate_image,
                             parameters = [
@@ -393,7 +393,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "rotate_image_manual",
                             name = "Повернуть изображение (АЛГОРИТМ)",
-                            icon = icons.IMAGE,
+                            icon = icons.AUTORENEW,
                             color = colors.YELLOW,
                             function = rotate_image_manual,
                             parameters = [
@@ -422,7 +422,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "negative_transformation",
                             name = "Негативное градационное преобразование",
-                            icon = icons.IMAGE,
+                            icon = icons.COMPARE,
                             color = colors.GREEN,
                             function = negative_transformation,
                             parameters = [
@@ -438,7 +438,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "gamma_correction",
                             name = "Гамма-преобразование",
-                            icon = icons.IMAGE,
+                            icon = icons.AUTO_FIX_HIGH,
                             color = colors.GREEN,
                             function = gamma_correction,
                             parameters = [
@@ -460,7 +460,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "logarithmic_transformation",
                             name = "Логарифмическое градационное преобразование",
-                            icon = icons.IMAGE,
+                            icon = icons.EXPOSURE,
                             color = colors.GREEN,
                             function = logarithmic_transformation,
                             parameters = [
@@ -511,7 +511,7 @@ class NodeLibrary:
                         NodeConfig(
                             key = "plot_brightness_histogram",
                             name = "Построить гистограмму яркости",
-                            icon = icons.IMAGE,
+                            icon = icons.INSERT_CHART_OUTLINED_OUTLINED,
                             color = colors.INDIGO,
                             function = plot_brightness_histogram,
                             parameters = [

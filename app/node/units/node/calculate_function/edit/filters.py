@@ -52,6 +52,7 @@ def gamma_correction(image, gamma: float = 1.0, constant: float = 1.0):
         image = read_file(image.path)
 
     gamma_image = constant * np.power(image, gamma)
+    gamma_image = np.clip(gamma_image, 0, 255).astype(np.uint8)
     return {
         "gamma_image": NodeResult(gamma_image, ResultType.IMAGE_CV2)
     }
