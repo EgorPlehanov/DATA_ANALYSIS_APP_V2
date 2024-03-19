@@ -25,12 +25,17 @@ class NodeArea(cv.Canvas):
         self.nodes: list[Node] = []
         self.selected_nodes: list[Node] = []
 
+        self.selection_box = self.create_selection_box()
+        self.selection_box_stroke = self.create_selection_box_stroke()
+
         self.content = GestureDetector(
-            content = Stack(
-                width = self.width,
-                height = self.height,
-                controls = self.nodes,                
-            ),
+            content = Stack([
+                Stack(self.nodes),
+                cv.Canvas([
+                    self.selection_box,
+                    self.selection_box_stroke
+                ]),
+            ]),
             drag_interval = 10,
             on_tap = lambda e: self.clear_selection(),
             on_scroll = self.scroll_scale_node_area,
@@ -38,8 +43,6 @@ class NodeArea(cv.Canvas):
             on_pan_update = self.drag_selection_box,
             on_pan_end = self.end_selection_box,
         )
-
-        self.selection_box = self.create_selection_box()
 
     
     def create_background_grid(self):
@@ -308,11 +311,35 @@ class NodeArea(cv.Canvas):
         """
         return cv.Rect(
             paint = Paint(
-                color = colors.with_opacity(0.1, colors.WHITE),
-                # stroke_width = 10,
+                color = colors.with_opacity(0.05, colors.WHITE)
             )
         )
     
+
+    def create_selection_box_stroke(self):
+        '''
+        Обновить обводку прямоугольного выделения
+        '''
+        self.selection_box_stroke_corner_1 = cv.Path.MoveTo(0, 0)
+        self.selection_box_stroke_corner_2 = cv.Path.LineTo(0, 0)
+        self.selection_box_stroke_corner_3 = cv.Path.LineTo(0, 0)
+        self.selection_box_stroke_corner_4 = cv.Path.LineTo(0, 0)
+        return cv.Path(
+            [
+                self.selection_box_stroke_corner_1,
+                self.selection_box_stroke_corner_2,
+                self.selection_box_stroke_corner_3,
+                self.selection_box_stroke_corner_4,
+                cv.Path.Close(),
+            ],
+            paint = Paint(
+                stroke_width = 1,
+                color = colors.WHITE,
+                style = PaintingStyle.STROKE,
+                stroke_dash_pattern = [10, 5],
+            ),
+        )
+        
 
     def start_selection_box(self, e):
         '''
@@ -322,17 +349,36 @@ class NodeArea(cv.Canvas):
         self.selection_box.y = e.local_y
         self.selection_box.width = 0
         self.selection_box.height = 0
-        self.shapes.insert(0, self.selection_box)
-        self.update()
+
+        self.selection_box_stroke_corner_1.x = e.local_x
+        self.selection_box_stroke_corner_1.y = e.local_y
+        self.selection_box_stroke_corner_2.x = e.local_x
+        self.selection_box_stroke_corner_2.y = e.local_y
+        self.selection_box_stroke_corner_3.x = e.local_x
+        self.selection_box_stroke_corner_3.y = e.local_y
+        self.selection_box_stroke_corner_4.x = e.local_x
+        self.selection_box_stroke_corner_4.y = e.local_y
+
+        self.selection_box.visible = True
+        self.selection_box_stroke.visible = True
+        self.clear_selection()
 
     
     def drag_selection_box(self, e):
         '''
         Переместить выделение
         '''
-        self.clear_selection()
         self.selection_box.width = e.local_x - self.selection_box.x
         self.selection_box.height = e.local_y - self.selection_box.y
+
+        end_x = self.selection_box.x + self.selection_box.width
+        end_y = self.selection_box.y + self.selection_box.height
+
+        self.selection_box_stroke_corner_1.x = end_x
+        self.selection_box_stroke_corner_2.x = end_x
+        self.selection_box_stroke_corner_2.y = end_y
+        self.selection_box_stroke_corner_3.y = end_y
+
         self.update()
 
 
@@ -340,7 +386,8 @@ class NodeArea(cv.Canvas):
         '''
         Завершить выделение
         '''
-        self.shapes.remove(self.selection_box)
+        self.selection_box.visible = False
+        self.selection_box_stroke.visible = False
         self.select_all_in_selection_box()
         self.update()
 
@@ -366,3 +413,4 @@ class NodeArea(cv.Canvas):
             ):
                 if not node.is_selected:
                     node.toggle_selection()
+    
