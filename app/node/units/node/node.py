@@ -8,13 +8,12 @@ from typing import Callable, List, Dict, get_type_hints
 from inspect import signature
 from dataclasses import dataclass, field
 import math
+import keyboard
 
 from .node_typing import Color
 from ..parameters.parameters_dict import *
 from .calculate_function.calculate_function_typing import *
 from .node_result_view import *
-
-import keyboard
 
 
 
@@ -25,14 +24,16 @@ class NodeConfig:
     
     key - ключ узла
     name - название узла
+    icon - иконка узла
     group - группа узла
     color - цвет узла
     left - позиция узла по оси x
-    enabled - активен ли узел
+    top - позиция узла по оси y
+    width - ширина узла
+    enabled - активен ли узел для выбора
     function - функция узла
     parameters - параметры узла
-    x - координата x узла
-    y - координата y узла
+    is_display_result - показывать ли результат узла (используется для узла отображения результата)
     """
     key: str                = "unknown"
     name: str               = "Untitled"
@@ -458,12 +459,12 @@ class Node(GestureDetector):
         """
         Обработка нажатия на узел
         """
-        is_selected = not self.is_selected
-        if not keyboard.is_pressed('shift'):
+        if keyboard.is_pressed('shift'):
+            self.toggle_selection()
+        else:
             self.node_area.clear_selection()
             self.set_selection_value(True)
-        else:
-            self.set_selection_value(is_selected)
+            
 
 
     def set_selection_value(self, is_selected: bool):
@@ -615,6 +616,7 @@ class Node(GestureDetector):
         for param_key, result in self.result.items():
             if param_key not in self.parameters_results_view_dict:
                 continue
+
             result_control: NodeResultView = self.parameters_results_view_dict[param_key]
             if result["label"] == "" and self.connects_from[param_key] is not None:
                 result["label"] = self.connects_from[param_key].node.name
@@ -624,4 +626,5 @@ class Node(GestureDetector):
                 self.parameters_results_view_dict[param_key] = result_control
             else:
                 result_control.update_result(result)
+                
         result_area.update()
