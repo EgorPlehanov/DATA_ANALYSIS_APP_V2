@@ -32,9 +32,8 @@ class NodeArea(cv.Canvas):
                 controls = self.nodes,                
             ),
             drag_interval = 10,
-            on_tap = self.clear_selection,
+            on_tap = lambda e: self.clear_selection(),
             on_scroll = self.scroll_scale_node_area,
-            # on_pan_update = self.drag_all
             on_pan_start = self.start_selection_box,
             on_pan_update = self.drag_selection_box,
             on_pan_end = self.end_selection_box,
@@ -198,12 +197,12 @@ class NodeArea(cv.Canvas):
             self.workplace.node_stats.update_text("selected", len(self.selected_nodes))
 
 
-    def clear_selection(self, e):
+    def clear_selection(self):
         """
         Очистить выделение со всех выбранных узлов
         """
         for node in reversed(self.selected_nodes):
-            node.toggle_selection(None)
+            node.toggle_selection()
         self.selected_nodes = []
 
 
@@ -224,16 +223,16 @@ class NodeArea(cv.Canvas):
         self.paint_line()
     
 
-    def select_all(self, e):
+    def select_all(self):
         '''
         Выделить все узлы
         '''
         for node in self.nodes:
             if not node.is_selected:
-                node.toggle_selection(None)
+                node.toggle_selection()
 
 
-    def delete_selected_nodes(self, e):
+    def delete_selected_nodes(self):
         '''
         Удалить выделенные узлы
         '''
@@ -241,17 +240,16 @@ class NodeArea(cv.Canvas):
             self.delete_node(node)
         
 
-    def invert_selection(self, e):
+    def invert_selection(self):
         '''
         Инвертировать выделение
         '''
         for node in self.nodes:
-            node.is_selected = not node.is_selected
-            node.set_selection()
+            node.toggle_selection()
         self.update()
 
 
-    def move_selection_to_start(self, e):
+    def move_selection_to_start(self):
         '''
         Переместить выделенные узлы в начало
         '''
@@ -310,7 +308,7 @@ class NodeArea(cv.Canvas):
         """
         return cv.Rect(
             paint = Paint(
-                color = colors.with_opacity(0.05, colors.WHITE),
+                color = colors.with_opacity(0.1, colors.WHITE),
                 # stroke_width = 10,
             )
         )
@@ -332,7 +330,7 @@ class NodeArea(cv.Canvas):
         '''
         Переместить выделение
         '''
-        self.clear_selection(None)
+        self.clear_selection()
         self.selection_box.width = e.local_x - self.selection_box.x
         self.selection_box.height = e.local_y - self.selection_box.y
         self.update()
@@ -367,4 +365,4 @@ class NodeArea(cv.Canvas):
                 and node.top + node.height > y_start
             ):
                 if not node.is_selected:
-                    node.toggle_selection(None)
+                    node.toggle_selection()

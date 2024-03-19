@@ -14,6 +14,8 @@ from ..parameters.parameters_dict import *
 from .calculate_function.calculate_function_typing import *
 from .node_result_view import *
 
+import keyboard
+
 
 
 @dataclass
@@ -110,9 +112,9 @@ class Node(GestureDetector):
         self.id = next(Node.id_counter)
         self.mouse_cursor = MouseCursor.CLICK
         self.drag_interval = 20
+        self.on_pan_start = self.on_drag_start
         self.on_pan_update = self.on_drag
-        self.on_tap = lambda e: self.set_node_selection(True)
-        # self.on_tap = self.toggle_selection
+        self.on_tap = self.on_tap_select
 
         self.is_open = True
         self.is_selected = False
@@ -423,18 +425,25 @@ class Node(GestureDetector):
         return points if point_idx is None else points[point_idx]
     
 
+    def on_drag_start(self, e: DragStartEvent):
+        """
+        Обработка начала перемещения узла
+        """
+        if keyboard.is_pressed('shift'):
+            self.toggle_selection()
+        elif not self.is_selected:
+            self.node_area.clear_selection()
+            self.set_selection_value(True)
+    
+
     def on_drag(self, e: DragUpdateEvent):
         """
         Обработка перемещения узла
         """
-        if not self.is_selected:
-            self.is_selected = True
-            self.node_area.clear_selection(None)
-            self.set_selection()
-
-        self.node_area.drag_selection(top_delta = e.delta_y, left_delta = e.delta_x)
-        self.node_area.paint_line()
-        self.node_area.update()
+        if not keyboard.is_pressed('shift'):
+            self.node_area.drag_selection(top_delta = e.delta_y, left_delta = e.delta_x)
+            self.node_area.paint_line()
+            self.node_area.update()
 
 
     def drag_node(self, left_delta = 0, top_delta = 0):
@@ -445,25 +454,39 @@ class Node(GestureDetector):
         self.left = max(0, self.left + left_delta * self.scale)
 
 
-    def set_node_selection(self, is_selected: bool):
+    def on_tap_select(self, e: TapEvent):
+        """
+        Обработка нажатия на узел
+        """
+        is_selected = not self.is_selected
+        if not keyboard.is_pressed('shift'):
+            self.node_area.clear_selection()
+            self.set_selection_value(True)
+        else:
+            self.set_selection_value(is_selected)
+
+
+    def set_selection_value(self, is_selected: bool):
         """
         Выделить узел
         """
+        if self.is_selected == is_selected:
+            return
         self.is_selected = is_selected
-        self.set_selection()
+        self.set_selection_style()
         self.update()
 
 
-    def toggle_selection(self, e):
+    def toggle_selection(self):
         """
         Переключает выделение узла
         """
         self.is_selected = not self.is_selected
-        self.set_selection()
+        self.set_selection_style()
         self.update()
 
 
-    def set_selection(self):
+    def set_selection_style(self):
         """
         Включает выделение узла
         """
